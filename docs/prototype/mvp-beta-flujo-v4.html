@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caudall — Flujo del MVP beta</title>
+<style>
+:root{
+  --yale:#0F5499; --cola:#0783D9; --picton:#34C1EE;
+  --quartz:#4B4C4C; --nickel:#737373; --silver:#B8B8B8;
+  --bg:#F4F5F7; --surface:#ECEEF1; --white:#FFFFFF;
+  --border:#D8DBDF; --border-strong:#B8B8B8;
+  --radius-md:8px; --radius-lg:12px; --radius-xl:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--quartz);line-height:1.5;padding:24px 16px}
+.wrap{max-width:760px;margin:0 auto}
+.title{text-align:center;margin-bottom:4px}
+.title h1{font-size:22px;font-weight:500;color:var(--yale)}
+.title p{font-size:13px;color:var(--nickel);margin-top:4px}
+.tag-min{display:inline-block;background:#E6F1FB;color:#0C447C;font-size:11px;padding:3px 10px;border-radius:var(--radius-md);margin-top:6px}
+.tabs{display:flex;gap:8px;margin:18px 0 16px}
+.tab{flex:1;padding:11px 12px;border:0.5px solid var(--border-strong);border-radius:var(--radius-md);background:transparent;cursor:pointer;font-size:14px;font-family:inherit;color:var(--nickel)}
+.tab.on{background:var(--yale);color:#fff;border-color:var(--yale)}
+.frame{background:var(--surface);border-radius:var(--radius-lg);padding:22px}
+.side{display:none}
+.side.on{display:block}
+.step{font-size:12px;color:var(--nickel);text-align:center;margin-bottom:12px}
+.screen{display:none}
+.screen.on{display:block}
+.phone{max-width:312px;margin:0 auto;background:var(--white);border:0.5px solid var(--border-strong);border-radius:var(--radius-xl);overflow:hidden}
+.bar{background:var(--yale);color:#fff;padding:11px 15px;font-size:13px;display:flex;align-items:center;justify-content:space-between}
+.bodyp{padding:18px 16px}
+.proghead{display:flex;justify-content:space-between;font-size:11px;color:var(--nickel);margin-bottom:5px}
+.prog{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin:0 0 15px}
+.prog span{display:block;height:100%;background:var(--picton)}
+.h{font-size:16px;font-weight:500;margin:0 0 5px;color:var(--quartz)}
+.sub{font-size:13px;color:var(--nickel);margin:0 0 15px}
+.input{border:0.5px solid var(--border-strong);border-radius:var(--radius-md);padding:10px 12px;font-size:13px;color:var(--silver);margin-bottom:10px}
+.opt{border:0.5px solid var(--border-strong);border-radius:var(--radius-md);padding:11px 12px;font-size:13px;margin-bottom:9px;color:var(--nickel);display:flex;align-items:center;gap:9px}
+.opt.sel{border-color:var(--cola);color:var(--yale)}
+.btn{background:var(--yale);color:#fff;border:none;border-radius:var(--radius-md);padding:12px;font-size:13px;width:100%;text-align:center;font-family:inherit;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--cola);border:0.5px solid var(--cola)}
+.cap{font-size:11px;color:var(--silver);text-align:center;margin-top:11px;line-height:1.5}
+.icon{width:54px;height:54px;border-radius:50%;background:#E6F1FB;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:var(--yale);font-size:24px}
+.icon.ok{background:#EAF3DE;color:#3B6D11}
+.mlbl{font-size:11px;color:var(--nickel);margin:0 0 4px}
+.checkbox{display:flex;gap:9px;align-items:flex-start;border:0.5px solid var(--border-strong);border-radius:var(--radius-md);padding:11px;margin:11px 0;font-size:11px;color:var(--quartz);cursor:pointer}
+.checkbox .box{flex-shrink:0;width:17px;height:17px;border:1.5px solid var(--yale);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;background:#fff}
+.benchmark{display:flex;height:28px;border-radius:var(--radius-md);overflow:hidden;font-size:9px}
+.subhead{font-size:12px;font-weight:500;color:var(--quartz);margin:14px 0 8px}
+.subhead .lead-tag{font-size:9px;color:var(--nickel);font-weight:400}
+.suggest{display:flex;gap:9px;align-items:flex-start;border:0.5px solid var(--border);border-radius:var(--radius-md);padding:9px 10px;font-size:12px;margin-bottom:7px;color:var(--nickel)}
+.suggest .ic{flex-shrink:0;width:24px;height:24px;border-radius:5px;background:#E6F1FB;color:var(--yale);display:flex;align-items:center;justify-content:center;font-size:13px}
+.suggest b{font-weight:500;color:var(--quartz)}
+.prodcard{border:0.5px solid var(--border-strong);border-radius:var(--radius-md);padding:10px;margin-bottom:8px}
+.prodcard .top{display:flex;gap:9px;align-items:center}
+.prodcard .ic{flex-shrink:0;width:28px;height:28px;border-radius:5px;background:#E6F1FB;color:var(--yale);display:flex;align-items:center;justify-content:center;font-size:14px}
+.prodcard b{font-weight:500;color:var(--quartz);font-size:12px}
+.prodcard .meta{font-size:11px;color:var(--nickel)}
+.prodbtn{background:var(--yale);color:#fff;border:none;border-radius:var(--radius-md);padding:7px;font-size:11px;width:100%;margin-top:8px;font-family:inherit;cursor:pointer}
+.chosen{background:#E6F1FB;border-radius:var(--radius-md);padding:9px 11px;font-size:12px;color:#0C447C;margin-bottom:12px}
+.chosen b{font-weight:500}
+.foot{text-align:center;font-size:11px;color:var(--silver);margin-top:20px;line-height:1.6}
+.nav{display:flex;gap:10px;margin-top:14px;align-items:center;justify-content:center}
+.arrow{background:transparent;border:0.5px solid var(--border-strong);border-radius:var(--radius-md);width:34px;height:34px;cursor:pointer;color:var(--nickel);font-size:16px}
+.dotrow{display:flex;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--border-strong);border:none;padding:0;cursor:pointer}
+.dot.on{background:var(--yale)}
+.boardnote{background:#FAEEDA;border-radius:var(--radius-md);padding:7px 9px;font-size:10px;color:#854F0B;margin-top:9px;line-height:1.5}
+.desk{background:var(--white);border:0.5px solid var(--border-strong);border-radius:var(--radius-md);overflow:hidden}
+.deskhdr{background:var(--yale);color:#fff;padding:12px 16px;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.deskbody{padding:16px}
+.dlbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.dlbar .count{font-size:12px;color:var(--nickel)}
+.dlbtn{background:var(--yale);color:#fff;border:none;border-radius:var(--radius-md);padding:8px 14px;font-size:12px;font-family:inherit;cursor:pointer}
+.ltable{width:100%;border-collapse:collapse;font-size:11px}
+.ltable th{text-align:left;color:var(--nickel);font-weight:500;padding:7px 8px;border-bottom:0.5px solid var(--border-strong)}
+.ltable td{padding:8px;border-bottom:0.5px solid var(--border);color:var(--quartz)}
+.ltable tr:last-child td{border-bottom:none}
+.ok-chip{font-size:10px;background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:var(--radius-md)}
+.note{background:#E6F1FB;border-radius:var(--radius-md);padding:12px;font-size:12px;color:#0C447C;margin-top:14px}
+.scopebox{border:0.5px solid var(--border-strong);border-radius:var(--radius-md);padding:12px;margin-top:12px;font-size:12px}
+.scopebox b{color:var(--quartz);font-weight:500}
+.scopebox .in{color:#3B6D11}
+.scopebox .out{color:var(--nickel)}
+.legalbox{background:#FCEBEB;border-radius:var(--radius-md);padding:12px;font-size:12px;color:#791F1F;margin-top:12px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="title">
+  <h1>caudall</h1>
+  <p>Flujo del MVP beta — Fase 1 · revisión del advisory board incorporada</p>
+  <span class="tag-min">6 pantallas de usuario · 1 vista interna · sin panel institucional</span>
+</div>
+
+<div class="tabs">
+  <button class="tab on" data-side="user" onclick="side('user')">Recorrido del usuario</button>
+  <button class="tab" data-side="lead" onclick="side('lead')">Vista interna de leads</button>
+</div>
+
+<div class="frame">
+
+  <!-- ================= USUARIO ================= -->
+  <div class="side on" id="user">
+    <div class="step" id="ustep"></div>
+
+    <!-- 1 Landing -->
+    <div class="screen on" data-u="0">
+      <div class="phone">
+        <div class="bar"><span>caudall</span><span>&#9776;</span></div>
+        <div class="bodyp" style="text-align:center;padding-top:32px;padding-bottom:32px">
+          <div class="icon">&#9678;</div>
+          <p class="h" style="font-size:18px">Sabes dónde estás.<br>Caudall te conecta.</p>
+          <p class="sub">Conoce tu salud financiera y tu lugar frente a los dominicanos en 2 minutos.</p>
+          <button class="btn">Conocer mi salud financiera</button>
+          <p class="cap">Copy: CTA orientado al valor, no a la tarea.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 Diagnóstico -->
+    <div class="screen" data-u="1">
+      <div class="phone">
+        <div class="bar"><span>&#8592; Diagnóstico</span></div>
+        <div class="bodyp">
+          <div class="proghead"><span>Pregunta 3 de 8</span><span>37%</span></div>
+          <div class="prog"><span style="width:37%"></span></div>
+          <p class="h">¿Logras ahorrar parte de lo que ganas?</p>
+          <p class="sub">Pilar: ahorro</p>
+          <div class="opt">&#9711; Sí, todos los meses</div>
+          <div class="opt sel">&#9989; A veces</div>
+          <div class="opt">&#9711; Casi nunca</div>
+          <button class="btn" style="margin-top:6px">Siguiente</button>
+          <p class="cap">Conteo "3 de 8" + barra: reduce el abandono (a medir en la beta).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 Resultados -->
+    <div class="screen" data-u="2">
+      <div class="phone">
+        <div class="bar"><span>Tu resultado</span><span>&#8599;</span></div>
+        <div class="bodyp" style="text-align:center">
+          <p class="mlbl">Tu índice de salud financiera</p>
+          <p style="font-size:44px;font-weight:500;margin:2px 0;color:var(--yale)">54</p>
+          <span style="font-size:10px;padding:3px 8px;border-radius:var(--radius-md);background:#FAEEDA;color:#854F0B">Sobreviviendo</span>
+          <div style="margin:18px 0 6px;text-align:left">
+            <p style="font-size:11px;color:var(--nickel);margin:0 0 6px">Tu lugar frente a los dominicanos</p>
+            <div class="benchmark">
+              <div style="width:30%;background:#F7C1C1;color:#791F1F;display:flex;align-items:center;justify-content:center">30%</div>
+              <div style="width:55%;background:#FAC775;color:#633806;display:flex;align-items:center;justify-content:center;position:relative">55% &middot; tú aquí
+                <div style="position:absolute;top:-4px;bottom:-4px;left:50%;width:2px;background:var(--yale)"></div>
+              </div>
+              <div style="width:15%;background:#C0DD97;color:#27500A;display:flex;align-items:center;justify-content:center">15%</div>
+            </div>
+          </div>
+          <button class="btn" style="margin-top:6px">Ver cómo mejorar</button>
+          <p class="cap" style="text-align:left">Individual + comparativo nacional. El benchmark es lo que ChatGPT no da.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Acciones sugeridas — aprende primero, productos después -->
+    <div class="screen" data-u="3">
+      <div class="phone">
+        <div class="bar"><span>&#8592; Cómo mejorar</span></div>
+        <div class="bodyp">
+          <p class="h">Tu pilar más débil: ahorro</p>
+          <p class="sub">Empieza por entenderlo. Después, si quieres, da el paso.</p>
+          <p class="subhead">Aprende — empieza aquí</p>
+          <div class="suggest"><div class="ic">&#9998;</div><div><b>Curso: cómo empezar a ahorrar</b><br>Contenido existente de Caudall.</div></div>
+          <div class="suggest"><div class="ic">&#9998;</div><div><b>Artículo: tu fondo de emergencia</b><br>Contenido existente de Caudall.</div></div>
+          <p class="subhead">Productos <span class="lead-tag">— de instituciones aliadas reguladas</span></p>
+          <div class="prodcard">
+            <div class="top"><div class="ic">&#127974;</div><div><b>Ahorro programado</b><div class="meta">Cuando estés listo para dar el paso.</div></div></div>
+            <button class="prodbtn">Me interesa &mdash; quiero que me contacten</button>
+          </div>
+          <div class="prodcard">
+            <div class="top"><div class="ic">&#128181;</div><div><b>Asesoría financiera</b><div class="meta">Habla con un experto del aliado.</div></div></div>
+            <button class="prodbtn">Me interesa &mdash; quiero que me contacten</button>
+          </div>
+          <div class="boardnote">Conductual (Kahneman): el aprendizaje va primero — no se vende usando la ansiedad del diagnóstico. El clic en "Me interesa" es la declaración del producto.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 Captura de contacto + consentimiento -->
+    <div class="screen" data-u="4">
+      <div class="phone">
+        <div class="bar"><span>&#8592; Tu contacto</span></div>
+        <div class="bodyp">
+          <div class="chosen">Tu solicitud: <b>Ahorro programado</b></div>
+          <p class="h">¿Cómo te contactamos?</p>
+          <p class="sub">Para que la institución se comunique contigo.</p>
+          <div class="input">tu@correo.com</div>
+          <div class="input">Teléfono</div>
+          <div class="checkbox">
+            <div class="box">&#10003;</div>
+            <span>Autorizo a Caudall a compartir mi nombre, correo, teléfono y el resultado de mi diagnóstico con la institución financiera aliada seleccionada, con el único fin de que se comunique conmigo sobre el producto solicitado. Puedo retirar esta autorización en cualquier momento.</span>
+          </div>
+          <button class="btn">Enviar mi solicitud</button>
+          <div class="boardnote">Legal RD: texto de consentimiento específico — qué datos, con quién, para qué fin, revocable. Pendiente: revisión por abogado antes de la beta.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6 Confirmación -->
+    <div class="screen" data-u="5">
+      <div class="phone">
+        <div class="bar"><span>Listo</span><span>&#10003;</span></div>
+        <div class="bodyp" style="text-align:center;padding-top:24px">
+          <div class="icon ok">&#10003;</div>
+          <p class="h">Tu solicitud fue registrada</p>
+          <p class="sub">Caudall la enviará a la institución aliada. Ellos te contactarán al correo y teléfono que indicaste, normalmente en pocos días.</p>
+          <div class="chosen" style="margin:0 0 12px">Solicitaste: <b>Ahorro programado</b></div>
+          <button class="btn ghost">Volver al inicio</button>
+          <div class="boardnote">UX (Nielsen): toda acción necesita respuesta del sistema. El usuario sabe qué pasó y qué sigue.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button class="arrow" onclick="move('user',-1)">&#8249;</button>
+      <div class="dotrow" id="udots"></div>
+      <button class="arrow" onclick="move('user',1)">&#8250;</button>
+    </div>
+  </div>
+
+  <!-- ================= VISTA INTERNA DE LEADS ================= -->
+  <div class="side" id="lead">
+    <p style="font-size:14px;font-weight:500;color:var(--quartz);margin-bottom:4px">Vista interna de leads — uso del equipo Caudall</p>
+    <p style="font-size:12px;color:var(--nickel);margin-bottom:16px">Utilidad interna mínima: lista los leads consentidos y permite descargarlos todos para el envío manual al aliado. No es el panel institucional.</p>
+
+    <div class="desk">
+      <div class="deskhdr"><span>caudall · leads (uso interno)</span><span style="font-size:11px">Fase 1 — MVP beta</span></div>
+      <div class="deskbody">
+        <div class="dlbar">
+          <span class="count">47 leads consentidos acumulados</span>
+          <button class="dlbtn">&#11015; Descargar todos (CSV)</button>
+        </div>
+        <table class="ltable">
+          <tr><th>Fecha</th><th>Índice</th><th>Producto</th><th>Contacto</th><th>Consent.</th></tr>
+          <tr><td>16/05</td><td>54</td><td>Ahorro programado</td><td>Correo + tel.</td><td><span class="ok-chip">Sí</span></td></tr>
+          <tr><td>16/05</td><td>38</td><td>Asesoría financiera</td><td>Correo + tel.</td><td><span class="ok-chip">Sí</span></td></tr>
+          <tr><td>15/05</td><td>61</td><td>Ahorro programado</td><td>Correo + tel.</td><td><span class="ok-chip">Sí</span></td></tr>
+          <tr><td>15/05</td><td>47</td><td>Ahorro programado</td><td>Correo + tel.</td><td><span class="ok-chip">Sí</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="scopebox">
+      <b>Alcance congelado del punto 7 — para proteger el presupuesto reducido:</b><br>
+      <span class="in">&#10003; Incluye:</span> lista de leads + botón de descargar todos.<br>
+      <span class="out">&#10005; No incluye (es Fase 2):</span> filtros, marcar enviados, estados, métricas, login por institución.
+    </div>
+
+    <div class="legalbox"><b>Pendiente bloqueante — Derecho financiero RD:</b> antes de lanzar la beta, la captura, almacenamiento y transferencia de datos financieros personales debe ser revisada por un abogado. Aplica el Reglamento de Protección al Usuario y obligaciones de protección de datos. No es opcional.</div>
+
+    <div class="note"><b>La prueba del MVP beta:</b> el equipo descarga los leads, los envía a mano al aliado, y mide si la institución paga por el lote — sin haber construido el panel ni el release completo.</div>
+  </div>
+
+</div>
+
+<p class="foot">
+  MVP beta · Fase 1 · Caudall — revisión del advisory board incorporada.<br>
+  Prototipo de presentación, no funcional. Diferidos a Fase 2: panel institucional, paths dinámicos, directorio, comparador, recurrencia del diagnóstico.
+</p>
+
+</div>
+
+<script>
+var state={user:0};
+var len={user:6};
+var lbl={
+  user:["Landing básico","Diagnóstico","Resultados","Acciones sugeridas (declaración integrada)","Captura de contacto y consentimiento","Confirmación"]
+};
+function dots(s){
+  var w=document.getElementById('udots');w.innerHTML='';
+  for(var k=0;k<len[s];k++){
+    var b=document.createElement('button');
+    b.className='dot'+(k===state[s]?' on':'');
+    b.onclick=(function(i){return function(){go(s,i);};})(k);
+    w.appendChild(b);
+  }
+}
+function go(s,i){
+  if(i<0||i>=len[s])return;
+  state[s]=i;
+  var sc=document.querySelectorAll('[data-u]');
+  sc.forEach(function(e){e.classList.remove('on');});
+  sc[i].classList.add('on');
+  document.getElementById('ustep').textContent='Pantalla '+(i+1)+' de '+len[s]+' — '+lbl[s][i];
+  dots(s);
+}
+function move(s,d){go(s,state[s]+d);}
+function side(s){
+  document.getElementById('user').classList.toggle('on',s==='user');
+  document.getElementById('lead').classList.toggle('on',s==='lead');
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('on',t.dataset.side===s);});
+}
+go('user',0);
+</script>
+</body>
+</html>

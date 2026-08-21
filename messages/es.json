@@ -1,0 +1,28 @@
+{
+  "app": {
+    "name": "Caudall",
+    "tagline": "Bienestar financiero, como beneficio de tu empresa"
+  },
+  "employee": {
+    "landing": {
+      "title": "Sabes dónde estás. Caudall te conecta.",
+      "subtitle": "Un espacio privado para conocer tu salud financiera y mejorarla.",
+      "enrollmentCodePlaceholder": "Código de tu empresa",
+      "ctaContinue": "Continuar"
+    },
+    "trust": {
+      "privacyGuarantee": "Tu empresa nunca verá tus respuestas individuales. Solo métricas agregadas y anónimas."
+    }
+  },
+  "hr": {
+    "dashboard": {
+      "title": "Resumen"
+    },
+    "aggregationNotice": "Todos los datos son agregados y anónimos. Segmentos con menos de {min} personas no se muestran, para proteger la confidencialidad de tus empleados."
+  },
+  "admin": {
+    "methodology": {
+      "title": "Metodología"
+    }
+  }
+}

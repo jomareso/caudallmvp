@@ -1,0 +1,16 @@
+# Configuración de deploy en Netlify para Caudall MVP
+# El plugin @netlify/plugin-nextjs se instala automáticamente
+# cuando Netlify detecta un proyecto Next.js.
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# Redirects y rewrites se manejan desde Next.js (App Router)
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

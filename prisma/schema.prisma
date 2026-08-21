@@ -1,0 +1,605 @@
+// Caudall MVP — Prisma Schema
+// Basado en docs/data-model.md
+// Ver docs/decisions.md para las 9 decisiones que gobiernan el modelo
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// BLOQUE 1 — MULTI-TENANT Y USUARIOS
+// ============================================================
+
+model Tenant {
+  id                          String   @id @default(cuid())
+  name                        String
+  enrollmentCode              String   @unique
+  logoUrl                     String?
+  primaryColor                String   @default("#0F5499")
+  secondaryColor              String?
+  aggregationMinSegmentSize   Int      @default(5)
+  defaultLanguage             String   @default("es")
+  status                      TenantStatus @default(PILOT)
+  corporateEmailDomain        String?
+  methodologyVersionId        String?
+  questionBankVersionId       String?
+  scoringVersionId            String?
+  interventionCatalogVersionId String?
+  createdAt                   DateTime @default(now())
+  activatedAt                 DateTime?
+
+  segments                    Segment[]
+  employees                   Employee[]
+  tenantAdmins                TenantAdmin[]
+  evidence                    Evidence[]
+  interventionOverrides       TenantInterventionOverride[]
+  learningEvents              LearningEvent[]
+
+  @@map("tenants")
+}
+
+enum TenantStatus {
+  PILOT
+  ACTIVE
+  SUSPENDED
+}
+
+model Segment {
+  id              String   @id @default(cuid())
+  tenantId        String
+  name            String
+  type            SegmentType
+  parentSegmentId String?
+  createdAt       DateTime @default(now())
+
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  parent          Segment? @relation("SegmentHierarchy", fields: [parentSegmentId], references: [id])
+  children        Segment[] @relation("SegmentHierarchy")
+  employees       EmployeeSegment[]
+
+  @@index([tenantId])
+  @@map("segments")
+}
+
+enum SegmentType {
+  DEPARTMENT
+  LOCATION
+  ROLE
+  CUSTOM
+}
+
+model Employee {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  personalEmail      String
+  enrollmentCodeUsed String
+  authMethod         AuthMethod
+  demographicData    Json?
+  status             EmployeeStatus @default(REGISTERED)
+  createdAt          DateTime @default(now())
+  lastActiveAt       DateTime?
+
+  tenant             Tenant   @relation(fields: [tenantId], references: [id])
+  segments           EmployeeSegment[]
+  evidence           Evidence[]
+  variableStates     VariableState[]
+  constructScores    ConstructScore[]
+  dimensionScores    DimensionScore[]
+  financialState     FinancialState?
+  safetyFlags        SafetyFlag[]
+  interventions      EmployeeIntervention[]
+
+  @@unique([tenantId, personalEmail])
+  @@index([tenantId])
+  @@map("employees")
+}
+
+enum AuthMethod {
+  MAGIC_LINK
+  GOOGLE_OAUTH
+}
+
+enum EmployeeStatus {
+  REGISTERED
+  ACTIVE
+  OPTED_OUT
+}
+
+model EmployeeSegment {
+  employeeId String
+  segmentId  String
+  assignedAt DateTime @default(now())
+
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  segment    Segment  @relation(fields: [segmentId], references: [id])
+
+  @@id([employeeId, segmentId])
+  @@map("employee_segments")
+}
+
+model TenantAdmin {
+  id           String   @id @default(cuid())
+  tenantId     String
+  email        String   @unique
+  role         TenantAdminRole @default(VIEWER)
+  createdAt    DateTime @default(now())
+  lastActiveAt DateTime?
+
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("tenant_admins")
+}
+
+enum TenantAdminRole {
+  VIEWER
+  ADMIN
+}
+
+model PlatformUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  role         PlatformRole
+  createdAt    DateTime @default(now())
+  lastActiveAt DateTime?
+
+  auditLogs    AuditLog[]
+
+  @@map("platform_users")
+}
+
+enum PlatformRole {
+  PLATFORM_OWNER
+  METHODOLOGIST
+  PRODUCT_ADMIN
+  ANALYST
+  VIEWER
+}
+
+// ============================================================
+// BLOQUE 2 — METODOLOGÍA Y BANCO (VERSIONADO)
+// ============================================================
+
+model Methodology {
+  id           String   @id @default(cuid())
+  version      String
+  status       VersionStatus @default(DRAFT)
+  publishedAt  DateTime?
+  publishedById String?
+  createdAt    DateTime @default(now())
+
+  dimensions   Dimension[]
+
+  @@unique([version])
+  @@map("methodologies")
+}
+
+enum VersionStatus {
+  DRAFT
+  IN_REVIEW
+  ACTIVE
+  DEPRECATED
+  ROLLBACK
+}
+
+model Dimension {
+  id               String   @id @default(cuid())
+  methodologyId    String
+  code             DimensionCode
+  nameI18nKey      String
+  descriptionI18nKey String
+  weight           Float    @default(20.0)
+
+  methodology      Methodology @relation(fields: [methodologyId], references: [id])
+  constructs       Construct[]
+  variables        Variable[]
+  questions        Question[]
+  interventions    Intervention[]
+
+  @@unique([methodologyId, code])
+  @@map("dimensions")
+}
+
+enum DimensionCode {
+  CONTROL
+  RESILIENCE
+  DEBT
+  SAVING
+  PLANNING
+}
+
+model Construct {
+  id                     String   @id @default(cuid())
+  dimensionId            String
+  code                   String
+  nameI18nKey            String
+  weightWithinDimension  Float
+
+  dimension              Dimension @relation(fields: [dimensionId], references: [id])
+  variablesOwned         Variable[] @relation("PrimaryOwner")
+  questions              Question[]
+  constructScores        ConstructScore[]
+  evidenceOwned          Evidence[]
+
+  @@unique([dimensionId, code])
+  @@map("constructs")
+}
+
+model Variable {
+  id                      String   @id @default(cuid())
+  code                    String   @unique
+  variableType            VariableType
+  dimensionId             String?
+  possibleStates          Json
+  primaryOwnerConstructId String?
+
+  dimension               Dimension? @relation(fields: [dimensionId], references: [id])
+  primaryOwner            Construct? @relation("PrimaryOwner", fields: [primaryOwnerConstructId], references: [id])
+  questions               Question[]
+  variableStates          VariableState[]
+  evidence                Evidence[]
+
+  @@map("variables")
+}
+
+enum VariableType {
+  SCORE
+  CONTEXT
+  BEHAVIORAL
+  READINESS
+  DERIVED
+}
+
+model QuestionBank {
+  id        String   @id @default(cuid())
+  version   String   @unique
+  status    VersionStatus @default(DRAFT)
+  createdAt DateTime @default(now())
+
+  questions Question[]
+
+  @@map("question_banks")
+}
+
+model Question {
+  id                          String   @id @default(cuid())
+  bankId                      String
+  code                        String
+  textI18nKey                 String
+  dimensionId                 String
+  variableTargetId            String
+  constructTargetId           String?
+  askIfRule                   Json?
+  skipIfRule                  Json?
+  doNotAskIfRule              Json?
+  basePriority                Int      @default(50)
+  informationValue            Float    @default(0.5)
+  safetyValue                 Float    @default(0.0)
+  scoringValue                Float    @default(0.5)
+  routingValue                Float    @default(0.5)
+  uncertaintyReduction        Float    @default(0.5)
+  burden                      Int      @default(3)
+  inferenceSubstitutionAllowed Boolean @default(true)
+  minConfidenceToSkip         Int      @default(80)
+  status                      VersionStatus @default(DRAFT)
+
+  bank                        QuestionBank @relation(fields: [bankId], references: [id])
+  dimension                   Dimension    @relation(fields: [dimensionId], references: [id])
+  variableTarget              Variable     @relation(fields: [variableTargetId], references: [id])
+  constructTarget             Construct?   @relation(fields: [constructTargetId], references: [id])
+  answerOptions               AnswerOption[]
+  evidence                    Evidence[]
+
+  @@unique([bankId, code])
+  @@index([dimensionId])
+  @@map("questions")
+}
+
+model AnswerOption {
+  id                String   @id @default(cuid())
+  questionId        String
+  textI18nKey       String
+  evidenceProduced  Json
+
+  question          Question @relation(fields: [questionId], references: [id])
+  evidence          Evidence[]
+
+  @@map("answer_options")
+}
+
+model ScoringConfig {
+  id                    String   @id @default(cuid())
+  version               String   @unique
+  status                VersionStatus @default(DRAFT)
+  dimensionWeights      Json
+  constructWeights      Json
+  naRedistributionRule  Json
+
+  @@map("scoring_configs")
+}
+
+model ForbiddenInference {
+  id                  String   @id @default(cuid())
+  sourceVariableCode  String
+  sourceValue         String
+  targetVariableCode  String
+  targetValue         String
+  reason              String
+
+  @@unique([sourceVariableCode, sourceValue, targetVariableCode, targetValue])
+  @@map("forbidden_inferences")
+}
+
+// ============================================================
+// BLOQUE 3 — ESTADO VIVO DEL EMPLEADO
+// ============================================================
+
+model Evidence {
+  id                     String   @id @default(cuid())
+  tenantId               String
+  employeeId             String
+  source                 EvidenceSource
+  questionId             String?
+  answerOptionId         String?
+  variableId             String
+  value                  Json
+  reliability            Reliability
+  confidence             Int
+  primaryOwnerConstructId String?
+  timestamp              DateTime @default(now())
+  period                 DateTime?
+  methodologyVersionId   String
+
+  tenant                 Tenant       @relation(fields: [tenantId], references: [id])
+  employee               Employee     @relation(fields: [employeeId], references: [id])
+  question               Question?    @relation(fields: [questionId], references: [id])
+  answerOption           AnswerOption? @relation(fields: [answerOptionId], references: [id])
+  variable               Variable     @relation(fields: [variableId], references: [id])
+  primaryOwner           Construct?   @relation(fields: [primaryOwnerConstructId], references: [id])
+
+  @@index([tenantId, employeeId])
+  @@index([employeeId, variableId])
+  @@map("evidence")
+}
+
+enum EvidenceSource {
+  QUESTION
+  INFERENCE
+  INTEGRATION
+}
+
+enum Reliability {
+  DIRECT
+  STRONG_INFERENCE
+  WEAK_INFERENCE
+}
+
+model VariableState {
+  employeeId              String
+  variableId              String
+  value                   Json
+  confidence              Int
+  state                   String
+  derivedFromEvidenceIds  String[]
+  updatedAt               DateTime @updatedAt
+
+  employee                Employee @relation(fields: [employeeId], references: [id])
+  variable                Variable @relation(fields: [variableId], references: [id])
+
+  @@id([employeeId, variableId])
+  @@map("variable_states")
+}
+
+model ConstructScore {
+  employeeId  String
+  constructId String
+  score       Float
+  confidence  Int
+  computedAt  DateTime @default(now()) @updatedAt
+
+  employee    Employee  @relation(fields: [employeeId], references: [id])
+  construct   Construct @relation(fields: [constructId], references: [id])
+
+  @@id([employeeId, constructId])
+  @@map("construct_scores")
+}
+
+model DimensionScore {
+  employeeId       String
+  dimensionId      String
+  score            Float
+  state            DimensionState
+  confidence       Int
+  driverVariableId String?
+  computedAt       DateTime @default(now()) @updatedAt
+
+  employee         Employee  @relation(fields: [employeeId], references: [id])
+
+  @@id([employeeId, dimensionId])
+  @@map("dimension_scores")
+}
+
+enum DimensionState {
+  MET
+  PARTIAL
+  UNMET
+  CRITICAL
+  NA
+}
+
+model FinancialState {
+  employeeId                 String   @id
+  cfhiScore                  Float
+  cfhiConfidence             Int
+  userGoal                   Json?
+  systemPriority             String?
+  rootCause                  String?
+  eligibility                Json?
+  finReadiness               String?
+  behReadiness               String?
+  lastDiagnosticCompletedAt  DateTime?
+  updatedAt                  DateTime @updatedAt
+
+  employee                   Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("financial_states")
+}
+
+model SafetyFlag {
+  id           String   @id @default(cuid())
+  employeeId   String
+  flagCode     String
+  raisedAt     DateTime @default(now())
+  evidenceIds  String[]
+  resolvedAt   DateTime?
+
+  employee     Employee @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId])
+  @@map("safety_flags")
+}
+
+// ============================================================
+// BLOQUE 4 — INTERVENCIONES Y CONTENIDO
+// ============================================================
+
+model InterventionCatalog {
+  id        String   @id @default(cuid())
+  version   String   @unique
+  status    VersionStatus @default(DRAFT)
+  createdAt DateTime @default(now())
+
+  interventions Intervention[]
+
+  @@map("intervention_catalogs")
+}
+
+model Intervention {
+  id                          String   @id @default(cuid())
+  catalogId                   String
+  type                        InterventionType
+  dimensionId                 String
+  appliesToStates             String[]
+  appliesToStages             String[]
+  financialReadinessRequired  String?
+  behavioralReadinessRequired String?
+  behavioralTechniqueCode     String?
+  titleI18nKey                String
+  descriptionI18nKey          String
+  actionTextI18nKey           String?
+  whyThisStepI18nKey          String?
+
+  catalog                     InterventionCatalog @relation(fields: [catalogId], references: [id])
+  dimension                   Dimension           @relation(fields: [dimensionId], references: [id])
+  tenantOverrides             TenantInterventionOverride[]
+  employeeInstances           EmployeeIntervention[]
+
+  @@map("interventions")
+}
+
+enum InterventionType {
+  EDUCATIONAL_CONTENT
+  BEHAVIORAL_ACTION
+  COMMITMENT
+  REMINDER
+}
+
+model TenantInterventionOverride {
+  tenantId       String
+  interventionId String
+  status         OverrideStatus
+
+  tenant         Tenant       @relation(fields: [tenantId], references: [id])
+  intervention   Intervention @relation(fields: [interventionId], references: [id])
+
+  @@id([tenantId, interventionId])
+  @@map("tenant_intervention_overrides")
+}
+
+enum OverrideStatus {
+  ENABLED
+  DISABLED
+}
+
+model EmployeeIntervention {
+  id             String   @id @default(cuid())
+  employeeId     String
+  interventionId String
+  assignedAt     DateTime @default(now())
+  status         EmployeeInterventionStatus @default(SUGGESTED)
+  commitmentData Json?
+  completedAt    DateTime?
+  outcome        InterventionOutcome?
+  feedback       Json?
+
+  employee       Employee     @relation(fields: [employeeId], references: [id])
+  intervention   Intervention @relation(fields: [interventionId], references: [id])
+
+  @@index([employeeId])
+  @@map("employee_interventions")
+}
+
+enum EmployeeInterventionStatus {
+  SUGGESTED
+  COMMITTED
+  IN_PROGRESS
+  COMPLETED
+  DISMISSED
+}
+
+enum InterventionOutcome {
+  ACHIEVED
+  PARTIAL
+  NOT_ACHIEVED
+}
+
+// ============================================================
+// BLOQUE 5 — AUDITORÍA, VERSIONADO Y APRENDIZAJE
+// ============================================================
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  whoId         String
+  whoData       Json
+  what          String
+  when          DateTime @default(now())
+  previousValue Json?
+  newValue      Json?
+  entityType    String
+  entityId      String
+
+  who           PlatformUser @relation(fields: [whoId], references: [id])
+
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
+
+model LearningEvent {
+  id         String   @id @default(cuid())
+  eventType  LearningEventType
+  employeeId String?
+  tenantId   String
+  context    Json
+  timestamp  DateTime @default(now())
+
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, timestamp])
+  @@map("learning_events")
+}
+
+enum LearningEventType {
+  QUESTION_SHOWN
+  QUESTION_ANSWERED
+  QUESTION_ABANDONED
+  DIAGNOSTIC_COMPLETED
+  INTERVENTION_SUGGESTED
+  INTERVENTION_COMMITTED
+  INTERVENTION_COMPLETED
+  OUTCOME_REPORTED
+}
