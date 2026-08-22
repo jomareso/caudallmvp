@@ -31,10 +31,103 @@
     },
     "welcome": {
       "title": "Ya estás dentro, bienvenido a {tenantName}",
-      "subtitle": "Tu diagnóstico de salud financiera está por llegar. Pronto podrás conocer tu Índice de Salud Financiera (CFHI)."
+      "subtitle": "Ahora sí, vamos a conocer tu salud financiera.",
+      "ctaStart": "Empezar mi diagnóstico"
     },
     "trust": {
       "privacyGuarantee": "Tu empresa nunca verá tus respuestas individuales. Solo métricas agregadas y anónimas."
+    }
+  },
+  "diagnostic": {
+    "progress": "Pregunta {current} de {total}",
+    "ctaContinue": "Continuar",
+    "ctaFinish": "Ver mi resultado",
+    "errorSelectOption": "Selecciona una opción antes de continuar.",
+    "dimensions": {
+      "CONTROL": "Control",
+      "RESILIENCE": "Resiliencia",
+      "DEBT": "Deuda",
+      "SAVING": "Ahorro",
+      "PLANNING": "Planificación",
+      "descriptions": {
+        "CONTROL": "¿Manejo sosteniblemente mis finanzas cotidianas?",
+        "RESILIENCE": "¿Puedo absorber un shock financiero?",
+        "DEBT": "¿Mis obligaciones son sostenibles?",
+        "SAVING": "¿Acumulo recursos de forma sostenible?",
+        "PLANNING": "¿Convierto mis objetivos en acciones?"
+      }
+    },
+    "questions": {
+      "CTRL-01": {
+        "text": "¿Cómo describirías el balance entre lo que ganas y lo que gastas cada mes?",
+        "options": {
+          "HIGH": "Me sobra bastante, ahorro con facilidad",
+          "POSITIVE": "Me sobra un poco cada mes",
+          "EVEN": "Gasto casi exactamente lo que gano",
+          "NEGATIVE": "Gasto un poco más de lo que gano",
+          "CRITICAL": "Gasto bastante más de lo que gano"
+        }
+      },
+      "RES-01": {
+        "text": "Si perdieras tu ingreso mañana, ¿cuánto tiempo podrías cubrir tus gastos con lo que tienes ahorrado?",
+        "options": {
+          "STRONG": "Más de 6 meses",
+          "GOOD": "Entre 3 y 6 meses",
+          "PARTIAL": "Entre 1 y 3 meses",
+          "LOW": "Menos de un mes",
+          "VERY_LOW": "No tengo nada ahorrado"
+        }
+      },
+      "DEBT-01": {
+        "text": "¿Tienes deudas activas actualmente (tarjetas, préstamos, financiamientos)?",
+        "options": {
+          "NONE": "No, no tengo deudas",
+          "APPLICABLE": "Sí, tengo deudas activas"
+        }
+      },
+      "DEBT-02": {
+        "text": "¿Qué tan cómodo te sientes pagando tus deudas cada mes?",
+        "options": {
+          "COMFORTABLE": "Muy cómodo, no me cuesta nada",
+          "MANAGEABLE": "Cómodo, sin mayor esfuerzo",
+          "TIGHT": "Ajustado, tengo que planificarlo",
+          "DIFFICULT": "Difícil, me cuesta cubrirlo",
+          "UNMANAGEABLE": "No puedo cubrirlo"
+        }
+      },
+      "SAV-01": {
+        "text": "¿Con qué frecuencia logras ahorrar parte de tu ingreso?",
+        "options": {
+          "EVERY_MONTH": "Todos los meses",
+          "MOST_MONTHS": "La mayoría de los meses",
+          "SOMETIMES": "A veces",
+          "RARELY": "Rara vez",
+          "NEVER": "Nunca"
+        }
+      },
+      "PLAN-01": {
+        "text": "¿En qué etapa estás con tus metas financieras?",
+        "options": {
+          "NO_DIRECTION": "No he pensado en metas financieras",
+          "ASPIRATION": "Tengo ideas generales pero nada definido",
+          "GOAL_DEFINED": "Tengo una meta definida pero no un plan",
+          "PLAN_DEFINED": "Tengo meta y plan, pero no he empezado",
+          "STARTED": "Ya empecé a ejecutar mi plan"
+        }
+      }
+    },
+    "result": {
+      "title": "Tu Índice de Salud Financiera",
+      "outOf100": "de 100",
+      "dimensionsTitle": "Tus 5 dimensiones",
+      "debtNotApplicable": "No aplica — nos dijiste que no tienes deudas",
+      "bands": {
+        "CRITICAL": "Crítico",
+        "UNMET": "En riesgo",
+        "PARTIAL": "En construcción",
+        "MET": "Saludable",
+        "NA": "No aplica"
+      }
     }
   },
   "hr": {
