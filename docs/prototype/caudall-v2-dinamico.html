@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caudall v2.0 — Prototipo dinámico completo</title>
+<style>
+:root{
+  --yale:#0F5499; --cola:#0783D9; --picton:#34C1EE;
+  --quartz:#4B4C4C; --nickel:#737373; --silver:#B8B8B8;
+  --bg:#F4F5F7; --surface:#ECEEF1; --white:#FFFFFF;
+  --border:#D8DBDF; --border-strong:#B8B8B8;
+  --radius-md:8px; --radius-lg:12px; --radius-xl:16px;
+  --ok:#3B6D11; --warn:#854F0B; --bad:#791F1F;
+  --ok-bg:#EAF3DE; --warn-bg:#FAEEDA; --bad-bg:#FCEBEB; --info-bg:#E6F1FB;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--quartz);line-height:1.5;padding:20px 12px}
+.wrap{max-width:1100px;margin:0 auto}
+.title{text-align:center;margin-bottom:6px}
+.title h1{font-size:22px;font-weight:500;color:var(--yale)}
+.title p{font-size:12px;color:var(--nickel);margin-top:4px}
+.title .demo{display:inline-block;background:var(--info-bg);color:#0C447C;font-size:11px;padding:3px 10px;border-radius:8px;margin-top:6px}
+.viewtabs{display:flex;gap:6px;margin:18px 0 14px;flex-wrap:wrap}
+.vtab{flex:1;min-width:150px;padding:10px 12px;border:0.5px solid var(--border-strong);border-radius:8px;background:transparent;cursor:pointer;font-size:13px;font-family:inherit;color:var(--nickel)}
+.vtab.on{background:var(--yale);color:#fff;border-color:var(--yale)}
+.vtab small{display:block;font-size:10px;opacity:.8;margin-top:2px}
+.frame{background:var(--surface);border-radius:12px;padding:18px}
+.view{display:none}
+.view.on{display:block}
+.progressbar{max-width:380px;margin:0 auto 10px;display:flex;gap:3px;justify-content:center;flex-wrap:wrap}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--border-strong);cursor:pointer;border:none;padding:0}
+.pdot.on{background:var(--yale);width:20px;border-radius:4px}
+.pdot.done{background:var(--cola)}
+.resetbar{max-width:320px;margin:12px auto 0;text-align:center}
+.resetlink{background:none;border:none;color:var(--nickel);font-size:11px;cursor:pointer;text-decoration:underline;font-family:inherit;padding:6px}
+.phone{max-width:340px;margin:0 auto;background:var(--white);border:0.5px solid var(--border-strong);border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(15,84,153,0.08)}
+.bar{background:var(--yale);color:#fff;padding:10px 14px;font-size:13px;display:flex;align-items:center;justify-content:space-between}
+.bar .co{display:flex;align-items:center;gap:6px}
+.bar .co-logo{width:20px;height:20px;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--yale);font-weight:500}
+.bar .back{background:none;border:none;color:#fff;cursor:pointer;font-size:14px;padding:0}
+.bodyp{padding:18px 16px;min-height:500px;display:flex;flex-direction:column}
+.h{font-size:16px;font-weight:500;margin:0 0 5px;color:var(--quartz)}
+.sub{font-size:13px;color:var(--nickel);margin:0 0 14px}
+.input{border:0.5px solid var(--border-strong);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--quartz);margin-bottom:9px;background:#fff;width:100%;font-family:inherit}
+.opt{border:0.5px solid var(--border-strong);border-radius:8px;padding:11px 12px;font-size:13px;margin-bottom:8px;color:var(--nickel);display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none}
+.opt:hover{border-color:var(--cola);color:var(--quartz)}
+.opt.sel{border-color:var(--cola);color:var(--yale);background:var(--info-bg)}
+.opt-radio{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--silver);flex-shrink:0}
+.opt.sel .opt-radio{border-color:var(--yale);background:var(--yale);box-shadow:inset 0 0 0 3px #fff}
+.btn{background:var(--yale);color:#fff;border:none;border-radius:8px;padding:11px;font-size:13px;width:100%;text-align:center;font-family:inherit;cursor:pointer;margin-top:auto}
+.btn.ghost{background:transparent;color:var(--cola);border:0.5px solid var(--cola)}
+.btn.g{background:#fff;color:var(--yale);border:0.5px solid var(--border-strong)}
+.trust-note{background:var(--info-bg);border-radius:8px;padding:9px 10px;font-size:11px;color:#0C447C;margin:11px 0;display:flex;gap:7px;align-items:flex-start}
+.condicional-note{background:#F5EFDD;border-radius:8px;padding:8px 10px;font-size:10px;color:#7A5C0F;margin-bottom:10px;line-height:1.4}
+.icon-c{width:52px;height:52px;border-radius:50%;background:var(--info-bg);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;color:var(--yale);font-size:22px}
+.icon-c.ok{background:var(--ok-bg);color:var(--ok)}
+.proghead{display:flex;justify-content:space-between;font-size:11px;color:var(--nickel);margin-bottom:5px}
+.prog{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin:0 0 14px}
+.prog span{display:block;height:100%;background:linear-gradient(90deg,var(--picton),var(--cola))}
+.dimchip{display:inline-block;font-size:10px;padding:2px 8px;border-radius:8px;background:var(--info-bg);color:#0C447C;margin-bottom:8px;font-weight:500}
+.benchmark{display:flex;height:32px;border-radius:8px;overflow:hidden;font-size:9px;position:relative}
+.dim-card{border:0.5px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;background:#fff}
+.dim-head{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:5px}
+.dim-head b{font-weight:500;color:var(--quartz)}
+.bars{height:8px;background:var(--border);border-radius:5px;overflow:hidden}
+.bars span{display:block;height:100%}
+.tag{font-size:10px;padding:3px 8px;border-radius:8px}
+.t-critical{background:#FCEBEB;color:#791F1F}
+.t-atrisk{background:#FCDDC7;color:#7A3A0A}
+.t-building{background:var(--warn-bg);color:var(--warn)}
+.t-healthy{background:var(--ok-bg);color:var(--ok)}
+.t-optimal{background:#DDEDC5;color:#2A4E0B}
+.action-card{border:1px solid var(--cola);border-radius:8px;padding:12px;margin-bottom:10px;background:#fff}
+.action-card .why{font-size:11px;color:var(--nickel);margin-top:8px;padding-top:8px;border-top:0.5px dashed var(--border)}
+.action-card .type-badge{font-size:9px;background:var(--info-bg);color:#0C447C;padding:2px 6px;border-radius:8px;display:inline-block;margin-bottom:6px}
+.intv{display:flex;gap:9px;align-items:flex-start;border:0.5px solid var(--border);border-radius:8px;padding:10px;margin-bottom:7px;font-size:12px;color:var(--nickel);cursor:pointer;background:#fff}
+.intv .ic{flex-shrink:0;width:26px;height:26px;border-radius:5px;background:var(--info-bg);color:var(--yale);display:flex;align-items:center;justify-content:center;font-size:13px}
+.intv b{font-weight:500;color:var(--quartz)}
+.desk{background:var(--white);border:0.5px solid var(--border-strong);border-radius:8px;overflow:hidden;max-width:940px;margin:0 auto;box-shadow:0 4px 20px rgba(15,84,153,0.08)}
+.deskhdr{background:var(--yale);color:#fff;padding:12px 18px;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+.deskhdr .co-badge{background:rgba(255,255,255,.15);padding:3px 8px;border-radius:8px;font-size:11px;margin-left:10px}
+.desknav{background:#F9FAFB;border-bottom:0.5px solid var(--border);padding:0 18px;display:flex;font-size:12px;overflow-x:auto}
+.desknav a{padding:11px 14px;color:var(--nickel);text-decoration:none;border-bottom:2px solid transparent;cursor:pointer;user-select:none;white-space:nowrap}
+.desknav a.on{color:var(--yale);border-bottom-color:var(--yale);font-weight:500}
+.deskbody{padding:20px;min-height:520px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.metric{background:var(--surface);border-radius:8px;padding:14px}
+.mlbl{font-size:11px;color:var(--nickel);margin:0 0 5px}
+.mval{font-size:24px;font-weight:500;margin:0;color:var(--quartz)}
+.msub{font-size:10px;color:var(--nickel);margin-top:3px}
+.msub.ok{color:var(--ok)}
+.msub.bad{color:var(--bad)}
+.section-title{font-size:13px;font-weight:500;color:var(--quartz);margin:18px 0 10px}
+.dim-mini{background:var(--surface);border-radius:8px;padding:12px;text-align:center;cursor:pointer}
+.dim-mini .name{font-size:11px;color:var(--nickel);margin-bottom:4px}
+.dim-mini .val{font-size:22px;font-weight:500;color:var(--yale)}
+.dim-mini .status{font-size:9px;padding:2px 6px;border-radius:8px;margin-top:5px;display:inline-block}
+.threshold-notice{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:11px;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start}
+.chart-fake{background:linear-gradient(180deg,#fff 0%,var(--info-bg) 100%);border:0.5px solid var(--border);border-radius:8px;height:200px;display:flex;align-items:flex-end;justify-content:space-around;padding:15px 20px 22px;position:relative}
+.chart-fake .bar-c{width:34px;background:var(--yale);border-radius:4px 4px 0 0;position:relative}
+.chart-fake .bar-c::after{content:attr(data-lbl);position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--nickel);white-space:nowrap}
+.chart-fake .bar-c::before{content:attr(data-val);position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--quartz);font-weight:500}
+.alert-box{background:var(--bad-bg);color:var(--bad);border-radius:8px;padding:12px;font-size:12px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start}
+.alert-box.warn{background:var(--warn-bg);color:var(--warn)}
+.alert-box.info{background:var(--info-bg);color:#0C447C}
+.alert-box b{font-weight:500;display:block;margin-bottom:3px}
+.info-box{background:var(--info-bg);border-radius:8px;padding:11px;font-size:12px;color:#0C447C;margin:12px 0;line-height:1.5}
+.info-box b{font-weight:500}
+.admin-side{display:grid;grid-template-columns:200px 1fr;min-height:520px}
+.admin-nav{background:#0C447C;color:#fff;padding:18px 0}
+.admin-nav .grp{font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;padding:14px 18px 6px;letter-spacing:0.5px}
+.admin-nav a{display:block;padding:9px 18px;font-size:12px;color:rgba(255,255,255,.85);text-decoration:none;cursor:pointer;border-left:3px solid transparent;user-select:none}
+.admin-nav a.on{background:rgba(255,255,255,.1);border-left-color:var(--picton);color:#fff}
+.admin-body{padding:20px}
+.entity-table{width:100%;border-collapse:collapse;font-size:12px}
+.entity-table th{text-align:left;color:var(--nickel);font-weight:500;padding:8px 10px;border-bottom:0.5px solid var(--border-strong);font-size:11px}
+.entity-table td{padding:9px 10px;border-bottom:0.5px solid var(--border);color:var(--quartz)}
+.status-chip{font-size:10px;padding:2px 7px;border-radius:8px}
+.status-chip.active{background:var(--ok-bg);color:var(--ok)}
+.status-chip.draft{background:var(--warn-bg);color:var(--warn)}
+.tree{font-size:12px;font-family:'Courier New',monospace;color:var(--quartz);line-height:1.7;background:var(--surface);border-radius:8px;padding:12px}
+.tree .k{color:var(--yale);font-weight:500}
+.tree .n{color:var(--nickel)}
+.foot{text-align:center;font-size:11px;color:var(--silver);margin-top:22px;line-height:1.7}
+.foot b{color:var(--nickel);font-weight:500}
+@media (max-width:640px){
+  .grid-3,.grid-2,.grid-4,.grid-5{grid-template-columns:1fr 1fr}
+  .admin-side{grid-template-columns:1fr}
+  .admin-nav{padding:10px 0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="title">
+  <h1>caudall</h1>
+  <p>Prototipo del MVP v2.0 &middot; Modelo B2B2E &middot; <b>puntaje din&aacute;mico</b></p>
+  <span class="demo">El CFHI cambia seg&uacute;n tus respuestas &middot; 3 vistas: Empleado / RRHH / Admin</span>
+</div>
+
+<div class="viewtabs">
+  <button class="vtab on" onclick="setView('emp')" id="tab-emp">Empleado <small>diagnóstico dinámico</small></button>
+  <button class="vtab" onclick="setView('rrhh')" id="tab-rrhh">RRHH <small>panel de la empresa</small></button>
+  <button class="vtab" onclick="setView('admin')" id="tab-admin">Admin Caudall <small>metodología v2.0</small></button>
+</div>
+
+<div class="frame">
+
+<div class="view on" id="view-emp">
+  <div class="progressbar" id="dots-emp"></div>
+  <div id="emp-container"></div>
+  <div class="resetbar"><button class="resetlink" onclick="resetView('emp')">↺ Reiniciar demo del empleado</button></div>
+</div>
+
+<div class="view" id="view-rrhh">
+  <div class="progressbar" id="dots-rrhh"></div>
+  <div id="rrhh-container"></div>
+  <div class="resetbar"><button class="resetlink" onclick="resetView('rrhh')">↺ Reiniciar demo de RRHH</button></div>
+</div>
+
+<div class="view" id="view-admin">
+  <div class="progressbar" id="dots-admin"></div>
+  <div id="admin-container"></div>
+  <div class="resetbar"><button class="resetlink" onclick="resetView('admin')">↺ Reiniciar demo del admin</button></div>
+</div>
+
+</div>
+
+<p class="foot"><b>Caudall v2.0 &middot; Modelo B2B2E</b><br>Puntaje din&aacute;mico &middot; 5 dimensiones ponderadas &middot; Next Best Action adaptativo</p>
+
+</div>
+
+<script>
+// ===============================================
+// DATOS
+// ===============================================
+var questions = [
+  {id:'q1', dim:'ctrl', dimName:'Control', text:'¿Tus ingresos son regulares mes a mes?', options:[
+    {t:'Sí, muy estables', s:100},
+    {t:'Estables pero con pequeñas variaciones', s:80},
+    {t:'Varían bastante mes a mes', s:45},
+    {t:'Muy variables o impredecibles', s:15}
+  ]},
+  {id:'q2', dim:'ctrl', dimName:'Control', text:'¿Sabes con precisión cuánto gastaste el mes pasado?', options:[
+    {t:'Sí, hasta el detalle', s:100},
+    {t:'Sí, en categorías generales', s:75},
+    {t:'Tengo una idea aproximada', s:45},
+    {t:'No sabría decir con certeza', s:10}
+  ]},
+  {id:'q3', dim:'res', dimName:'Resiliencia', text:'Si perdieras tu ingreso mañana, ¿por cuánto tiempo podrías cubrir tus gastos con lo que tienes ahorrado?', options:[
+    {t:'Más de 6 meses', s:100},
+    {t:'De 3 a 6 meses', s:80},
+    {t:'De 1 a 3 meses', s:55},
+    {t:'Menos de un mes', s:25},
+    {t:'No tengo nada ahorrado', s:0}
+  ]},
+  {id:'q4', dim:'res', dimName:'Resiliencia', text:'Ante una emergencia médica seria, ¿estarías cubierto?', options:[
+    {t:'Sí, tengo seguro que cubre bien', s:100},
+    {t:'Solo el ARS del trabajo', s:55},
+    {t:'Tengo seguro pero no sé qué cubre', s:40},
+    {t:'No tengo cobertura', s:5}
+  ]},
+  {id:'q5', dim:'debt', dimName:'Deuda', text:'De cada RD$100 que ganas al mes, ¿cuánto se va en pagar deudas?', options:[
+    {t:'Nada, no tengo deudas', s:100},
+    {t:'Menos de RD$20', s:85},
+    {t:'Entre RD$20 y RD$40', s:60},
+    {t:'Entre RD$40 y RD$60', s:25},
+    {t:'Más de RD$60', s:5}
+  ]},
+  {id:'q6', dim:'debt', dimName:'Deuda', text:'En los últimos 12 meses, ¿te has atrasado en algún pago de deuda?', options:[
+    {t:'Nunca', s:100},
+    {t:'Una vez puntual', s:70},
+    {t:'Varias veces, pero ya al día', s:30},
+    {t:'Estoy con atraso vigente ahora', s:5}
+  ]},
+  {id:'q7', dim:'debt', dimName:'Deuda', text:'Si tienes tarjetas de crédito, ¿cómo las pagas normalmente?', options:[
+    {t:'Pago el saldo total cada mes', s:100},
+    {t:'Más del mínimo pero menos del total', s:60},
+    {t:'Solo el pago mínimo', s:15},
+    {t:'No tengo tarjetas de crédito', s:85}
+  ]},
+  {id:'q8', dim:'sav', dimName:'Ahorro', text:'¿Logras ahorrar parte de tus ingresos regularmente?', options:[
+    {t:'Sí, todos los meses', s:100},
+    {t:'La mayoría de los meses', s:75},
+    {t:'A veces, cuando puedo', s:45},
+    {t:'Casi nunca', s:20},
+    {t:'Nunca, no tengo margen', s:0}
+  ]},
+  {id:'q9', dim:'sav', dimName:'Ahorro', text:'¿Qué te impide ahorrar de forma más consistente?', conditional:true, options:[
+    {t:'Ingresos que varían mes a mes', s:55},
+    {t:'Gastos imprevistos', s:50},
+    {t:'No tengo un sistema para hacerlo', s:40},
+    {t:'Otras prioridades más urgentes', s:30}
+  ]},
+  {id:'q10', dim:'plan', dimName:'Planificación', text:'¿Tienes definidas metas financieras a mediano o largo plazo?', options:[
+    {t:'Sí, con plazos y montos claros', s:100},
+    {t:'Tengo ideas generales pero no específicas', s:55},
+    {t:'Pensé en algún momento pero no ahora', s:25},
+    {t:'No he pensado en metas financieras', s:5}
+  ]},
+  {id:'q11', dim:'plan', dimName:'Planificación', text:'¿Estás aportando activamente a tu retiro (AFP o pensión)?', options:[
+    {t:'Sí, AFP más aportes voluntarios', s:100},
+    {t:'Solo lo que descuenta mi empleador', s:55},
+    {t:'A veces cotizo, a veces no', s:25},
+    {t:'No estoy cotizando actualmente', s:5}
+  ]}
+];
+
+var dimensions = {ctrl:'Control', res:'Resiliencia', debt:'Deuda', sav:'Ahorro', plan:'Planificación'};
+
+var nbaByDim = {
+  ctrl:{title:'Empieza a registrar tus gastos diarios por 2 semanas', desc:'Anota cada gasto por 14 días. En 2 semanas tendrás claridad sobre a dónde se va tu dinero.', why:'Tu dimensión más débil es Control. Sin saber dónde va tu dinero, es imposible cambiarlo.', m1:'Curso: Cómo registrar gastos sin agobiarte', m1t:'8 min', m2:'Artículo: El presupuesto que sí funciona', m2t:'5 min'},
+  res:{title:'Empieza tu fondo de emergencia con RD$500 esta semana', desc:'Abre una cuenta separada solo para emergencias. Deposita RD$500. La meta es llegar a 3 meses de gastos.', why:'Tu dimensión más débil es Resiliencia. Sin fondo, cualquier imprevisto te empuja a la deuda.', m1:'Curso: Fondo de emergencia en 3 pasos', m1t:'8 min', m2:'Artículo: Cuánto es "suficiente"', m2t:'4 min'},
+  debt:{title:'Lista todas tus deudas de mayor a menor tasa', desc:'Anota cada deuda: monto, cuota, tasa. Ordénalas de mayor tasa a menor. Empezar por la más costosa ahorra más dinero.', why:'Tu dimensión más débil es Deuda. Sin claridad del panorama total, es fácil pagar la más ruidosa en vez de la más cara.', m1:'Curso: Ordenar tus deudas en 3 pasos', m1t:'10 min', m2:'Artículo: Método avalancha vs bola de nieve', m2t:'6 min'},
+  sav:{title:'Automatiza un ahorro semanal pequeño', desc:'RD$500 cada viernes por transferencia automática. Menos importa el monto que la consistencia. En un año son RD$26,000 sin pensarlo.', why:'Tu dimensión más débil es Ahorro. Automatizar antes de gastar te protege del impulso.', m1:'Curso: Ahorro automático en 15 minutos', m1t:'8 min', m2:'Artículo: Por qué el ahorro pequeño gana', m2t:'4 min'},
+  plan:{title:'Define UNA meta financiera con plazo y monto', desc:'Elige una sola meta. Ejemplo: "Ahorrar RD$50,000 para viaje en 12 meses". Específica, con fecha, con monto.', why:'Tu dimensión más débil es Planificación. Las metas vagas no se cumplen — las específicas sí.', m1:'Curso: Metas SMART para tu dinero', m1t:'7 min', m2:'Artículo: Retiro sin miedo', m2t:'5 min'}
+};
+
+// ===============================================
+// ESTADO
+// ===============================================
+var answers = {};
+var currentScreen = {emp:0, rrhh:0, admin:0};
+var totalScreens = {emp:16, rrhh:8, admin:5};
+
+// ===============================================
+// SCORING
+// ===============================================
+function dimScore(dim){
+  var qs = questions.filter(function(q){return q.dim===dim;});
+  var vals = qs.map(function(q){return answers[q.id];}).filter(function(v){return v!==undefined;});
+  if(vals.length===0) return 0;
+  var sum = 0;
+  for(var i=0;i<vals.length;i++) sum += vals[i];
+  return Math.round(sum/vals.length);
+}
+
+function cfhi(){
+  var dims = ['ctrl','res','debt','sav','plan'];
+  var sum = 0;
+  for(var i=0;i<dims.length;i++) sum += dimScore(dims[i]);
+  return Math.round(sum/dims.length);
+}
+
+function bandInfo(s){
+  if(s<=30) return {name:'Crítico',cls:'t-critical',msg:'Tu salud financiera necesita atención urgente. Con acciones concretas puedes empezar a estabilizarte en las próximas semanas.'};
+  if(s<=50) return {name:'En riesgo',cls:'t-atrisk',msg:'Estás en un rango de vulnerabilidad. Con foco en tus 2 dimensiones más débiles puedes salir del riesgo en 3-6 meses.'};
+  if(s<=70) return {name:'En construcción',cls:'t-building',msg:'Estás en un punto medio. Con acciones concretas puedes subir a "Saludable" en los próximos 6 meses.'};
+  if(s<=85) return {name:'Saludable',cls:'t-healthy',msg:'Tu salud financiera es sólida. Mantén tus prácticas y afina donde puedes crecer más.'};
+  return {name:'Óptimo',cls:'t-optimal',msg:'Tu salud financiera es excelente. Estás en el 10% más alto de dominicanos.'};
+}
+
+function barColor(s){
+  if(s<=30) return '#E24B4A';
+  if(s<=50) return '#F07935';
+  if(s<=70) return '#EF9F27';
+  if(s<=85) return '#97C459';
+  return '#5A9B0F';
+}
+
+function dimDesc(dim, s){
+  var t = {
+    high:{ctrl:'Sabes tus gastos y manejas tu día a día bien.',res:'Tienes un colchón sólido.',debt:'Tu carga de deuda es manejable.',sav:'Ahorras de forma consistente.',plan:'Tienes metas claras.'},
+    mid:{ctrl:'Tienes noción general pero podrías afinar el detalle.',res:'Tienes algún colchón pero bajo lo recomendado.',debt:'Tu deuda es manejable pero mereces afinarla.',sav:'Ahorras pero no siempre.',plan:'Tienes intención pero falta concretar.'},
+    low:{ctrl:'Falta claridad sobre a dónde va tu dinero.',res:'Tu colchón es insuficiente.',debt:'Tu carga te está presionando.',sav:'Ahorras rara vez. Tu principal área.',plan:'Falta definir metas concretas.'},
+    crit:{ctrl:'Sin visibilidad de tus gastos, es difícil avanzar.',res:'Sin colchón, cualquier imprevisto te empuja a deuda.',debt:'Tu deuda está en niveles críticos.',sav:'Sin ahorro, no hay colchón.',plan:'Sin metas, no hay dirección.'}
+  };
+  if(s>=71) return t.high[dim];
+  if(s>=51) return t.mid[dim];
+  if(s>=31) return t.low[dim];
+  return t.crit[dim];
+}
+
+function weakestDim(){
+  var dims = ['ctrl','res','debt','sav','plan'];
+  var min = 999, minDim = 'sav';
+  for(var i=0;i<dims.length;i++){
+    var s = dimScore(dims[i]);
+    if(s<min){min=s;minDim=dims[i];}
+  }
+  return minDim;
+}
+
+// ===============================================
+// RENDER EMPLEADO
+// ===============================================
+function renderEmpScreen(i){
+  var html = '';
+  if(i===0){
+    html = '<div class="phone"><div class="bar"><div class="co"><div class="co-logo">A</div><span>caudall</span></div><span>&equiv;</span></div>'
+      +'<div class="bodyp" style="text-align:center;padding-top:28px">'
+      +'<div class="icon-c">&#9678;</div>'
+      +'<p class="h" style="font-size:17px">Bienestar financiero,<br>como beneficio de tu empresa</p>'
+      +'<p class="sub">Un espacio privado para conocer tu salud financiera y mejorarla.</p>'
+      +'<input class="input" type="text" placeholder="Código de tu empresa" style="text-align:center;text-transform:uppercase" value="ACME2026">'
+      +'<button class="btn" onclick="nextEmp()">Continuar</button></div></div>';
+  } else if(i===1){
+    html = '<div class="phone"><div class="bar"><div class="co"><div class="co-logo" style="background:#E8A317;color:#fff">A</div><span>Empresa Acme &middot; caudall</span></div></div>'
+      +'<div class="bodyp"><p class="h">Tu correo personal</p>'
+      +'<p class="sub">Usa un correo tuyo, no el corporativo. Es tu cuenta, no de la empresa.</p>'
+      +'<input class="input" type="email" value="maria@gmail.com">'
+      +'<button class="btn" onclick="nextEmp()">Enviarme un link para entrar</button>'
+      +'<p style="text-align:center;font-size:11px;color:var(--nickel);margin:14px 0 10px">o</p>'
+      +'<button class="btn g" onclick="nextEmp()">Continuar con Google (personal)</button>'
+      +'<div class="trust-note"><span style="font-size:14px">&#128274;</span><span><b>Tu empresa nunca verá tus respuestas individuales.</b> Solo métricas agregadas y anónimas.</span></div>'
+      +'</div></div>';
+  } else if(i>=2 && i<=12){
+    var qIdx = i-2;
+    var q = questions[qIdx];
+    var pct = Math.round(((qIdx+1)/11)*100);
+    var backBtn = qIdx>0 ? '<button class="back" onclick="prevEmp()">&larr;</button>' : '';
+    var condNote = q.conditional ? '<div class="condicional-note"><b>&#9432; Pregunta condicional (demo):</b> en la app real esta pregunta solo aparecería según lo que respondiste antes.</div>' : '';
+    var privNote = qIdx===0 ? '<p class="sub" style="font-size:11px">Tus respuestas son privadas. La empresa nunca las verá.</p>' : '';
+    var optHtml = '';
+    for(var j=0;j<q.options.length;j++){
+      var o = q.options[j];
+      var sel = answers[q.id]===o.s ? ' sel' : '';
+      optHtml += '<div class="opt'+sel+'" onclick="pickAnswer(\''+q.id+'\','+o.s+',this)"><div class="opt-radio"></div> '+o.t+'</div>';
+    }
+    var btnLabel = qIdx===10 ? 'Calcular mi resultado' : 'Continuar';
+    html = '<div class="phone"><div class="bar"><div class="co">'+backBtn+'<span>Diagnóstico</span></div></div>'
+      +'<div class="bodyp"><div class="proghead"><span>Pregunta '+(qIdx+1)+' de 11</span><span>'+q.dimName+'</span></div>'
+      +'<div class="prog"><span style="width:'+pct+'%"></span></div>'
+      +'<span class="dimchip">'+q.dimName+'</span>'
+      +'<p class="h">'+q.text+'</p>'
+      +privNote+condNote+optHtml
+      +'<button class="btn" onclick="requireAndNext(\''+q.id+'\')">'+btnLabel+'</button>'
+      +'</div></div>';
+  } else if(i===13){
+    var c = cfhi();
+    var b = bandInfo(c);
+    html = '<div class="phone"><div class="bar"><div class="co"><div class="co-logo" style="background:#E8A317;color:#fff">A</div><span>Tu resultado</span></div></div>'
+      +'<div class="bodyp" style="text-align:center">'
+      +'<p class="mlbl">Tu Índice de Salud Financiera</p>'
+      +'<p style="font-size:52px;font-weight:500;margin:2px 0;color:var(--yale);line-height:1">'+c+'</p>'
+      +'<p style="font-size:11px;color:var(--nickel);margin-bottom:8px">de 100</p>'
+      +'<span class="tag '+b.cls+'">'+b.name+'</span>'
+      +'<p class="sub" style="font-size:12px;margin-top:14px">'+b.msg+'</p>'
+      +'<div style="margin:12px 0 6px;text-align:left"><p style="font-size:11px;color:var(--nickel);margin:0 0 6px">Tu lugar frente a los dominicanos</p>'
+      +'<div class="benchmark">'
+      +'<div style="width:15%;background:#E24B4A;color:#fff;display:flex;align-items:center;justify-content:center">Crítico</div>'
+      +'<div style="width:35%;background:#F7A470;color:#63200A;display:flex;align-items:center;justify-content:center">En riesgo</div>'
+      +'<div style="width:25%;background:#FAC775;color:#633806;display:flex;align-items:center;justify-content:center">Construcción</div>'
+      +'<div style="width:15%;background:#C0DD97;color:#27500A;display:flex;align-items:center;justify-content:center">Saludable</div>'
+      +'<div style="width:10%;background:#97C459;color:#fff;display:flex;align-items:center;justify-content:center">Óptimo</div>'
+      +'<div style="position:absolute;top:-6px;bottom:-6px;width:3px;background:var(--yale);border-radius:2px;left:'+c+'%"></div>'
+      +'</div>'
+      +'<p style="font-size:10px;color:var(--nickel);margin-top:6px;text-align:center">Fuente: Estudio de Salud Financiera RD 2024</p>'
+      +'</div>'
+      +'<button class="btn" style="margin-top:12px" onclick="nextEmp()">Ver mis dimensiones</button>'
+      +'</div></div>';
+  } else if(i===14){
+    var dims = ['ctrl','res','debt','sav','plan'];
+    var cardsHtml = '';
+    for(var k=0;k<dims.length;k++){
+      var d = dims[k];
+      var ds = dimScore(d);
+      var bd = bandInfo(ds);
+      cardsHtml += '<div class="dim-card"><div class="dim-head"><b>'+dimensions[d]+'</b><span class="tag '+bd.cls+'">'+ds+'</span></div>'
+        +'<p style="font-size:11px;color:var(--nickel);margin-bottom:6px">'+dimDesc(d,ds)+'</p>'
+        +'<div class="bars"><span style="width:'+ds+'%;background:'+barColor(ds)+'"></span></div></div>';
+    }
+    html = '<div class="phone"><div class="bar"><div class="co"><button class="back" onclick="prevEmp()">&larr;</button><span>Tus dimensiones</span></div></div>'
+      +'<div class="bodyp"><p class="sub">Las 5 áreas que determinan tu salud financiera.</p>'
+      +cardsHtml
+      +'<button class="btn" onclick="nextEmp()">Ver mi próximo paso</button></div></div>';
+  } else if(i===15){
+    var wd = weakestDim();
+    var nba = nbaByDim[wd];
+    html = '<div class="phone"><div class="bar"><div class="co"><div class="co-logo" style="background:#E8A317;color:#fff">A</div><span>Tu próximo paso</span></div></div>'
+      +'<div class="bodyp"><div class="action-card">'
+      +'<span class="type-badge">Acción conductual</span>'
+      +'<p style="font-size:14px;font-weight:500;color:var(--quartz);margin-bottom:6px">'+nba.title+'</p>'
+      +'<p style="font-size:12px;color:var(--nickel)">'+nba.desc+'</p>'
+      +'<div class="why"><b style="color:var(--quartz);font-weight:500">¿Por qué este paso?</b><br>'+nba.why+'</div>'
+      +'</div>'
+      +'<p class="sub" style="font-size:11px;margin-top:14px">Aprende más:</p>'
+      +'<div class="intv"><div class="ic">&#9998;</div><div><b>'+nba.m1+'</b><br>Educación &middot; '+nba.m1t+'</div></div>'
+      +'<div class="intv"><div class="ic">&#9432;</div><div><b>'+nba.m2+'</b><br>Educación &middot; '+nba.m2t+'</div></div>'
+      +'<button class="btn" onclick="resetView(\'emp\')">Reiniciar demo</button></div></div>';
+  }
+  document.getElementById('emp-container').innerHTML = html;
+}
+
+// ===============================================
+// RENDER RRHH
+// ===============================================
+function renderRrhhScreen(i){
+  var html = '';
+  var navHtml = function(active){
+    var items = ['Resumen','Adopción','Bienestar','Evolución','Benchmark','Intervenciones','Configuración'];
+    var result = '';
+    for(var k=0;k<items.length;k++){
+      var idx = k+1;
+      var cls = idx===active ? ' class="on"' : '';
+      var onClick = idx===active ? '' : ' onclick="goRrhh('+idx+')"';
+      result += '<a'+cls+onClick+'>'+items[k]+'</a>';
+    }
+    return result;
+  };
+  if(i===0){
+    html = '<div class="desk" style="max-width:420px"><div class="deskhdr"><span>caudall &middot; portal RRHH</span></div>'
+      +'<div class="deskbody"><p class="h">Ingresar a tu panel</p>'
+      +'<p class="sub">Portal para administradores de RRHH.</p>'
+      +'<input class="input" type="email" value="alicia@empresa-acme.com">'
+      +'<button class="btn" onclick="nextRrhh()">Enviarme un link para entrar</button></div></div>';
+  } else if(i===1){
+    html = '<div class="desk"><div class="deskhdr"><span>caudall</span><span class="co-badge">Empresa Acme</span></div>'
+      +'<div class="desknav">'+navHtml(1)+'</div>'
+      +'<div class="deskbody">'
+      +'<div class="threshold-notice"><span style="font-size:14px">&#128274;</span><span><b>Todos los datos son agregados y anónimos.</b> Segmentos con menos de 5 personas no se muestran.</span></div>'
+      +'<div class="section-title">Últimos 30 días</div>'
+      +'<div class="grid-4">'
+      +'<div class="metric"><p class="mlbl">Empleados registrados</p><p class="mval">142</p><p class="msub ok">&#9650; +18 &middot; 68% adopción</p></div>'
+      +'<div class="metric"><p class="mlbl">Diagnósticos completados</p><p class="mval">118</p><p class="msub ok">&#9650; +22 este mes</p></div>'
+      +'<div class="metric"><p class="mlbl">Compromisos activos</p><p class="mval">89</p><p class="msub">76% de completados</p></div>'
+      +'<div class="metric"><p class="mlbl">CFHI promedio</p><p class="mval">57</p><p class="msub ok">&#9650; +3 pts vs mes anterior</p></div>'
+      +'</div>'
+      +'<div class="section-title">CFHI por dimensión</div>'
+      +'<div class="grid-5">'
+      +'<div class="dim-mini"><div class="name">Control</div><div class="val">68</div><span class="status t-healthy">Bien</span></div>'
+      +'<div class="dim-mini"><div class="name">Resiliencia</div><div class="val">54</div><span class="status t-building">Parcial</span></div>'
+      +'<div class="dim-mini"><div class="name">Deuda</div><div class="val">61</div><span class="status t-healthy">Bien</span></div>'
+      +'<div class="dim-mini"><div class="name">Ahorro</div><div class="val">47</div><span class="status t-atrisk">A trabajar</span></div>'
+      +'<div class="dim-mini"><div class="name">Planificación</div><div class="val">52</div><span class="status t-building">Parcial</span></div>'
+      +'</div>'
+      +'<div class="section-title">Alertas y oportunidades</div>'
+      +'<div class="alert-box warn"><span style="font-size:16px">&#9888;</span><div><b>Ahorro y Resiliencia bajos.</b> Considera activar la campaña "Fondo de emergencia".</div></div>'
+      +'<div class="alert-box info"><span style="font-size:16px">&#128161;</span><div><b>92 empleados aún no han hecho su diagnóstico.</b> Envía un recordatorio.</div></div>'
+      +'<button class="btn" style="max-width:280px;margin:14px auto 0;display:block" onclick="nextRrhh()">Ver adopción &rarr;</button>'
+      +'</div></div>';
+  } else if(i===2){
+    html = '<div class="desk"><div class="deskhdr"><span>caudall</span><span class="co-badge">Empresa Acme</span></div>'
+      +'<div class="desknav">'+navHtml(2)+'</div>'
+      +'<div class="deskbody"><div class="section-title">Adopción por departamento</div>'
+      +'<div class="chart-fake">'
+      +'<div class="bar-c" style="height:70%" data-lbl="Operaciones" data-val="70%"></div>'
+      +'<div class="bar-c" style="height:85%" data-lbl="Finanzas" data-val="85%"></div>'
+      +'<div class="bar-c" style="height:60%" data-lbl="Ventas" data-val="60%"></div>'
+      +'<div class="bar-c" style="height:45%" data-lbl="Marketing" data-val="45%"></div>'
+      +'<div class="bar-c" style="height:78%" data-lbl="Tecnología" data-val="78%"></div>'
+      +'<div class="bar-c" style="height:52%" data-lbl="Logística" data-val="52%"></div>'
+      +'</div>'
+      +'<div class="threshold-notice" style="margin-top:32px"><span style="font-size:14px">&#9432;</span><span><b>Áreas ocultas:</b> RRHH (3) y Dirección (2) no se muestran por umbral.</span></div>'
+      +'<div class="section-title" style="margin-top:20px">Adopción por edad</div>'
+      +'<div class="grid-4">'
+      +'<div class="metric"><p class="mlbl">25 - 34</p><p class="mval">74%</p><p class="msub ok">Más alta</p></div>'
+      +'<div class="metric"><p class="mlbl">35 - 44</p><p class="mval">71%</p><p class="msub">Promedio</p></div>'
+      +'<div class="metric"><p class="mlbl">45 - 54</p><p class="mval">62%</p><p class="msub">Bajo promedio</p></div>'
+      +'<div class="metric"><p class="mlbl">55+</p><p class="mval">48%</p><p class="msub bad">Oportunidad</p></div>'
+      +'</div>'
+      +'<button class="btn" style="max-width:280px;margin:18px auto 0;display:block" onclick="nextRrhh()">Ver bienestar &rarr;</button>'
+      +'</div></div>';
+  } else if(i===3){
+    html = '<div class="desk"><div class="deskhdr"><span>caudall</span><span class="co-badge">Empresa Acme</span></div>'
+      +'<div class="desknav">'+navHtml(3)+'</div>'
+      +'<div class="deskbody"><div class="section-title">Distribución del CFHI</div>'
+      +'<div class="chart-fake">'
+      +'<div class="bar-c" style="height:20%;background:#E24B4A" data-lbl="Crítico" data-val="12"></div>'
+      +'<div class="bar-c" style="height:35%;background:#EF9F27" data-lbl="En riesgo" data-val="23"></div>'
+      +'<div class="bar-c" style="height:65%;background:#FAC775" data-lbl="Construcción" data-val="42"></div>'
+      +'<div class="bar-c" style="height:75%;background:#C0DD97" data-lbl="Saludable" data-val="28"></div>'
+      +'<div class="bar-c" style="height:30%;background:#97C459" data-lbl="Óptimo" data-val="13"></div>'
+      +'</div>'
+      +'<div class="section-title" style="margin-top:32px">Detalle por dimensión</div>'
+      +'<div class="grid-2">'
+      +'<div class="metric"><b style="font-size:12px">Control &middot; 68</b><p style="font-size:10px;color:var(--nickel);margin-top:6px">Fortaleza: 82% sabe sus gastos.</p></div>'
+      +'<div class="metric"><b style="font-size:12px">Resiliencia &middot; 54</b><p style="font-size:10px;color:var(--nickel);margin-top:6px">Alerta: 61% con menos de 3 meses de cobertura.</p></div>'
+      +'<div class="metric"><b style="font-size:12px">Deuda &middot; 61</b><p style="font-size:10px;color:var(--nickel);margin-top:6px">Solo 8% con atraso vigente.</p></div>'
+      +'<div class="metric"><b style="font-size:12px">Ahorro &middot; 47</b><p style="font-size:10px;color:var(--nickel);margin-top:6px">38% ahorra "a veces" o "casi nunca".</p></div>'
+      +'</div>'
+      +'<div class="info-box" style="margin-top:16px"><b>Recomendación:</b> activar serie "Fondo de emergencia".</div>'
+      +'<button class="btn" style="max-width:280px;margin:18px auto 0;display:block" onclick="nextRrhh()">Ver evolución &rarr;</button>'
+      +'</div></div>';
+  } else if(i===4){
+    html = '<div class="desk"><div class="deskhdr"><span>caudall</span><span class="co-badge">Empresa Acme</span></div>'
+      +'<div class="desknav">'+navHtml(4)+'</div>'
+      +'<div class="deskbody"><div class="section-title">CFHI &middot; últimos 6 meses</div>'
+      +'<div class="chart-fake" style="height:180px">'
+      +'<div class="bar-c" style="height:40%" data-lbl="Oct" data-val="49"></div>'
+      +'<div class="bar-c" style="height:45%" data-lbl="Nov" data-val="51"></div>'
+      +'<div class="bar-c" style="height:48%" data-lbl="Dic" data-val="52"></div>'
+      +'<div class="bar-c" style="height:55%" data-lbl="Ene" data-val="54"></div>'
+      +'<div class="bar-c" style="height:63%" data-lbl="Feb" data-val="57"></div>'
+      +'<div class="bar-c" style="height:70%" data-lbl="Mar" data-val="60"></div>'
+      +'</div>'
+      +'<div class="info-box" style="margin-top:24px"><b>Tendencia positiva:</b> +11 puntos en 6 meses.</div>'
+      +'<div class="grid-3" style="margin-top:16px">'
+      +'<div class="metric"><p class="mlbl">Subieron de banda</p><p class="mval">31</p><p class="msub ok">6 meses</p></div>'
+      +'<div class="metric"><p class="mlbl">Completion</p><p class="mval">76%</p><p class="msub ok">&#9650; +8 pts</p></div>'
+      +'<div class="metric"><p class="mlbl">Críticos</p><p class="mval">12</p><p class="msub ok">&#9660; -7</p></div>'
+      +'</div>'
+      +'<button class="btn" style="max-width:280px;margin:18px auto 0;display:block" onclick="nextRrhh()">Ver benchmark &rarr;</button>'
+      +'</div></div>';
+  } else if(i===5){
+    html = '<div class="desk"><div class="deskhdr"><span>caudall</span><span class="co-badge">Empresa Acme</span></div>'
+      +'<div class="desknav">'+navHtml(5)+'</div>'
+      +'<div class="deskbody"><div class="section-title">Empresa Acme vs Nacional (RD 2024)</div>'
+      +'<div class="grid-2">'
+      +'<div class="metric"><p class="mlbl">CFHI global</p><p class="mval">57 / 48</p><p class="msub ok">+9 pts</p></div>'
+      +'<div class="metric"><p class="mlbl">Control</p><p class="mval">68 / 54</p><p class="msub ok">+14 pts</p></div>'
+      +'<div class="metric"><p class="mlbl">Resiliencia</p><p class="mval">54 / 41</p><p class="msub ok">+13 pts</p></div>'
+      +'<div class="metric"><p class="mlbl">Deuda</p><p class="mval">61 / 52</p><p class="msub ok">+9 pts</p></div>'
+      +'<div class="metric"><p class="mlbl">Ahorro</p><p class="mval">47 / 44</p><p class="msub">+3 pts</p></div>'
+      +'<div class="metric"><p class="mlbl">Planificación</p><p class="mval">52 / 45</p><p class="msub ok">+7 pts</p></div>'
+      +'</div>'
+      +'<div class="info-box" style="margin-top:16px"><b>Tu empresa está por encima del promedio nacional.</b> Brecha mayor: Control (+14). Menor ventaja: Ahorro (+3).</div>'
+      +'<div class="grid-3" style="margin-top:16px">'
+      +'<div class="metric"><p class="mlbl">Dominicanos vulnerables</p><p class="mval">82%</p><p class="msub">2024</p></div>'
+      +'<div class="metric"><p class="mlbl">Sin fondo emergencia</p><p class="mval">68%</p><p class="msub">Nacional</p></div>'
+      +'<div class="metric"><p class="mlbl">Empresas con bienestar</p><p class="mval">7%</p><p class="msub">RD 2024</p></div>'
+      +'</div>'
+      +'<button class="btn" style="max-width:280px;margin:18px auto 0;display:block" onclick="nextRrhh()">Ver intervenciones &rarr;</button>'
+      +'</div></div>';
+  } else if(i===6){
+    html = '<div class="desk"><div class="deskhdr"><span>caudall</span><span class="co-badge">Empresa Acme</span></div>'
+      +'<div class="desknav">'+navHtml(6)+'</div>'
+      +'<div class="deskbody"><div class="section-title">Series activadas</div>'
+      +'<div class="grid-2">'
+      +'<div class="metric"><b>Fondo de emergencia</b><p style="font-size:11px;color:var(--nickel);margin-top:4px">Resiliencia &middot; 62 iniciaron &middot; 41 completaron (66%)</p></div>'
+      +'<div class="metric"><b>Ahorro programado</b><p style="font-size:11px;color:var(--nickel);margin-top:4px">Ahorro &middot; 48 iniciaron &middot; 29 completaron (60%)</p></div>'
+      +'<div class="metric"><b>Ordenar deudas</b><p style="font-size:11px;color:var(--nickel);margin-top:4px">Deuda &middot; 31 iniciaron &middot; 22 completaron (71%)</p></div>'
+      +'<div class="metric"><b>Meta mediano plazo</b><p style="font-size:11px;color:var(--nickel);margin-top:4px">Planificación &middot; 27 iniciaron &middot; 16 completaron (59%)</p></div>'
+      +'<div class="metric"><b>Control gasto diario</b><p style="font-size:11px;color:var(--nickel);margin-top:4px">Control &middot; 19 iniciaron &middot; 15 completaron (79%)</p></div>'
+      +'<div class="metric" style="background:var(--info-bg)"><b style="color:#0C447C">Impacto medido</b><p style="font-size:11px;color:#0C447C;margin-top:4px">+8 pts promedio en CFHI por serie completada</p></div>'
+      +'</div>'
+      +'<div class="grid-3" style="margin-top:22px">'
+      +'<div class="metric"><p class="mlbl">Completion promedio</p><p class="mval">67%</p><p class="msub ok">vs 52% mercado</p></div>'
+      +'<div class="metric"><p class="mlbl">Compromisos vivos</p><p class="mval">89</p><p class="msub">63% completados</p></div>'
+      +'<div class="metric"><p class="mlbl">Series activas</p><p class="mval">5</p><p class="msub">4 más en catálogo</p></div>'
+      +'</div>'
+      +'<button class="btn" style="max-width:280px;margin:18px auto 0;display:block" onclick="nextRrhh()">Ver configuración &rarr;</button>'
+      +'</div></div>';
+  } else if(i===7){
+    html = '<div class="desk"><div class="deskhdr"><span>caudall</span><span class="co-badge">Empresa Acme</span></div>'
+      +'<div class="desknav">'+navHtml(7)+'</div>'
+      +'<div class="deskbody"><div class="section-title">Personalización visual</div>'
+      +'<div class="grid-2">'
+      +'<div><p style="font-size:11px;color:var(--nickel);margin-bottom:4px">Logo de la empresa</p><div style="border:0.5px dashed var(--border-strong);border-radius:8px;padding:24px;text-align:center;font-size:12px;color:var(--nickel);cursor:pointer">Arrastra tu logo aquí</div></div>'
+      +'<div><p style="font-size:11px;color:var(--nickel);margin-bottom:4px">Color primario</p><div style="display:flex;gap:6px;flex-wrap:wrap"><div style="width:32px;height:32px;border-radius:5px;background:#0F5499;border:2px solid var(--yale)"></div><div style="width:32px;height:32px;border-radius:5px;background:#E8A317"></div><div style="width:32px;height:32px;border-radius:5px;background:#791F1F"></div><div style="width:32px;height:32px;border-radius:5px;background:#3B6D11"></div><div style="width:32px;height:32px;border-radius:5px;background:#4B4C4C"></div></div></div>'
+      +'</div>'
+      +'<div class="section-title" style="margin-top:20px">Catálogo de intervenciones</div>'
+      +'<div class="grid-2">'
+      +'<div class="metric"><b>Fondo de emergencia</b> &middot; <span style="color:var(--ok);font-size:11px">Activo</span><p style="font-size:11px;color:var(--nickel);margin-top:4px">3 acciones &middot; Resiliencia</p></div>'
+      +'<div class="metric"><b>Manejo del crédito</b> &middot; <span style="color:var(--warn);font-size:11px">Inactivo</span><p style="font-size:11px;color:var(--nickel);margin-top:4px">5 acciones &middot; Deuda</p></div>'
+      +'<div class="metric"><b>Ahorro programado</b> &middot; <span style="color:var(--ok);font-size:11px">Activo</span><p style="font-size:11px;color:var(--nickel);margin-top:4px">4 acciones &middot; Ahorro</p></div>'
+      +'<div class="metric"><b>Metas familiares</b> &middot; <span style="color:var(--ok);font-size:11px">Activo</span><p style="font-size:11px;color:var(--nickel);margin-top:4px">3 acciones &middot; Planificación</p></div>'
+      +'</div>'
+      +'<div class="info-box"><b>Umbral de anonimato:</b> segmentos con menos de <b>5 empleados</b> no se muestran.</div>'
+      +'<div class="info-box"><b>Consentimiento:</b> cada empleado consintió al registrarse. Puede retirar consentimiento cuando quiera.</div>'
+      +'<button class="btn ghost" style="max-width:280px;margin:14px auto 0;display:block" onclick="resetView(\'rrhh\')">&#8635; Volver al resumen</button>'
+      +'</div></div>';
+  }
+  document.getElementById('rrhh-container').innerHTML = html;
+}
+
+// ===============================================
+// RENDER ADMIN
+// ===============================================
+function renderAdminScreen(i){
+  var html = '';
+  var sideNav = function(active){
+    var g1 = [['Dimensiones',0],['Variables',1],['Constructos',-1],['Scoring',-1],['Inferencias',-1]];
+    var g2 = [['Preguntas',2],['Simulador',-1]];
+    var g3 = [['Tenants',3],['Intervenciones',-1],['Versionado',4]];
+    var buildGroup = function(items){
+      var r = '';
+      for(var k=0;k<items.length;k++){
+        var name = items[k][0];
+        var idx = items[k][1];
+        var cls = idx===active ? ' class="on"' : '';
+        var onClick = idx>=0 && idx!==active ? ' onclick="goAdmin('+idx+')"' : '';
+        r += '<a'+cls+onClick+'>'+name+'</a>';
+      }
+      return r;
+    };
+    return '<div class="grp">Metodología</div>'+buildGroup(g1)
+      +'<div class="grp">Banco</div>'+buildGroup(g2)
+      +'<div class="grp">Plataforma</div>'+buildGroup(g3);
+  };
+
+  if(i===0){
+    html = '<div class="desk"><div class="deskhdr"><span>caudall &middot; admin</span><span style="font-size:12px">Metodologist &middot; v2.0.1</span></div>'
+      +'<div class="admin-side"><div class="admin-nav">'+sideNav(0)+'</div>'
+      +'<div class="admin-body">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'
+      +'<div><p style="font-size:14px;font-weight:500;color:var(--quartz)">Metodología v2.0.1 <span class="status-chip active">Activa</span></p>'
+      +'<p style="font-size:11px;color:var(--nickel);margin-top:3px">Publicada: 15/mar &middot; R. Solér</p></div>'
+      +'<button class="btn g" style="width:auto;padding:8px 14px;font-size:12px">+ Crear draft</button></div>'
+      +'<p style="font-size:12px;font-weight:500;color:var(--quartz);margin-bottom:8px">Las 5 dimensiones del CFHI</p>'
+      +'<table class="entity-table">'
+      +'<tr><th>Código</th><th>Nombre</th><th>Peso</th><th>Constructos</th><th>Variables</th></tr>'
+      +'<tr><td><b>CONTROL</b></td><td>Control Financiero</td><td>20%</td><td>3</td><td>10</td></tr>'
+      +'<tr><td><b>RESILIENCE</b></td><td>Resiliencia</td><td>20%</td><td>3</td><td>10</td></tr>'
+      +'<tr><td><b>DEBT</b></td><td>Deuda</td><td>20%</td><td>3</td><td>12</td></tr>'
+      +'<tr><td><b>SAVING</b></td><td>Ahorro</td><td>20%</td><td>3</td><td>11</td></tr>'
+      +'<tr><td><b>PLANNING</b></td><td>Planificación</td><td>20%</td><td>5</td><td>13</td></tr>'
+      +'</table>'
+      +'<div class="info-box"><b>Regla:</b> los pesos suman 100%. Cambios crean nueva versión draft.</div>'
+      +'<button class="btn" style="max-width:280px;margin:8px auto 0;display:block" onclick="nextAdmin()">Ver variable &rarr;</button>'
+      +'</div></div></div>';
+  } else if(i===1){
+    html = '<div class="desk"><div class="deskhdr"><span>caudall &middot; admin</span><span style="font-size:12px">Metodologist &middot; v2.0.1</span></div>'
+      +'<div class="admin-side"><div class="admin-nav">'+sideNav(1)+'</div>'
+      +'<div class="admin-body">'
+      +'<p style="font-size:14px;font-weight:500;color:var(--quartz);margin-bottom:4px">Variable: DEBT_ARREARS</p>'
+      +'<p style="font-size:11px;color:var(--nickel);margin-bottom:14px">Atrasos en pagos de deuda</p>'
+      +'<div class="grid-2">'
+      +'<div><p style="font-size:11px;color:var(--nickel);margin-bottom:6px">Tipo</p><p style="font-size:12px;color:var(--quartz)">SCORE variable</p>'
+      +'<p style="font-size:11px;color:var(--nickel);margin:14px 0 6px">Dimensión</p><p style="font-size:12px;color:var(--quartz)">DEBT</p>'
+      +'<p style="font-size:11px;color:var(--nickel);margin:14px 0 6px">Primary Owner</p><p style="font-size:12px;color:var(--yale);font-weight:500">DEBT_STRESS_CONSTRUCT</p></div>'
+      +'<div><p style="font-size:11px;color:var(--nickel);margin-bottom:6px">Estados posibles</p>'
+      +'<div class="tree"><span class="k">NONE</span> <span class="n">&rarr; sin atraso</span><br><span class="k">ONE_TIME</span> <span class="n">&rarr; puntual</span><br><span class="k">RECURRENT</span> <span class="n">&rarr; recurrentes</span><br><span class="k">CURRENT</span> <span class="n">&rarr; vigente</span></div>'
+      +'</div></div>'
+      +'<div class="info-box"><b>Regla:</b> aunque DEBT_ARREARS informa a otras variables, solo penaliza el CFHI a través de su Primary Owner. No hay double counting.</div>'
+      +'<button class="btn" style="max-width:280px;margin:8px auto 0;display:block" onclick="nextAdmin()">Ver banco de preguntas &rarr;</button>'
+      +'</div></div></div>';
+  } else if(i===2){
+    html = '<div class="desk"><div class="deskhdr"><span>caudall &middot; admin</span><span style="font-size:12px">Product admin</span></div>'
+      +'<div class="admin-side"><div class="admin-nav">'+sideNav(2)+'</div>'
+      +'<div class="admin-body">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'
+      +'<div><p style="font-size:14px;font-weight:500;color:var(--quartz)">Banco de preguntas v2.0.4 <span class="status-chip active">Activo</span></p>'
+      +'<p style="font-size:11px;color:var(--nickel);margin-top:3px">56 activas &middot; 8 en draft</p></div>'
+      +'<button class="btn g" style="width:auto;padding:8px 14px;font-size:12px">+ Nueva</button></div>'
+      +'<table class="entity-table">'
+      +'<tr><th>ID</th><th>Dimensión</th><th>Variable</th><th>Info Value</th><th>Estado</th></tr>'
+      +'<tr><td>SAV-01</td><td>Ahorro</td><td>SAV_FREQUENCY</td><td>0.94</td><td><span class="status-chip active">Activa</span></td></tr>'
+      +'<tr><td>SAV-02</td><td>Ahorro</td><td>SAV_CAPACITY</td><td>0.88</td><td><span class="status-chip active">Activa</span></td></tr>'
+      +'<tr><td>DEBT-04</td><td>Deuda</td><td>DEBT_ARREARS</td><td>0.85</td><td><span class="status-chip active">Activa</span></td></tr>'
+      +'<tr><td>CTRL-03</td><td>Control</td><td>CTRL_CASHFLOW</td><td>0.82</td><td><span class="status-chip active">Activa</span></td></tr>'
+      +'<tr><td>SAV-09</td><td>Ahorro</td><td>SAV_BARRIER</td><td>0.71</td><td><span class="status-chip draft">Draft</span></td></tr>'
+      +'</table>'
+      +'<div class="info-box"><b>NBQ Engine:</b> el motor decide qué pregunta viene según respuestas previas, priorizando alto Information Value.</div>'
+      +'<button class="btn" style="max-width:280px;margin:14px auto 0;display:block" onclick="nextAdmin()">Ver tenants &rarr;</button>'
+      +'</div></div></div>';
+  } else if(i===3){
+    html = '<div class="desk"><div class="deskhdr"><span>caudall &middot; admin</span><span style="font-size:12px">Platform owner</span></div>'
+      +'<div class="admin-side"><div class="admin-nav">'+sideNav(3)+'</div>'
+      +'<div class="admin-body">'
+      +'<p style="font-size:14px;font-weight:500;color:var(--quartz);margin-bottom:14px">Empresas activas &middot; 3 tenants</p>'
+      +'<table class="entity-table">'
+      +'<tr><th>Empresa</th><th>Empleados</th><th>Activos</th><th>Metodología</th><th>Banco</th><th>Estado</th></tr>'
+      +'<tr><td><b>Empresa Acme</b></td><td>210</td><td>142</td><td>v2.0.1</td><td>v2.0.4</td><td><span class="status-chip active">Piloto</span></td></tr>'
+      +'<tr><td><b>Grupo Beta</b></td><td>450</td><td>287</td><td>v2.0.1</td><td>v2.0.4</td><td><span class="status-chip active">Activo</span></td></tr>'
+      +'<tr><td><b>Corp Delta</b></td><td>78</td><td>44</td><td>v2.0.1</td><td>v2.0.3</td><td><span class="status-chip draft">Onboarding</span></td></tr>'
+      +'</table>'
+      +'<div class="info-box"><b>Regla:</b> cada tenant atado a versión específica de metodología. Cambios de versión no reescriben respuestas históricas.</div>'
+      +'<div class="grid-3" style="margin-top:16px">'
+      +'<div class="metric"><p class="mlbl">Total empleados</p><p class="mval">738</p></div>'
+      +'<div class="metric"><p class="mlbl">Activos</p><p class="mval">473</p><p class="msub ok">64% adopción</p></div>'
+      +'<div class="metric"><p class="mlbl">Diagnósticos</p><p class="mval">389</p></div>'
+      +'</div>'
+      +'<button class="btn" style="max-width:280px;margin:14px auto 0;display:block" onclick="nextAdmin()">Ver versionado &rarr;</button>'
+      +'</div></div></div>';
+  } else if(i===4){
+    html = '<div class="desk"><div class="deskhdr"><span>caudall &middot; admin</span><span style="font-size:12px">Platform owner</span></div>'
+      +'<div class="admin-side"><div class="admin-nav">'+sideNav(4)+'</div>'
+      +'<div class="admin-body">'
+      +'<p style="font-size:14px;font-weight:500;color:var(--quartz);margin-bottom:14px">Versionado de metodología</p>'
+      +'<table class="entity-table">'
+      +'<tr><th>Versión</th><th>Estado</th><th>Publicada</th><th>Autor</th><th>Cambios principales</th></tr>'
+      +'<tr><td><b>v2.0.1</b></td><td><span class="status-chip active">Activa</span></td><td>15/mar/2026</td><td>R. Solér</td><td>Ajuste de pesos en Ahorro</td></tr>'
+      +'<tr><td><b>v2.0.0</b></td><td>Anterior</td><td>28/ene/2026</td><td>R. Solér</td><td>Lanzamiento inicial B2B2E</td></tr>'
+      +'<tr><td><b>v2.1.0</b></td><td><span class="status-chip draft">Draft</span></td><td>—</td><td>R. Solér</td><td>Nuevas preguntas sobre educación financiera de hijos</td></tr>'
+      +'</table>'
+      +'<div class="section-title" style="margin-top:22px">Reglas de gobierno</div>'
+      +'<div class="info-box"><b>Publicación:</b> requiere aprobación de metodólogo + platform owner. Todo cambio queda auditado con timestamp y autor.</div>'
+      +'<div class="info-box"><b>Migración:</b> cuando un tenant migra de versión, sus respuestas históricas NO se reprocesan. Se recalcula CFHI solo con nuevas respuestas bajo la nueva versión.</div>'
+      +'<div class="info-box"><b>Rollback:</b> si una versión introduce errores, se puede volver a la anterior en cualquier momento. Los usuarios ven un mensaje de "reindexando".</div>'
+      +'<button class="btn ghost" style="max-width:280px;margin:14px auto 0;display:block" onclick="resetView(\'admin\')">&#8635; Volver al inicio</button>'
+      +'</div></div></div>';
+  }
+  document.getElementById('admin-container').innerHTML = html;
+}
+
+// ===============================================
+// NAVEGACIÓN
+// ===============================================
+function renderDots(view){
+  var wrap = document.getElementById('dots-'+view);
+  var total = totalScreens[view];
+  var current = currentScreen[view];
+  var html = '';
+  for(var i=0;i<total;i++){
+    var cls = 'pdot';
+    if(i===current) cls += ' on';
+    else if(i<current) cls += ' done';
+    html += '<button class="'+cls+'" onclick="goToScreen(\''+view+'\','+i+')"></button>';
+  }
+  wrap.innerHTML = html;
+}
+
+function goToScreen(view, i){
+  if(i<0 || i>=totalScreens[view]) return;
+  currentScreen[view] = i;
+  if(view==='emp') renderEmpScreen(i);
+  else if(view==='rrhh') renderRrhhScreen(i);
+  else if(view==='admin') renderAdminScreen(i);
+  renderDots(view);
+  var frame = document.querySelector('.frame');
+  if(frame) frame.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function nextEmp(){ goToScreen('emp', currentScreen.emp+1); }
+function prevEmp(){ goToScreen('emp', currentScreen.emp-1); }
+function nextRrhh(){ goToScreen('rrhh', currentScreen.rrhh+1); }
+function goRrhh(i){ goToScreen('rrhh', i); }
+function nextAdmin(){ goToScreen('admin', currentScreen.admin+1); }
+function goAdmin(i){ goToScreen('admin', i); }
+
+function resetView(view){
+  if(view==='emp') answers = {};
+  goToScreen(view, 0);
+}
+
+function setView(v){
+  document.getElementById('view-emp').classList.remove('on');
+  document.getElementById('view-rrhh').classList.remove('on');
+  document.getElementById('view-admin').classList.remove('on');
+  document.getElementById('view-'+v).classList.add('on');
+  document.getElementById('tab-emp').classList.remove('on');
+  document.getElementById('tab-rrhh').classList.remove('on');
+  document.getElementById('tab-admin').classList.remove('on');
+  document.getElementById('tab-'+v).classList.add('on');
+}
+
+function pickAnswer(qid, score, el){
+  answers[qid] = score;
+  var siblings = el.parentElement.querySelectorAll('.opt');
+  for(var i=0;i<siblings.length;i++){
+    siblings[i].classList.remove('sel');
+  }
+  el.classList.add('sel');
+}
+
+function requireAndNext(qid){
+  if(answers[qid]===undefined){
+    alert('Por favor selecciona una opción antes de continuar.');
+    return;
+  }
+  nextEmp();
+}
+
+// ===============================================
+// INIT
+// ===============================================
+renderEmpScreen(0);
+renderRrhhScreen(0);
+renderAdminScreen(0);
+renderDots('emp');
+renderDots('rrhh');
+renderDots('admin');
+</script>
+</body>
+</html>
