@@ -31,6 +31,11 @@ type EmployeeJwt = {
 // de un solo uso emitido por src/lib/auth/magic-link.ts.
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: 'jwt' },
+  // NextAuth v5 solo confía en el header Host de la petición automáticamente
+  // en Vercel. En cualquier otro host (Netlify incluido) hay que decirlo
+  // explícito, si no falla con "There was a problem with the server
+  // configuration" aunque todo lo demás esté bien configurado.
+  trustHost: true,
   pages: {
     signIn: '/'
   },
