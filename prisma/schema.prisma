@@ -215,18 +215,23 @@ enum DimensionCode {
 
 model Construct {
   id                     String   @id @default(cuid())
-  dimensionId            String
-  code                   String
+  // Nullable: los constructos conductuales (BEH_*) no pertenecen a ninguna
+  // de las 5 dimensiones del CFHI (spec: "Behavioral NO constituye una
+  // sexta dimensión"). weightWithinDimension queda en 0 para esos casos.
+  dimensionId            String?
+  code                   String   @unique
   nameI18nKey            String
   weightWithinDimension  Float
+  // false para constructos conductuales: informan al motor pero nunca
+  // entran al promedio ponderado del CFHI (regla CORE #7/#16).
+  contributesToCfhi      Boolean  @default(true)
 
-  dimension              Dimension @relation(fields: [dimensionId], references: [id])
+  dimension              Dimension? @relation(fields: [dimensionId], references: [id])
   variablesOwned         Variable[] @relation("PrimaryOwner")
   questions              Question[]
   constructScores        ConstructScore[]
   evidenceOwned          Evidence[]
 
-  @@unique([dimensionId, code])
   @@map("constructs")
 }
 
@@ -237,6 +242,13 @@ model Variable {
   dimensionId             String?
   possibleStates          Json
   primaryOwnerConstructId String?
+  // Clasificación original del banco maestro (ej. "SCORE/DIAGNOSTIC",
+  // "ROUTING/BEHAVIORAL") — más granular que VariableType; se conserva
+  // textual para no perder información hasta que el motor la necesite.
+  rawType                 String?
+  // Nota textual de la columna "Afecta CFHI" del banco (Sí / Sí* / No /
+  // No directo) — documental; el motor decide vía primaryOwnerConstructId.
+  affectsCfhiNote         String?
 
   dimension               Dimension? @relation(fields: [dimensionId], references: [id])
   primaryOwner            Construct? @relation("PrimaryOwner", fields: [primaryOwnerConstructId], references: [id])
@@ -271,9 +283,15 @@ model Question {
   bankId                      String
   code                        String
   textI18nKey                 String
-  dimensionId                 String
+  // Nullable: preguntas de rol BEHAVIORAL no pertenecen a una dimensión del
+  // CFHI (mismo motivo que Construct.dimensionId).
+  dimensionId                 String?
   variableTargetId            String
   constructTargetId           String?
+  // Rol funcional dentro del banco (spec §22): ANCHOR se le pregunta a
+  // todos; el resto es condicional. Ver docs sobre el motor NBQ pendiente.
+  role                        QuestionRole @default(ADAPTIVE)
+  whyAskI18nKey               String?
   askIfRule                   Json?
   skipIfRule                  Json?
   doNotAskIfRule              Json?
@@ -282,14 +300,21 @@ model Question {
   safetyValue                 Float    @default(0.0)
   scoringValue                Float    @default(0.5)
   routingValue                Float    @default(0.5)
+  rootCauseValue              Float    @default(0.0)
   uncertaintyReduction        Float    @default(0.5)
   burden                      Int      @default(3)
   inferenceSubstitutionAllowed Boolean @default(true)
   minConfidenceToSkip         Int      @default(80)
+  frictionTargetCode          String?
+  aiRegenerationAllowed       Boolean  @default(true)
+  coreLogicEditable           Boolean  @default(true)
+  benchmarkSource             String?
+  methodologicalFunction      String?
+  behavioralConstructCode     String?
   status                      VersionStatus @default(DRAFT)
 
   bank                        QuestionBank @relation(fields: [bankId], references: [id])
-  dimension                   Dimension    @relation(fields: [dimensionId], references: [id])
+  dimension                   Dimension?   @relation(fields: [dimensionId], references: [id])
   variableTarget              Variable     @relation(fields: [variableTargetId], references: [id])
   constructTarget             Construct?   @relation(fields: [constructTargetId], references: [id])
   answerOptions               AnswerOption[]
@@ -300,11 +325,28 @@ model Question {
   @@map("questions")
 }
 
+enum QuestionRole {
+  ANCHOR
+  ADAPTIVE
+  GATE
+  BEHAVIORAL
+  CONTEXT
+  FOLLOWUP
+}
+
 model AnswerOption {
   id                String   @id @default(cuid())
   questionId        String
+  order              Int?
   textI18nKey       String
   evidenceProduced  Json
+  // Notas del banco maestro que todavía no alimentan ningún motor —
+  // se conservan para no perder trabajo, se estructuran cuando se
+  // construya el motor que las use.
+  secondaryUpdatesNote String?
+  frictionCode      String?
+  nextCandidatesRaw String?
+  notes             String?
 
   question          Question @relation(fields: [questionId], references: [id])
   evidence          Evidence[]
@@ -333,6 +375,74 @@ model ForbiddenInference {
 
   @@unique([sourceVariableCode, sourceValue, targetVariableCode, targetValue])
   @@map("forbidden_inferences")
+}
+
+// Distinto de ForbiddenInference (relaciones que NUNCA deben inferirse,
+// spec §9): esto es el catálogo de inferencias PERMITIDAS que pueden
+// sustituir una pregunta cuando la confianza alcanza el umbral (spec §8).
+// La condición fuente queda como texto crudo — el intérprete de reglas
+// (AND/OR/IN/confidence) todavía no existe, ver docs/prototype README.
+model InferenceRule {
+  id                     String   @id @default(cuid())
+  code                   String   @unique
+  type                   InferenceType
+  sourceConditionRaw     String
+  targetVariableCode     String
+  targetValue            String
+  confidence             Float
+  canSubstituteQuestion  Boolean  @default(false)
+  affectedQuestionCodes  String[]
+  notes                  String?
+
+  @@map("inference_rules")
+}
+
+enum InferenceType {
+  STRONG
+  WEAK
+}
+
+// Casos de prueba de metodología (spec §50 "QA OBLIGATORIO" / personas).
+// Referencia para validar el banco antes de publicar una versión; no se
+// ejecuta automáticamente todavía.
+model MethodologyQaScenario {
+  id             String   @id @default(cuid())
+  code           String   @unique
+  scenario       String
+  precondition   String
+  expectedResult String
+  severity       String
+
+  @@map("methodology_qa_scenarios")
+}
+
+// Catálogo fricción → técnica conductual (spec §economía conductual /
+// BEHAVIORAL DESIGN). FRICTION → TECHNIQUE, nunca al revés (regla CORE #19).
+model BehavioralTechnique {
+  id                  String   @id @default(cuid())
+  frictionCode        String
+  technique           String
+  useWhen             String
+  avoidWhen           String
+  copyTransformation  String
+  example             String?
+
+  @@map("behavioral_techniques")
+}
+
+// Mapa de sesgos/constructos conductuales usados para decidir cuándo
+// preguntar y qué NO concluir de una respuesta (evita el error metodológico
+// de interpretar un síntoma downstream como causa raíz, regla CORE #9).
+model BehavioralBiasMap {
+  id                     String   @id @default(cuid())
+  construct              String
+  whatItDetects          String
+  whenToAsk              String
+  whatNotToConclude      String
+  candidateIntervention  String
+  benchmarks             String?
+
+  @@map("behavioral_bias_map")
 }
 
 // ============================================================
