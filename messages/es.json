@@ -7,8 +7,31 @@
     "landing": {
       "title": "Sabes dónde estás. Caudall te conecta.",
       "subtitle": "Un espacio privado para conocer tu salud financiera y mejorarla.",
+      "enrollmentCodeLabel": "Código de tu empresa",
       "enrollmentCodePlaceholder": "Código de tu empresa",
-      "ctaContinue": "Continuar"
+      "ctaContinue": "Continuar",
+      "validating": "Verificando..."
+    },
+    "email": {
+      "title": "Tu correo personal",
+      "subtitle": "Usa un correo tuyo, no el corporativo. Es tu cuenta, no de la empresa.",
+      "emailLabel": "Correo personal",
+      "emailPlaceholder": "tucorreo@ejemplo.com",
+      "ctaSendLink": "Enviarme un link para entrar",
+      "sending": "Enviando..."
+    },
+    "confirmation": {
+      "title": "Revisa tu correo",
+      "subtitle": "Te enviamos un link para entrar. Vence en 15 minutos y solo funciona una vez. Si no lo ves, revisa spam."
+    },
+    "invalidLink": {
+      "title": "Este link ya no funciona",
+      "subtitle": "Puede que haya vencido o que ya lo hayas usado. Pide uno nuevo con tu código de empresa y tu correo.",
+      "ctaRetry": "Intentar de nuevo"
+    },
+    "welcome": {
+      "title": "Ya estás dentro, bienvenido a {tenantName}",
+      "subtitle": "Tu diagnóstico de salud financiera está por llegar. Pronto podrás conocer tu Índice de Salud Financiera (CFHI)."
     },
     "trust": {
       "privacyGuarantee": "Tu empresa nunca verá tus respuestas individuales. Solo métricas agregadas y anónimas."

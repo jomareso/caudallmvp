@@ -15,7 +15,11 @@ const config: Config = {
         'nickel': '#737373',
         'silver': '#B8B8B8',
         // Referencia al color primario del tenant activo
-        'tenant-primary': 'var(--tenant-primary-color, #0F5499)'
+        'tenant-primary': 'var(--tenant-primary-color, #0F5499)',
+        // Estados semánticos (éxito/alerta/error), tomados del prototipo visual
+        'ok': '#3B6D11',
+        'warn': '#854F0B',
+        'bad': '#791F1F'
       },
       fontFamily: {
         sans: ['-apple-system', 'BlinkMacSystemFont', 'Helvetica Neue', 'Arial', 'sans-serif']
