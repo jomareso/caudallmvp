@@ -8,12 +8,19 @@ import { computeRootCause } from './root-cause';
 // una fórmula ponderada. Este motor implementa las primeras tres capas con
 // datos reales que ya existen (SafetyFlag, InferenceRule, DimensionScore).
 //
-// Dependency, User Goal y Actionability quedan sin implementar a propósito:
-// no hay todavía un grafo de dependencia entre dimensiones, ninguna
-// pantalla captura el objetivo real del empleado (FinancialState.userGoal
-// sigue null), y Actionability depende del motor de Eligibility (siguiente
-// en la lista). Añadir lógica ahí sin esos datos sería inventar, no inferir
+// Dependency y User Goal quedan sin implementar a propósito: no hay
+// todavía un grafo de dependencia entre dimensiones, ni ninguna pantalla
+// que capture el objetivo real del empleado (FinancialState.userGoal
+// sigue null). Añadir lógica ahí sin esos datos sería inventar, no inferir
 // (regla CORE #9).
+//
+// Actionability sí se aplica, pero en next-best-action.ts, no aquí: este
+// motor devuelve la causa raíz REAL sin importar si hoy existe contenido
+// cargado para esa dimensión (eso sería mezclar "cuál es el problema" con
+// "qué tenemos para ofrecer", justo lo que la spec separa). Es Next Best
+// Action quien, al no encontrar ninguna intervención elegible para la
+// dimensión que Priority señaló, cae a worstDimensionBySeverity — por eso
+// se exporta.
 
 const SEVERITY_ORDER: Record<string, number> = {
   CRITICAL: 0,
@@ -28,7 +35,7 @@ export type PriorityResult = {
   explanation: string;
 };
 
-async function worstDimensionBySeverity(employeeId: string): Promise<PriorityResult> {
+export async function worstDimensionBySeverity(employeeId: string): Promise<PriorityResult> {
   const scores = await prisma.dimensionScore.findMany({ where: { employeeId, state: { not: 'NA' } } });
 
   if (scores.length === 0) {
