@@ -1041,7 +1041,20 @@
         "PARTIAL": "En construcción",
         "MET": "Saludable",
         "NA": "No aplica"
-      }
+      },
+      "ctaNextStep": "Ver mi próximo paso"
+    },
+    "action": {
+      "eyebrow": "Tu próximo paso",
+      "whyThisStep": "¿Por qué este paso?",
+      "commit": "Me comprometo",
+      "dismiss": "Ahora no",
+      "committedNotice": "Te comprometiste a este paso.",
+      "didYouDoIt": "¿Ya lo hiciste?",
+      "achieved": "Sí, lo hice",
+      "partial": "En parte",
+      "notAchieved": "No todavía",
+      "none": "Por ahora no tenemos una recomendación nueva para ti."
     }
   },
   "interventions": {

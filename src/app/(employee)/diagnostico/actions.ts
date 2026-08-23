@@ -9,6 +9,7 @@ import { evaluateSafety } from '@/lib/engines/safety';
 import { computeRootCause } from '@/lib/engines/root-cause';
 import { computePriority } from '@/lib/engines/priority';
 import { computeEligibility } from '@/lib/engines/eligibility';
+import { logLearningEvent } from '@/lib/engines/learning';
 
 async function requireEmployeeId(): Promise<string> {
   const session = await auth();
@@ -120,6 +121,16 @@ export async function submitDiagnosticAnswer(input: {
         behReadiness,
         eligibility
       }
+    });
+
+    // spec §31: el ciclo de Learning arranca en "Diagnóstico → Acción...".
+    // Este evento es el primer eslabón real (los demás — sugerencia,
+    // compromiso, resultado — se registran en diagnostico/accion/actions.ts).
+    await logLearningEvent({
+      eventType: 'DIAGNOSTIC_COMPLETED',
+      tenantId: employee.tenantId,
+      employeeId,
+      context: { rootCauseDimension: rootCauseResult.dimensionCode, systemPriorityDimension: priorityResult.dimensionCode }
     });
   }
 

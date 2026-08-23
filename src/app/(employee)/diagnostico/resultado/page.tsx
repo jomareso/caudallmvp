@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth/auth';
@@ -77,6 +78,13 @@ export default async function ResultadoPage() {
             );
           })}
         </div>
+
+        <Link
+          href="/diagnostico/accion"
+          className="block mt-6 text-center bg-yale text-white rounded-lg py-2.5 px-6 text-sm"
+        >
+          {t('ctaNextStep')}
+        </Link>
       </div>
     </main>
   );
