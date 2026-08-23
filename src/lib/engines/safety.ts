@@ -12,6 +12,17 @@ export const SAFETY_BLOCKED_ACTIONS = [
   'NEW_FINANCIAL_COMMITMENT'
 ] as const;
 
+// Todos los flags de safety definidos en spec §19 son de la dimensión Deuda
+// hoy. Se deja como mapa (no una constante única) para que el motor de
+// Priority no tenga que asumirlo si en el futuro se agregan flags de otras
+// dimensiones.
+export const SAFETY_FLAG_DIMENSION: Record<string, string> = {
+  DEBT_PAYMENT_STRESS: 'DEBT',
+  DEBT_CYCLE_RISK: 'DEBT',
+  CASHFLOW_CREDIT_DEPENDENCY: 'DEBT',
+  CRITICAL_DEBT: 'DEBT'
+};
+
 type SafetyRule = {
   flagCode: string;
   variableCode: string;

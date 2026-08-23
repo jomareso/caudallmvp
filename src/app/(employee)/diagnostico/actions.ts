@@ -7,6 +7,7 @@ import { recomputeCfhi, recomputeConstructScore, recomputeDimensionScore, type E
 import { getNextQuestion } from '@/lib/engines/diagnostic';
 import { evaluateSafety } from '@/lib/engines/safety';
 import { computeRootCause } from '@/lib/engines/root-cause';
+import { computePriority } from '@/lib/engines/priority';
 
 async function requireEmployeeId(): Promise<string> {
   const session = await auth();
@@ -90,13 +91,25 @@ export async function submitDiagnosticAnswer(input: {
   const done = !nextQuestion;
 
   if (done) {
-    // Causa raíz (spec §25) requiere el panorama completo de dimensiones,
-    // así que se calcula una sola vez al terminar, no en cada respuesta.
-    const rootCause = JSON.stringify(await computeRootCause(employeeId));
+    // Causa raíz (spec §25) y Prioridad (spec §26) requieren el panorama
+    // completo de dimensiones, así que se calculan una sola vez al
+    // terminar, no en cada respuesta. Priority reutiliza Root Cause
+    // internamente, así que se computa aparte para no duplicar el cálculo.
+    const rootCauseResult = await computeRootCause(employeeId);
+    const priorityResult = await computePriority(employeeId);
+    const rootCause = JSON.stringify(rootCauseResult);
+    const systemPriority = JSON.stringify(priorityResult);
     await prisma.financialState.upsert({
       where: { employeeId },
-      update: { lastDiagnosticCompletedAt: new Date(), rootCause },
-      create: { employeeId, cfhiScore: 0, cfhiConfidence: 0, lastDiagnosticCompletedAt: new Date(), rootCause }
+      update: { lastDiagnosticCompletedAt: new Date(), rootCause, systemPriority },
+      create: {
+        employeeId,
+        cfhiScore: 0,
+        cfhiConfidence: 0,
+        lastDiagnosticCompletedAt: new Date(),
+        rootCause,
+        systemPriority
+      }
     });
   }
 
