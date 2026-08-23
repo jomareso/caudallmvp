@@ -1,0 +1,71 @@
+'use client';
+
+import { useState, useTransition } from 'react';
+import { useTranslations } from 'next-intl';
+import { requestAdminMagicLink } from './actions';
+
+export function AdminLoginForm() {
+  const t = useTranslations('admin.login');
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+
+    startTransition(async () => {
+      const result = await requestAdminMagicLink(email);
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      setSent(true);
+    });
+  }
+
+  if (sent) {
+    return (
+      <main className="min-h-screen flex items-center justify-center p-6">
+        <div className="w-full max-w-sm text-center">
+          <h1 className="text-lg font-medium text-quartz mb-2">{t('sentTitle')}</h1>
+          <p className="text-sm text-nickel">{t('sentBody')}</p>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen flex items-center justify-center p-6">
+      <div className="w-full max-w-sm text-center">
+        <h1 className="text-2xl font-medium text-yale mb-1">caudall</h1>
+        <p className="text-nickel text-sm mb-8">{t('subtitle')}</p>
+
+        <form onSubmit={handleSubmit} className="bg-white border border-silver/60 rounded-xl p-6 text-left">
+          <label htmlFor="email" className="block text-xs text-nickel mb-1">
+            {t('emailLabel')}
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder={t('emailPlaceholder')}
+            className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-3 focus:outline-none focus:border-cola"
+          />
+
+          {error ? <p className="text-xs text-bad mb-3">{error}</p> : null}
+
+          <button
+            type="submit"
+            disabled={isPending}
+            className="w-full bg-yale text-white rounded-lg py-2.5 text-sm disabled:opacity-60"
+          >
+            {isPending ? t('sending') : t('ctaSendLink')}
+          </button>
+        </form>
+      </div>
+    </main>
+  );
+}

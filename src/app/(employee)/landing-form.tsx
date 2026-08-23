@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { validateEnrollmentCode } from './actions';
 
-export function LandingForm() {
+export function LandingForm({ hasLogo }: { hasLogo: boolean }) {
   const t = useTranslations('employee.landing');
   const tTrust = useTranslations('employee.trust');
   const router = useRouter();
@@ -30,7 +30,12 @@ export function LandingForm() {
   return (
     <main className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-sm text-center">
-        <h1 className="text-2xl font-medium text-yale mb-1">caudall</h1>
+        {hasLogo ? (
+          // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
+          <img src="/api/branding/logo" alt="Caudall" className="h-10 mx-auto mb-1" />
+        ) : (
+          <h1 className="text-2xl font-medium text-yale mb-1">caudall</h1>
+        )}
         <p className="text-nickel text-sm mb-8">{t('subtitle')}</p>
 
         <form onSubmit={handleSubmit} className="bg-white border border-silver/60 rounded-xl p-6 text-left">

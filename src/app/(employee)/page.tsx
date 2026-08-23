@@ -19,5 +19,8 @@ export default async function LandingPage() {
     if (employee) redirect('/bienvenida');
   }
 
-  return <LandingForm />;
+  const settings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } });
+  const hasLogo = Boolean(settings?.logoData);
+
+  return <LandingForm hasLogo={hasLogo} />;
 }

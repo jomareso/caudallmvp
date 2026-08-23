@@ -51,6 +51,29 @@
   "admin": {
     "methodology": {
       "title": "Metodología"
+    },
+    "login": {
+      "subtitle": "Panel administrativo",
+      "emailLabel": "Correo",
+      "emailPlaceholder": "tucorreo@caudall.com",
+      "ctaSendLink": "Enviarme un link para entrar",
+      "sending": "Enviando...",
+      "sentTitle": "Revisa tu correo",
+      "sentBody": "Si ese correo tiene una cuenta de administrador, te enviamos un link para entrar. Vence en 15 minutos y solo funciona una vez."
+    },
+    "settings": {
+      "title": "Configuración",
+      "logoTitle": "Logo de Caudall",
+      "logoDescription": "Se muestra en la pantalla de entrada de los empleados.",
+      "logoCurrentAlt": "Logo actual de Caudall",
+      "logoNone": "Todavía no hay un logo cargado — se muestra el texto \"caudall\" por defecto.",
+      "uploadLabel": "Subir un logo nuevo",
+      "uploadCta": "Guardar logo",
+      "uploading": "Guardando...",
+      "uploadSuccess": "Logo actualizado.",
+      "uploadErrorType": "El archivo debe ser una imagen (PNG, JPG, WEBP o SVG).",
+      "uploadErrorSize": "El archivo es muy grande — el máximo es 2 MB.",
+      "uploadErrorGeneric": "No pudimos guardar el logo. Intenta de nuevo."
     }
   },
   "diagnostic": {

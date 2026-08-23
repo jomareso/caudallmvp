@@ -5,21 +5,24 @@ import type { DefaultSession } from '@auth/core/types';
 // `declare module 'next-auth'` no se fusiona con un `export *`.
 declare module '@auth/core/types' {
   interface User {
-    tenantId: string;
-    role: 'employee';
+    tenantId?: string;
+    role: 'employee' | 'admin';
+    profileType?: string;
   }
 
   interface Session {
     user: {
-      tenantId: string;
-      role: 'employee';
+      tenantId?: string;
+      role: 'employee' | 'admin';
+      profileType?: string;
     } & DefaultSession['user'];
   }
 }
 
 declare module '@auth/core/types.js' {
   interface User {
-    tenantId: string;
-    role: 'employee';
+    tenantId?: string;
+    role: 'employee' | 'admin';
+    profileType?: string;
   }
 }

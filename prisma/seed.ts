@@ -355,6 +355,15 @@ async function main() {
     }
   });
 
+  // Bootstrap del primer admin: sin autoregistro (a diferencia del
+  // empleado), un AdminUser solo existe si alguien lo crea a mano. Este es
+  // el ADM inicial para poder entrar al panel administrativo.
+  const founderAdmin = await prisma.adminUser.upsert({
+    where: { email: 'reynososoler@gmail.com' },
+    update: {},
+    create: { email: 'reynososoler@gmail.com', profileType: 'ADM' }
+  });
+
   console.log('Seed del Banco Maestro v3.0 listo:');
   console.log(`- Methodology ${methodology.version} (ACTIVE)`);
   console.log(`- ${bancoMaestro.constructs.length} constructos, ${bancoMaestro.variables.length} variables`);
@@ -367,6 +376,7 @@ async function main() {
   console.log(
     `- Catálogo de intervenciones ${interventionCatalog.version} (${interventionCatalog.status}) con ${interventionCatalogDraft.interventions.length} intervenciones — pendiente de tu revisión`
   );
+  console.log(`- Admin inicial (ADM): ${founderAdmin.email}`);
 }
 
 main()

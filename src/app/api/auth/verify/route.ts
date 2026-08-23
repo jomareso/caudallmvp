@@ -16,8 +16,10 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL('/registro/invalido', request.url));
   }
 
+  const destination = payload.type === 'admin' ? '/admin' : '/bienvenida';
+
   try {
-    await signIn('magic-link', { token, redirectTo: '/bienvenida' });
+    await signIn('magic-link', { token, redirectTo: destination });
   } catch (error) {
     // NEXT_REDIRECT no es un error real: signIn lo usa para redirigir en éxito.
     if (error instanceof AuthError) {
@@ -26,5 +28,5 @@ export async function GET(request: Request) {
     throw error;
   }
 
-  return NextResponse.redirect(new URL('/bienvenida', request.url));
+  return NextResponse.redirect(new URL(destination, request.url));
 }

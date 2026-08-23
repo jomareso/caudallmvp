@@ -17,18 +17,27 @@ type EmployeeAuthUser = {
   role: 'employee';
 };
 
-// Mismo problema de reexport que EmployeeAuthUser, pero para el JWT: casteamos
-// puntualmente en vez de depender del module augmentation de @auth/core/jwt.
-type EmployeeJwt = {
+type AdminAuthUser = {
+  id: string;
+  email: string;
+  role: 'admin';
+  profileType: string;
+};
+
+type AppJwt = {
   employeeId?: string;
   tenantId?: string;
-  role?: 'employee';
+  adminUserId?: string;
+  profileType?: string;
+  role?: 'employee' | 'admin';
 };
 
 // Sesión por JWT, sin adapter de base de datos: la identidad real vive en
-// Employee (ver docs/data-model.md), no en un modelo genérico de NextAuth.
-// El provider "magic-link" no hace login/password: solo valida un token
-// de un solo uso emitido por src/lib/auth/magic-link.ts.
+// Employee o AdminUser (ver docs/data-model.md), no en un modelo genérico
+// de NextAuth. El provider "magic-link" no hace login/password: solo
+// valida un token de un solo uso emitido por src/lib/auth/magic-link.ts —
+// el mismo mecanismo sirve tanto para empleados como para admins, el
+// `type` dentro del token (spec: MagicLinkPayload) decide cuál.
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: 'jwt' },
   pages: {
@@ -47,6 +56,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const payload = await verifyMagicLinkToken(token);
         if (!payload) return null;
+
+        if (payload.type === 'admin') {
+          const admin = await prisma.adminUser.findUnique({ where: { id: payload.adminUserId } });
+          if (!admin || admin.email !== payload.email) return null;
+
+          await prisma.adminUser.update({
+            where: { id: admin.id },
+            data: { lastActiveAt: new Date() }
+          });
+
+          const adminUser: AdminAuthUser = {
+            id: admin.id,
+            email: admin.email,
+            role: 'admin',
+            profileType: admin.profileType
+          };
+          return adminUser;
+        }
 
         const employee = await prisma.employee.findUnique({
           where: { id: payload.employeeId }
@@ -80,21 +107,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async jwt({ token, user }) {
-      const employeeToken = token as typeof token & EmployeeJwt;
+      const appToken = token as typeof token & AppJwt;
       if (user) {
-        const employeeUser = user as EmployeeAuthUser;
-        employeeToken.employeeId = employeeUser.id;
-        employeeToken.tenantId = employeeUser.tenantId;
-        employeeToken.role = employeeUser.role;
+        const authUser = user as EmployeeAuthUser | AdminAuthUser;
+        if (authUser.role === 'admin') {
+          const adminUser = authUser;
+          appToken.adminUserId = adminUser.id;
+          appToken.profileType = adminUser.profileType;
+          appToken.role = 'admin';
+        } else {
+          const employeeUser = authUser;
+          appToken.employeeId = employeeUser.id;
+          appToken.tenantId = employeeUser.tenantId;
+          appToken.role = 'employee';
+        }
       }
-      return employeeToken;
+      return appToken;
     },
     async session({ session, token }) {
-      const employeeToken = token as typeof token & EmployeeJwt;
-      const sessionUser = session.user as typeof session.user & Partial<EmployeeAuthUser>;
-      if (employeeToken.employeeId) sessionUser.id = employeeToken.employeeId;
-      if (employeeToken.tenantId) sessionUser.tenantId = employeeToken.tenantId;
-      if (employeeToken.role) sessionUser.role = employeeToken.role;
+      const appToken = token as typeof token & AppJwt;
+      const sessionUser = session.user as typeof session.user & {
+        id?: string;
+        tenantId?: string;
+        role?: 'employee' | 'admin';
+        profileType?: string;
+      };
+
+      if (appToken.role === 'admin' && appToken.adminUserId) {
+        sessionUser.id = appToken.adminUserId;
+        sessionUser.role = 'admin';
+        sessionUser.profileType = appToken.profileType;
+      } else if (appToken.employeeId) {
+        sessionUser.id = appToken.employeeId;
+        sessionUser.tenantId = appToken.tenantId;
+        sessionUser.role = 'employee';
+      }
       return session;
     }
   }
