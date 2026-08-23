@@ -49,6 +49,11 @@
     "aggregationNotice": "Todos los datos son agregados y anónimos. Segmentos con menos de {min} personas no se muestran, para proteger la confidencialidad de tus empleados."
   },
   "admin": {
+    "nav": {
+      "settings": "Configuración",
+      "admins": "Administradores",
+      "logout": "Cerrar sesión"
+    },
     "methodology": {
       "title": "Metodología"
     },

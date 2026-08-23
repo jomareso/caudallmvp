@@ -32,7 +32,11 @@ export function LandingForm({ hasLogo }: { hasLogo: boolean }) {
       <div className="w-full max-w-sm text-center">
         {hasLogo ? (
           // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-          <img src="/api/branding/logo" alt="Caudall" className="h-10 mx-auto mb-1" />
+          <img
+            src="/api/branding/logo"
+            alt="Caudall"
+            className="h-14 mx-auto mb-2 mix-blend-multiply"
+          />
         ) : (
           <h1 className="text-2xl font-medium text-yale mb-1">caudall</h1>
         )}

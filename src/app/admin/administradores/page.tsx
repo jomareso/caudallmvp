@@ -34,7 +34,7 @@ export default async function AdministradoresPage() {
   const t = await getTranslations('admin.administradores');
 
   return (
-    <main className="min-h-screen p-6">
+    <main className="flex-1 p-6">
       <div className="w-full max-w-sm">
         <h1 className="text-lg font-medium text-quartz mb-6">{t('title')}</h1>
 

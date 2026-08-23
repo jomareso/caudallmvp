@@ -30,7 +30,7 @@ export default async function AdminEmpresaPage() {
 
   if (aggregates.status === 'INSUFFICIENT_ANONYMITY') {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6">
+      <main className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-sm text-center">
           <h1 className="text-lg font-medium text-quartz mb-2">{t('insufficientTitle')}</h1>
           <p className="text-sm text-nickel">
@@ -45,7 +45,7 @@ export default async function AdminEmpresaPage() {
   const cfhiBand = scoreToDimensionState(cfhiRounded);
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
+    <main className="flex-1 flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
         <h1 className="text-lg font-medium text-quartz mb-1 text-center">
           {t('title', { tenantName: admin.tenant.name })}

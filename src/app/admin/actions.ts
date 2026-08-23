@@ -1,7 +1,9 @@
 'use server';
 
+import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
+import { signOut } from '@/lib/auth/auth';
 import { createMagicLinkToken } from '@/lib/auth/magic-link';
 import { sendAdminMagicLinkEmail } from '@/lib/email/send-magic-link';
 import { getRequestOrigin } from '@/lib/http/request-origin';
@@ -37,4 +39,9 @@ export async function requestAdminMagicLink(
   }
 
   return { ok: true };
+}
+
+export async function logoutAdmin(): Promise<void> {
+  await signOut({ redirect: false });
+  redirect('/admin');
 }
