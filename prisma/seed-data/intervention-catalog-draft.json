@@ -1,0 +1,135 @@
+{
+  "version": "0.1.0-draft",
+  "interventions": [
+    {
+      "code": "CONTROL-LACK_OF_SYSTEM-01",
+      "dimension": "CONTROL",
+      "type": "BEHAVIORAL_ACTION",
+      "frictionCode": "LACK_OF_SYSTEM",
+      "appliesToStates": [
+        "CRITICAL",
+        "UNMET",
+        "PARTIAL"
+      ],
+      "i18nKeyBase": "control.lackOfSystem",
+      "financialReadinessRequired": "CONSTRAINED"
+    },
+    {
+      "code": "CONTROL-PROCRASTINATION-01",
+      "dimension": "CONTROL",
+      "type": "BEHAVIORAL_ACTION",
+      "frictionCode": "PROCRASTINATION",
+      "appliesToStates": [
+        "CRITICAL",
+        "UNMET",
+        "PARTIAL"
+      ],
+      "i18nKeyBase": "control.procrastination",
+      "financialReadinessRequired": "CONSTRAINED"
+    },
+    {
+      "code": "RESILIENCE-FRESH_START-01",
+      "dimension": "RESILIENCE",
+      "type": "BEHAVIORAL_ACTION",
+      "frictionCode": "FRESH_START",
+      "appliesToStates": [
+        "CRITICAL",
+        "UNMET",
+        "PARTIAL"
+      ],
+      "i18nKeyBase": "resilience.freshStart",
+      "financialReadinessRequired": null
+    },
+    {
+      "code": "RESILIENCE-LOW_SELF_EFFICACY-01",
+      "dimension": "RESILIENCE",
+      "type": "BEHAVIORAL_ACTION",
+      "frictionCode": "LOW_SELF_EFFICACY",
+      "appliesToStates": [
+        "CRITICAL",
+        "UNMET",
+        "PARTIAL"
+      ],
+      "i18nKeyBase": "resilience.lowSelfEfficacy",
+      "financialReadinessRequired": "CONSTRAINED"
+    },
+    {
+      "code": "DEBT-COMPLEXITY-01",
+      "dimension": "DEBT",
+      "type": "BEHAVIORAL_ACTION",
+      "frictionCode": "COMPLEXITY",
+      "appliesToStates": [
+        "CRITICAL",
+        "UNMET",
+        "PARTIAL"
+      ],
+      "i18nKeyBase": "debt.complexity",
+      "financialReadinessRequired": null
+    },
+    {
+      "code": "DEBT-WEAK_TRACKING-01",
+      "dimension": "DEBT",
+      "type": "BEHAVIORAL_ACTION",
+      "frictionCode": "WEAK_TRACKING",
+      "appliesToStates": [
+        "CRITICAL",
+        "UNMET",
+        "PARTIAL"
+      ],
+      "i18nKeyBase": "debt.weakTracking",
+      "financialReadinessRequired": null
+    },
+    {
+      "code": "SAVING-PROCRASTINATION-01",
+      "dimension": "SAVING",
+      "type": "BEHAVIORAL_ACTION",
+      "frictionCode": "PROCRASTINATION",
+      "appliesToStates": [
+        "CRITICAL",
+        "UNMET",
+        "PARTIAL"
+      ],
+      "i18nKeyBase": "saving.procrastination",
+      "financialReadinessRequired": "CONSTRAINED"
+    },
+    {
+      "code": "SAVING-LACK_OF_SYSTEM-01",
+      "dimension": "SAVING",
+      "type": "BEHAVIORAL_ACTION",
+      "frictionCode": "LACK_OF_SYSTEM",
+      "appliesToStates": [
+        "CRITICAL",
+        "UNMET",
+        "PARTIAL"
+      ],
+      "i18nKeyBase": "saving.lackOfSystem",
+      "financialReadinessRequired": "CONSTRAINED"
+    },
+    {
+      "code": "PLANNING-DISTANT_GOAL-01",
+      "dimension": "PLANNING",
+      "type": "BEHAVIORAL_ACTION",
+      "frictionCode": "DISTANT_GOAL",
+      "appliesToStates": [
+        "CRITICAL",
+        "UNMET",
+        "PARTIAL"
+      ],
+      "i18nKeyBase": "planning.distantGoal",
+      "financialReadinessRequired": null
+    },
+    {
+      "code": "PLANNING-NO_CLEAR_TRIGGER-01",
+      "dimension": "PLANNING",
+      "type": "BEHAVIORAL_ACTION",
+      "frictionCode": "NO_CLEAR_TRIGGER",
+      "appliesToStates": [
+        "CRITICAL",
+        "UNMET",
+        "PARTIAL"
+      ],
+      "i18nKeyBase": "planning.noClearTrigger",
+      "financialReadinessRequired": null
+    }
+  ]
+}

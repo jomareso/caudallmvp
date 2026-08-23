@@ -16,29 +16,29 @@ datasource db {
 // ============================================================
 
 model Tenant {
-  id                          String   @id @default(cuid())
-  name                        String
-  enrollmentCode              String   @unique
-  logoUrl                     String?
-  primaryColor                String   @default("#0F5499")
-  secondaryColor              String?
-  aggregationMinSegmentSize   Int      @default(5)
-  defaultLanguage             String   @default("es")
-  status                      TenantStatus @default(PILOT)
-  corporateEmailDomain        String?
-  methodologyVersionId        String?
-  questionBankVersionId       String?
-  scoringVersionId            String?
+  id                           String       @id @default(cuid())
+  name                         String
+  enrollmentCode               String       @unique
+  logoUrl                      String?
+  primaryColor                 String       @default("#0F5499")
+  secondaryColor               String?
+  aggregationMinSegmentSize    Int          @default(5)
+  defaultLanguage              String       @default("es")
+  status                       TenantStatus @default(PILOT)
+  corporateEmailDomain         String?
+  methodologyVersionId         String?
+  questionBankVersionId        String?
+  scoringVersionId             String?
   interventionCatalogVersionId String?
-  createdAt                   DateTime @default(now())
-  activatedAt                 DateTime?
+  createdAt                    DateTime     @default(now())
+  activatedAt                  DateTime?
 
-  segments                    Segment[]
-  employees                   Employee[]
-  tenantAdmins                TenantAdmin[]
-  evidence                    Evidence[]
-  interventionOverrides       TenantInterventionOverride[]
-  learningEvents              LearningEvent[]
+  segments              Segment[]
+  employees             Employee[]
+  adminUsers            AdminUser[]
+  evidence              Evidence[]
+  interventionOverrides TenantInterventionOverride[]
+  learningEvents        LearningEvent[]
 
   @@map("tenants")
 }
@@ -50,17 +50,17 @@ enum TenantStatus {
 }
 
 model Segment {
-  id              String   @id @default(cuid())
+  id              String      @id @default(cuid())
   tenantId        String
   name            String
   type            SegmentType
   parentSegmentId String?
-  createdAt       DateTime @default(now())
+  createdAt       DateTime    @default(now())
 
-  tenant          Tenant   @relation(fields: [tenantId], references: [id])
-  parent          Segment? @relation("SegmentHierarchy", fields: [parentSegmentId], references: [id])
-  children        Segment[] @relation("SegmentHierarchy")
-  employees       EmployeeSegment[]
+  tenant    Tenant            @relation(fields: [tenantId], references: [id])
+  parent    Segment?          @relation("SegmentHierarchy", fields: [parentSegmentId], references: [id])
+  children  Segment[]         @relation("SegmentHierarchy")
+  employees EmployeeSegment[]
 
   @@index([tenantId])
   @@map("segments")
@@ -74,25 +74,25 @@ enum SegmentType {
 }
 
 model Employee {
-  id                 String   @id @default(cuid())
+  id                 String         @id @default(cuid())
   tenantId           String
   personalEmail      String
   enrollmentCodeUsed String
   authMethod         AuthMethod
   demographicData    Json?
   status             EmployeeStatus @default(REGISTERED)
-  createdAt          DateTime @default(now())
+  createdAt          DateTime       @default(now())
   lastActiveAt       DateTime?
 
-  tenant             Tenant   @relation(fields: [tenantId], references: [id])
-  segments           EmployeeSegment[]
-  evidence           Evidence[]
-  variableStates     VariableState[]
-  constructScores    ConstructScore[]
-  dimensionScores    DimensionScore[]
-  financialState     FinancialState?
-  safetyFlags        SafetyFlag[]
-  interventions      EmployeeIntervention[]
+  tenant          Tenant                 @relation(fields: [tenantId], references: [id])
+  segments        EmployeeSegment[]
+  evidence        Evidence[]
+  variableStates  VariableState[]
+  constructScores ConstructScore[]
+  dimensionScores DimensionScore[]
+  financialState  FinancialState?
+  safetyFlags     SafetyFlag[]
+  interventions   EmployeeIntervention[]
 
   @@unique([tenantId, personalEmail])
   @@index([tenantId])
@@ -115,50 +115,64 @@ model EmployeeSegment {
   segmentId  String
   assignedAt DateTime @default(now())
 
-  employee   Employee @relation(fields: [employeeId], references: [id])
-  segment    Segment  @relation(fields: [segmentId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id])
+  segment  Segment  @relation(fields: [segmentId], references: [id])
 
   @@id([employeeId, segmentId])
   @@map("employee_segments")
 }
 
-model TenantAdmin {
-  id           String   @id @default(cuid())
-  tenantId     String
-  email        String   @unique
-  role         TenantAdminRole @default(VIEWER)
-  createdAt    DateTime @default(now())
-  lastActiveAt DateTime?
+// Modelo unificado de administradores: un solo lugar donde, al crear el
+// usuario, se define su perfil (a pedido de Reynoso — antes eran dos
+// tablas separadas, TenantAdmin y PlatformUser).
+//
+// ADM = control total de la plataforma (antes PlatformUser/PLATFORM_OWNER).
+// EMPRESA = RRHH de un tenant, ve agregados anonimizados de su propia
+// empresa (antes TenantAdmin) — tenantId obligatorio para este perfil.
+// FUNCIONAL = equipo de Caudall con un rol específico, no control total
+// (antes los demás roles de PlatformUser) — functionalRole define cuál.
+model AdminUser {
+  id             String           @id @default(cuid())
+  email          String           @unique
+  profileType    AdminProfileType
+  functionalRole FunctionalRole?
+  tenantId       String?
+  createdAt      DateTime         @default(now())
+  lastActiveAt   DateTime?
 
-  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  tenant    Tenant?    @relation(fields: [tenantId], references: [id])
+  auditLogs AuditLog[]
 
   @@index([tenantId])
-  @@map("tenant_admins")
+  @@map("admin_users")
 }
 
-enum TenantAdminRole {
-  VIEWER
-  ADMIN
+enum AdminProfileType {
+  ADM
+  EMPRESA
+  FUNCIONAL
 }
 
-model PlatformUser {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  role         PlatformRole
-  createdAt    DateTime @default(now())
-  lastActiveAt DateTime?
-
-  auditLogs    AuditLog[]
-
-  @@map("platform_users")
-}
-
-enum PlatformRole {
-  PLATFORM_OWNER
+enum FunctionalRole {
   METHODOLOGIST
   PRODUCT_ADMIN
   ANALYST
   VIEWER
+}
+
+// Configuración global de la plataforma Caudall (el logo de Caudall
+// mismo, no el de cada empresa cliente — ver Tenant.logoUrl para ese,
+// Decisión 3, co-branding por tenant). Fila única: siempre id "singleton".
+// Netlify no tiene almacenamiento de archivos persistente, así que el
+// logo se guarda como bytes directo en la base de datos (decisión de
+// Reynoso: simple para el MVP, sin agregar un servicio de storage nuevo).
+model PlatformSettings {
+  id           String   @id @default("singleton")
+  logoData     Bytes?
+  logoMimeType String?
+  updatedAt    DateTime @updatedAt
+
+  @@map("platform_settings")
 }
 
 // ============================================================
@@ -166,14 +180,14 @@ enum PlatformRole {
 // ============================================================
 
 model Methodology {
-  id           String   @id @default(cuid())
-  version      String
-  status       VersionStatus @default(DRAFT)
-  publishedAt  DateTime?
+  id            String        @id @default(cuid())
+  version       String
+  status        VersionStatus @default(DRAFT)
+  publishedAt   DateTime?
   publishedById String?
-  createdAt    DateTime @default(now())
+  createdAt     DateTime      @default(now())
 
-  dimensions   Dimension[]
+  dimensions Dimension[]
 
   @@unique([version])
   @@map("methodologies")
@@ -188,18 +202,18 @@ enum VersionStatus {
 }
 
 model Dimension {
-  id               String   @id @default(cuid())
-  methodologyId    String
-  code             DimensionCode
-  nameI18nKey      String
+  id                 String        @id @default(cuid())
+  methodologyId      String
+  code               DimensionCode
+  nameI18nKey        String
   descriptionI18nKey String
-  weight           Float    @default(20.0)
+  weight             Float         @default(20.0)
 
-  methodology      Methodology @relation(fields: [methodologyId], references: [id])
-  constructs       Construct[]
-  variables        Variable[]
-  questions        Question[]
-  interventions    Intervention[]
+  methodology   Methodology    @relation(fields: [methodologyId], references: [id])
+  constructs    Construct[]
+  variables     Variable[]
+  questions     Question[]
+  interventions Intervention[]
 
   @@unique([methodologyId, code])
   @@map("dimensions")
@@ -214,35 +228,47 @@ enum DimensionCode {
 }
 
 model Construct {
-  id                     String   @id @default(cuid())
-  dimensionId            String
-  code                   String
-  nameI18nKey            String
-  weightWithinDimension  Float
+  id                    String  @id @default(cuid())
+  // Nullable: los constructos conductuales (BEH_*) no pertenecen a ninguna
+  // de las 5 dimensiones del CFHI (spec: "Behavioral NO constituye una
+  // sexta dimensión"). weightWithinDimension queda en 0 para esos casos.
+  dimensionId           String?
+  code                  String  @unique
+  nameI18nKey           String
+  weightWithinDimension Float
+  // false para constructos conductuales: informan al motor pero nunca
+  // entran al promedio ponderado del CFHI (regla CORE #7/#16).
+  contributesToCfhi     Boolean @default(true)
 
-  dimension              Dimension @relation(fields: [dimensionId], references: [id])
-  variablesOwned         Variable[] @relation("PrimaryOwner")
-  questions              Question[]
-  constructScores        ConstructScore[]
-  evidenceOwned          Evidence[]
+  dimension       Dimension?       @relation(fields: [dimensionId], references: [id])
+  variablesOwned  Variable[]       @relation("PrimaryOwner")
+  questions       Question[]
+  constructScores ConstructScore[]
+  evidenceOwned   Evidence[]
 
-  @@unique([dimensionId, code])
   @@map("constructs")
 }
 
 model Variable {
-  id                      String   @id @default(cuid())
-  code                    String   @unique
+  id                      String       @id @default(cuid())
+  code                    String       @unique
   variableType            VariableType
   dimensionId             String?
   possibleStates          Json
   primaryOwnerConstructId String?
+  // Clasificación original del banco maestro (ej. "SCORE/DIAGNOSTIC",
+  // "ROUTING/BEHAVIORAL") — más granular que VariableType; se conserva
+  // textual para no perder información hasta que el motor la necesite.
+  rawType                 String?
+  // Nota textual de la columna "Afecta CFHI" del banco (Sí / Sí* / No /
+  // No directo) — documental; el motor decide vía primaryOwnerConstructId.
+  affectsCfhiNote         String?
 
-  dimension               Dimension? @relation(fields: [dimensionId], references: [id])
-  primaryOwner            Construct? @relation("PrimaryOwner", fields: [primaryOwnerConstructId], references: [id])
-  questions               Question[]
-  variableStates          VariableState[]
-  evidence                Evidence[]
+  dimension      Dimension?      @relation(fields: [dimensionId], references: [id])
+  primaryOwner   Construct?      @relation("PrimaryOwner", fields: [primaryOwnerConstructId], references: [id])
+  questions      Question[]
+  variableStates VariableState[]
+  evidence       Evidence[]
 
   @@map("variables")
 }
@@ -256,10 +282,10 @@ enum VariableType {
 }
 
 model QuestionBank {
-  id        String   @id @default(cuid())
-  version   String   @unique
+  id        String        @id @default(cuid())
+  version   String        @unique
   status    VersionStatus @default(DRAFT)
-  createdAt DateTime @default(now())
+  createdAt DateTime      @default(now())
 
   questions Question[]
 
@@ -267,72 +293,170 @@ model QuestionBank {
 }
 
 model Question {
-  id                          String   @id @default(cuid())
-  bankId                      String
-  code                        String
-  textI18nKey                 String
-  dimensionId                 String
-  variableTargetId            String
-  constructTargetId           String?
-  askIfRule                   Json?
-  skipIfRule                  Json?
-  doNotAskIfRule              Json?
-  basePriority                Int      @default(50)
-  informationValue            Float    @default(0.5)
-  safetyValue                 Float    @default(0.0)
-  scoringValue                Float    @default(0.5)
-  routingValue                Float    @default(0.5)
-  uncertaintyReduction        Float    @default(0.5)
-  burden                      Int      @default(3)
-  inferenceSubstitutionAllowed Boolean @default(true)
-  minConfidenceToSkip         Int      @default(80)
-  status                      VersionStatus @default(DRAFT)
+  id                           String        @id @default(cuid())
+  bankId                       String
+  code                         String
+  textI18nKey                  String
+  // Nullable: preguntas de rol BEHAVIORAL no pertenecen a una dimensión del
+  // CFHI (mismo motivo que Construct.dimensionId).
+  dimensionId                  String?
+  variableTargetId             String
+  constructTargetId            String?
+  // Rol funcional dentro del banco (spec §22): ANCHOR se le pregunta a
+  // todos; el resto es condicional. Ver docs sobre el motor NBQ pendiente.
+  role                         QuestionRole  @default(ADAPTIVE)
+  whyAskI18nKey                String?
+  askIfRule                    Json?
+  skipIfRule                   Json?
+  doNotAskIfRule               Json?
+  basePriority                 Int           @default(50)
+  informationValue             Float         @default(0.5)
+  safetyValue                  Float         @default(0.0)
+  scoringValue                 Float         @default(0.5)
+  routingValue                 Float         @default(0.5)
+  rootCauseValue               Float         @default(0.0)
+  uncertaintyReduction         Float         @default(0.5)
+  burden                       Int           @default(3)
+  inferenceSubstitutionAllowed Boolean       @default(true)
+  minConfidenceToSkip          Int           @default(80)
+  frictionTargetCode           String?
+  aiRegenerationAllowed        Boolean       @default(true)
+  coreLogicEditable            Boolean       @default(true)
+  benchmarkSource              String?
+  methodologicalFunction       String?
+  behavioralConstructCode      String?
+  status                       VersionStatus @default(DRAFT)
 
-  bank                        QuestionBank @relation(fields: [bankId], references: [id])
-  dimension                   Dimension    @relation(fields: [dimensionId], references: [id])
-  variableTarget              Variable     @relation(fields: [variableTargetId], references: [id])
-  constructTarget             Construct?   @relation(fields: [constructTargetId], references: [id])
-  answerOptions               AnswerOption[]
-  evidence                    Evidence[]
+  bank            QuestionBank   @relation(fields: [bankId], references: [id])
+  dimension       Dimension?     @relation(fields: [dimensionId], references: [id])
+  variableTarget  Variable       @relation(fields: [variableTargetId], references: [id])
+  constructTarget Construct?     @relation(fields: [constructTargetId], references: [id])
+  answerOptions   AnswerOption[]
+  evidence        Evidence[]
 
   @@unique([bankId, code])
   @@index([dimensionId])
   @@map("questions")
 }
 
-model AnswerOption {
-  id                String   @id @default(cuid())
-  questionId        String
-  textI18nKey       String
-  evidenceProduced  Json
+enum QuestionRole {
+  ANCHOR
+  ADAPTIVE
+  GATE
+  BEHAVIORAL
+  CONTEXT
+  FOLLOWUP
+}
 
-  question          Question @relation(fields: [questionId], references: [id])
-  evidence          Evidence[]
+model AnswerOption {
+  id                   String  @id @default(cuid())
+  questionId           String
+  order                Int?
+  textI18nKey          String
+  evidenceProduced     Json
+  // Notas del banco maestro que todavía no alimentan ningún motor —
+  // se conservan para no perder trabajo, se estructuran cuando se
+  // construya el motor que las use.
+  secondaryUpdatesNote String?
+  frictionCode         String?
+  nextCandidatesRaw    String?
+  notes                String?
+
+  question Question   @relation(fields: [questionId], references: [id])
+  evidence Evidence[]
 
   @@map("answer_options")
 }
 
 model ScoringConfig {
-  id                    String   @id @default(cuid())
-  version               String   @unique
-  status                VersionStatus @default(DRAFT)
-  dimensionWeights      Json
-  constructWeights      Json
-  naRedistributionRule  Json
+  id                   String        @id @default(cuid())
+  version              String        @unique
+  status               VersionStatus @default(DRAFT)
+  dimensionWeights     Json
+  constructWeights     Json
+  naRedistributionRule Json
 
   @@map("scoring_configs")
 }
 
 model ForbiddenInference {
-  id                  String   @id @default(cuid())
-  sourceVariableCode  String
-  sourceValue         String
-  targetVariableCode  String
-  targetValue         String
-  reason              String
+  id                 String @id @default(cuid())
+  sourceVariableCode String
+  sourceValue        String
+  targetVariableCode String
+  targetValue        String
+  reason             String
 
   @@unique([sourceVariableCode, sourceValue, targetVariableCode, targetValue])
   @@map("forbidden_inferences")
+}
+
+// Distinto de ForbiddenInference (relaciones que NUNCA deben inferirse,
+// spec §9): esto es el catálogo de inferencias PERMITIDAS que pueden
+// sustituir una pregunta cuando la confianza alcanza el umbral (spec §8).
+// La condición fuente queda como texto crudo — el intérprete de reglas
+// (AND/OR/IN/confidence) todavía no existe, ver docs/prototype README.
+model InferenceRule {
+  id                    String        @id @default(cuid())
+  code                  String        @unique
+  type                  InferenceType
+  sourceConditionRaw    String
+  targetVariableCode    String
+  targetValue           String
+  confidence            Float
+  canSubstituteQuestion Boolean       @default(false)
+  affectedQuestionCodes String[]
+  notes                 String?
+
+  @@map("inference_rules")
+}
+
+enum InferenceType {
+  STRONG
+  WEAK
+}
+
+// Casos de prueba de metodología (spec §50 "QA OBLIGATORIO" / personas).
+// Referencia para validar el banco antes de publicar una versión; no se
+// ejecuta automáticamente todavía.
+model MethodologyQaScenario {
+  id             String @id @default(cuid())
+  code           String @unique
+  scenario       String
+  precondition   String
+  expectedResult String
+  severity       String
+
+  @@map("methodology_qa_scenarios")
+}
+
+// Catálogo fricción → técnica conductual (spec §economía conductual /
+// BEHAVIORAL DESIGN). FRICTION → TECHNIQUE, nunca al revés (regla CORE #19).
+model BehavioralTechnique {
+  id                 String  @id @default(cuid())
+  frictionCode       String
+  technique          String
+  useWhen            String
+  avoidWhen          String
+  copyTransformation String
+  example            String?
+
+  @@map("behavioral_techniques")
+}
+
+// Mapa de sesgos/constructos conductuales usados para decidir cuándo
+// preguntar y qué NO concluir de una respuesta (evita el error metodológico
+// de interpretar un síntoma downstream como causa raíz, regla CORE #9).
+model BehavioralBiasMap {
+  id                    String  @id @default(cuid())
+  construct             String
+  whatItDetects         String
+  whenToAsk             String
+  whatNotToConclude     String
+  candidateIntervention String
+  benchmarks            String?
+
+  @@map("behavioral_bias_map")
 }
 
 // ============================================================
@@ -340,27 +464,27 @@ model ForbiddenInference {
 // ============================================================
 
 model Evidence {
-  id                     String   @id @default(cuid())
-  tenantId               String
-  employeeId             String
-  source                 EvidenceSource
-  questionId             String?
-  answerOptionId         String?
-  variableId             String
-  value                  Json
-  reliability            Reliability
-  confidence             Int
+  id                      String         @id @default(cuid())
+  tenantId                String
+  employeeId              String
+  source                  EvidenceSource
+  questionId              String?
+  answerOptionId          String?
+  variableId              String
+  value                   Json
+  reliability             Reliability
+  confidence              Int
   primaryOwnerConstructId String?
-  timestamp              DateTime @default(now())
-  period                 DateTime?
-  methodologyVersionId   String
+  timestamp               DateTime       @default(now())
+  period                  DateTime?
+  methodologyVersionId    String
 
-  tenant                 Tenant       @relation(fields: [tenantId], references: [id])
-  employee               Employee     @relation(fields: [employeeId], references: [id])
-  question               Question?    @relation(fields: [questionId], references: [id])
-  answerOption           AnswerOption? @relation(fields: [answerOptionId], references: [id])
-  variable               Variable     @relation(fields: [variableId], references: [id])
-  primaryOwner           Construct?   @relation(fields: [primaryOwnerConstructId], references: [id])
+  tenant       Tenant        @relation(fields: [tenantId], references: [id])
+  employee     Employee      @relation(fields: [employeeId], references: [id])
+  question     Question?     @relation(fields: [questionId], references: [id])
+  answerOption AnswerOption? @relation(fields: [answerOptionId], references: [id])
+  variable     Variable      @relation(fields: [variableId], references: [id])
+  primaryOwner Construct?    @relation(fields: [primaryOwnerConstructId], references: [id])
 
   @@index([tenantId, employeeId])
   @@index([employeeId, variableId])
@@ -380,16 +504,16 @@ enum Reliability {
 }
 
 model VariableState {
-  employeeId              String
-  variableId              String
-  value                   Json
-  confidence              Int
-  state                   String
-  derivedFromEvidenceIds  String[]
-  updatedAt               DateTime @updatedAt
+  employeeId             String
+  variableId             String
+  value                  Json
+  confidence             Int
+  state                  String
+  derivedFromEvidenceIds String[]
+  updatedAt              DateTime @updatedAt
 
-  employee                Employee @relation(fields: [employeeId], references: [id])
-  variable                Variable @relation(fields: [variableId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id])
+  variable Variable @relation(fields: [variableId], references: [id])
 
   @@id([employeeId, variableId])
   @@map("variable_states")
@@ -402,8 +526,8 @@ model ConstructScore {
   confidence  Int
   computedAt  DateTime @default(now()) @updatedAt
 
-  employee    Employee  @relation(fields: [employeeId], references: [id])
-  construct   Construct @relation(fields: [constructId], references: [id])
+  employee  Employee  @relation(fields: [employeeId], references: [id])
+  construct Construct @relation(fields: [constructId], references: [id])
 
   @@id([employeeId, constructId])
   @@map("construct_scores")
@@ -416,9 +540,9 @@ model DimensionScore {
   state            DimensionState
   confidence       Int
   driverVariableId String?
-  computedAt       DateTime @default(now()) @updatedAt
+  computedAt       DateTime       @default(now()) @updatedAt
 
-  employee         Employee  @relation(fields: [employeeId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id])
 
   @@id([employeeId, dimensionId])
   @@map("dimension_scores")
@@ -433,32 +557,32 @@ enum DimensionState {
 }
 
 model FinancialState {
-  employeeId                 String   @id
-  cfhiScore                  Float
-  cfhiConfidence             Int
-  userGoal                   Json?
-  systemPriority             String?
-  rootCause                  String?
-  eligibility                Json?
-  finReadiness               String?
-  behReadiness               String?
-  lastDiagnosticCompletedAt  DateTime?
-  updatedAt                  DateTime @updatedAt
+  employeeId                String    @id
+  cfhiScore                 Float
+  cfhiConfidence            Int
+  userGoal                  Json?
+  systemPriority            String?
+  rootCause                 String?
+  eligibility               Json?
+  finReadiness              String?
+  behReadiness              String?
+  lastDiagnosticCompletedAt DateTime?
+  updatedAt                 DateTime  @updatedAt
 
-  employee                   Employee @relation(fields: [employeeId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id])
 
   @@map("financial_states")
 }
 
 model SafetyFlag {
-  id           String   @id @default(cuid())
-  employeeId   String
-  flagCode     String
-  raisedAt     DateTime @default(now())
-  evidenceIds  String[]
-  resolvedAt   DateTime?
+  id          String    @id @default(cuid())
+  employeeId  String
+  flagCode    String
+  raisedAt    DateTime  @default(now())
+  evidenceIds String[]
+  resolvedAt  DateTime?
 
-  employee     Employee @relation(fields: [employeeId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id])
 
   @@index([employeeId])
   @@map("safety_flags")
@@ -469,10 +593,10 @@ model SafetyFlag {
 // ============================================================
 
 model InterventionCatalog {
-  id        String   @id @default(cuid())
-  version   String   @unique
+  id        String        @id @default(cuid())
+  version   String        @unique
   status    VersionStatus @default(DRAFT)
-  createdAt DateTime @default(now())
+  createdAt DateTime      @default(now())
 
   interventions Intervention[]
 
@@ -480,7 +604,7 @@ model InterventionCatalog {
 }
 
 model Intervention {
-  id                          String   @id @default(cuid())
+  id                          String           @id @default(cuid())
   catalogId                   String
   type                        InterventionType
   dimensionId                 String
@@ -494,10 +618,10 @@ model Intervention {
   actionTextI18nKey           String?
   whyThisStepI18nKey          String?
 
-  catalog                     InterventionCatalog @relation(fields: [catalogId], references: [id])
-  dimension                   Dimension           @relation(fields: [dimensionId], references: [id])
-  tenantOverrides             TenantInterventionOverride[]
-  employeeInstances           EmployeeIntervention[]
+  catalog           InterventionCatalog          @relation(fields: [catalogId], references: [id])
+  dimension         Dimension                    @relation(fields: [dimensionId], references: [id])
+  tenantOverrides   TenantInterventionOverride[]
+  employeeInstances EmployeeIntervention[]
 
   @@map("interventions")
 }
@@ -514,8 +638,8 @@ model TenantInterventionOverride {
   interventionId String
   status         OverrideStatus
 
-  tenant         Tenant       @relation(fields: [tenantId], references: [id])
-  intervention   Intervention @relation(fields: [interventionId], references: [id])
+  tenant       Tenant       @relation(fields: [tenantId], references: [id])
+  intervention Intervention @relation(fields: [interventionId], references: [id])
 
   @@id([tenantId, interventionId])
   @@map("tenant_intervention_overrides")
@@ -527,18 +651,18 @@ enum OverrideStatus {
 }
 
 model EmployeeIntervention {
-  id             String   @id @default(cuid())
+  id             String                     @id @default(cuid())
   employeeId     String
   interventionId String
-  assignedAt     DateTime @default(now())
+  assignedAt     DateTime                   @default(now())
   status         EmployeeInterventionStatus @default(SUGGESTED)
   commitmentData Json?
   completedAt    DateTime?
   outcome        InterventionOutcome?
   feedback       Json?
 
-  employee       Employee     @relation(fields: [employeeId], references: [id])
-  intervention   Intervention @relation(fields: [interventionId], references: [id])
+  employee     Employee     @relation(fields: [employeeId], references: [id])
+  intervention Intervention @relation(fields: [interventionId], references: [id])
 
   @@index([employeeId])
   @@map("employee_interventions")
@@ -573,21 +697,21 @@ model AuditLog {
   entityType    String
   entityId      String
 
-  who           PlatformUser @relation(fields: [whoId], references: [id])
+  who AdminUser @relation(fields: [whoId], references: [id])
 
   @@index([entityType, entityId])
   @@map("audit_logs")
 }
 
 model LearningEvent {
-  id         String   @id @default(cuid())
+  id         String            @id @default(cuid())
   eventType  LearningEventType
   employeeId String?
   tenantId   String
   context    Json
-  timestamp  DateTime @default(now())
+  timestamp  DateTime          @default(now())
 
-  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+  tenant Tenant @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId, timestamp])
   @@map("learning_events")

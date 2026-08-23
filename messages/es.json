@@ -31,7 +31,12 @@
     },
     "welcome": {
       "title": "Ya estás dentro, bienvenido a {tenantName}",
-      "subtitle": "Tu diagnóstico de salud financiera está por llegar. Pronto podrás conocer tu Índice de Salud Financiera (CFHI)."
+      "subtitle": "Ahora sí, vamos a conocer tu salud financiera.",
+      "ctaStart": "Empezar mi diagnóstico",
+      "beforeStart": {
+        "title": "Antes de empezar",
+        "body": "Te tomará unos 5–8 minutos. Busca un momento donde puedas concentrarte — entre más honestas sean tus respuestas, más útil va a ser tu diagnóstico."
+      }
     },
     "trust": {
       "privacyGuarantee": "Tu empresa nunca verá tus respuestas individuales. Solo métricas agregadas y anónimas."
@@ -46,6 +51,1108 @@
   "admin": {
     "methodology": {
       "title": "Metodología"
+    },
+    "login": {
+      "subtitle": "Panel administrativo",
+      "emailLabel": "Correo",
+      "emailPlaceholder": "tucorreo@caudall.com",
+      "ctaSendLink": "Enviarme un link para entrar",
+      "sending": "Enviando...",
+      "sentTitle": "Revisa tu correo",
+      "sentBody": "Si ese correo tiene una cuenta de administrador, te enviamos un link para entrar. Vence en 15 minutos y solo funciona una vez."
+    },
+    "settings": {
+      "title": "Configuración",
+      "logoTitle": "Logo de Caudall",
+      "logoDescription": "Se muestra en la pantalla de entrada de los empleados.",
+      "logoCurrentAlt": "Logo actual de Caudall",
+      "logoNone": "Todavía no hay un logo cargado — se muestra el texto \"caudall\" por defecto.",
+      "uploadLabel": "Subir un logo nuevo",
+      "uploadCta": "Guardar logo",
+      "uploading": "Guardando...",
+      "uploadSuccess": "Logo actualizado.",
+      "uploadErrorType": "El archivo debe ser una imagen (PNG, JPG, WEBP o SVG).",
+      "uploadErrorSize": "El archivo es muy grande — el máximo es 2 MB.",
+      "uploadErrorGeneric": "No pudimos guardar el logo. Intenta de nuevo."
+    }
+  },
+  "diagnostic": {
+    "ctaContinue": "Continuar",
+    "ctaFinish": "Ver mi resultado",
+    "errorSelectOption": "Selecciona una opción antes de continuar.",
+    "dimensions": {
+      "CONTROL": "Control",
+      "RESILIENCE": "Resiliencia",
+      "DEBT": "Deuda",
+      "SAVING": "Ahorro",
+      "PLANNING": "Planificación",
+      "BEHAVIORAL": "Conductual",
+      "descriptions": {
+        "CONTROL": "¿Manejo sosteniblemente mis finanzas cotidianas?",
+        "RESILIENCE": "¿Puedo absorber un shock financiero?",
+        "DEBT": "¿Mis obligaciones son sostenibles?",
+        "SAVING": "¿Acumulo recursos de forma sostenible?",
+        "PLANNING": "¿Convierto mis objetivos en acciones?"
+      }
+    },
+    "questions": {
+      "CTRL-01": {
+        "text": "Pensando en los últimos 3 meses, ¿cómo ha sido normalmente tu balance entre ingresos y gastos?",
+        "whyAsk": "Establece el estado base de margen financiero y orienta casi todo el routing de Control.",
+        "options": {
+          "HIGH": "Mis ingresos superan ampliamente mis gastos",
+          "POSITIVE": "Mis ingresos superan un poco mis gastos",
+          "EVEN": "Ingresos y gastos suelen quedar bastante parejos",
+          "NEGATIVE": "Mis gastos superan un poco mis ingresos",
+          "CRITICAL": "Mis gastos superan claramente mis ingresos"
+        }
+      },
+      "CTRL-02": {
+        "text": "En los últimos 3 meses, ¿con qué frecuencia has podido pagar tus compromisos importantes a tiempo?",
+        "whyAsk": "Mide cumplimiento efectivo sin asumir que el problema es deuda.",
+        "options": {
+          "ALWAYS": "Siempre",
+          "OFTEN": "Casi siempre",
+          "SOMETIMES": "Algunas veces",
+          "RARELY": "Pocas veces",
+          "NEVER": "Casi nunca"
+        }
+      },
+      "CTRL-03": {
+        "text": "¿Qué explica mejor que tus gastos estén superando tus ingresos?",
+        "whyAsk": "Distingue causa raíz: ingreso, gasto, deuda, variabilidad o evento puntual.",
+        "options": {
+          "INCOME_GAP": "Mis ingresos no alcanzan para cubrir lo esencial",
+          "SPENDING": "Mis gastos variables se me van de lo previsto",
+          "DEBT_LOAD": "Los pagos de deudas o compromisos pesan demasiado",
+          "VARIABLE_INCOME": "Mis ingresos cambian mucho de un mes a otro",
+          "ONE_OFF_EVENT": "Fue principalmente por una situación extraordinaria"
+        }
+      },
+      "CTRL-04": {
+        "text": "Cuando tus ingresos cambian de un mes a otro, ¿qué tan fácil te resulta ajustar tus gastos sin dejar de cubrir lo importante?",
+        "whyAsk": "Determina si la variabilidad del ingreso está siendo manejada o está generando vulnerabilidad.",
+        "options": {
+          "HIGH": "Muy fácil; sé qué ajustar",
+          "MODERATE": "Puedo ajustarme, aunque cuesta",
+          "LOW": "Me cuesta bastante",
+          "NONE": "Casi nunca logro ajustarme"
+        }
+      },
+      "CTRL-05": {
+        "text": "Cuando el dinero no alcanza para lo esencial, ¿qué sueles hacer primero?",
+        "whyAsk": "Detecta dependencia de crédito, reservas, terceros o diferimiento y activa safety si corresponde.",
+        "options": {
+          "CREDIT": "Uso crédito o una tarjeta",
+          "SAVINGS_DRAWDOWN": "Uso parte de mis ahorros o reserva",
+          "FAMILY_SUPPORT": "Pido ayuda a familiares o personas cercanas",
+          "PAYMENT_DEFERRAL": "Aplazo algún pago",
+          "NONE": "Normalmente logro ajustar otros gastos"
+        }
+      },
+      "CTRL-06": {
+        "text": "¿Qué tan claro tienes cuánto necesitas normalmente para cubrir tus gastos y compromisos cada mes?",
+        "whyAsk": "Distingue una dificultad de control de una dificultad de visibilidad.",
+        "options": {
+          "CLEAR": "Lo tengo muy claro",
+          "PARTIAL": "Más o menos",
+          "LOW": "Tengo poca claridad",
+          "UNKNOWN": "No sabría decirlo"
+        }
+      },
+      "CTRL-07": {
+        "text": "Cuando te queda dinero después de cubrir lo necesario, ¿qué suele ocurrir con ese margen?",
+        "whyAsk": "Conecta Control con Ahorro y Planificación sin penalizar dos veces.",
+        "options": {
+          "PLANNED": "Lo destino con intención a ahorro, inversión o metas",
+          "MIXED": "Una parte va a metas y otra se gasta",
+          "SPENT": "Normalmente termina gastándose",
+          "UNCLEAR": "No tengo claro en qué termina"
+        }
+      },
+      "CTRL-08": {
+        "text": "Si hoy tuvieras que decir en qué tres cosas se va la mayor parte de tu dinero, ¿qué tan fácil te resultaría?",
+        "whyAsk": "Valida visibilidad de manera más natural cuando la pregunta directa no fue suficiente.",
+        "options": {
+          "CLEAR": "Muy fácil",
+          "PARTIAL": "Podría decirlo aproximadamente",
+          "LOW": "Me costaría bastante",
+          "UNKNOWN": "No sabría decirlo"
+        }
+      },
+      "CTRL-09": {
+        "text": "Cuando aparece un gasto inesperado, ¿sueles poder ajustar otros gastos ese mismo mes?",
+        "whyAsk": "Mide capacidad de ajuste operativo sin confundirla con resiliencia acumulada.",
+        "options": {
+          "HIGH": "Sí, casi siempre",
+          "MODERATE": "A veces",
+          "LOW": "Rara vez",
+          "NONE": "No, normalmente no puedo"
+        }
+      },
+      "CTRL-10": {
+        "text": "Cuando un pago importante se retrasa, ¿qué suele estar detrás?",
+        "whyAsk": "Aclara la causa del incumplimiento para distinguir desorganización de falta real de capacidad.",
+        "options": {
+          "INCOME_GAP": "No había suficiente dinero disponible",
+          "ORGANIZATION": "Me olvidé o no lo tenía organizado",
+          "SHOCK": "Otro gasto inesperado desplazó ese pago",
+          "DEBT_LOAD": "Los pagos de deuda eran demasiado altos"
+        }
+      },
+      "CTRL-11": {
+        "text": "En los últimos 3 meses, ¿tu situación de ingresos y gastos ha sido parecida o ha cambiado mucho?",
+        "whyAsk": "Aumenta confianza sobre estabilidad cuando el promedio del flujo puede ocultar oscilaciones.",
+        "options": {
+          "STABLE": "Ha sido bastante parecida",
+          "MOSTLY_STABLE": "Ha variado un poco",
+          "VARIABLE": "Ha cambiado bastante",
+          "HIGHLY_VARIABLE": "Ha sido muy impredecible"
+        }
+      },
+      "CTRL-12": {
+        "text": "¿Tienes alguna forma —mental, en papel o digital— de revisar cómo vas durante el mes?",
+        "whyAsk": "Evalúa sistema de seguimiento sin premiar una herramienta específica.",
+        "options": {
+          "CLEAR": "Sí, y lo reviso con frecuencia",
+          "PARTIAL": "Tengo una forma, pero la reviso poco",
+          "LOW": "No tengo una forma definida"
+        }
+      },
+      "CTRL-13": {
+        "text": "En un mes normal, después de cubrir lo esencial y tus compromisos, ¿suele quedarte algo de dinero?",
+        "whyAsk": "Pregunta aclaratoria de margen cuando la primera respuesta fue ambigua o contradictoria.",
+        "options": {
+          "HIGH": "Sí, normalmente me queda un margen cómodo",
+          "POSITIVE": "Sí, pero es pequeño",
+          "EVEN": "Casi siempre quedo justo",
+          "NEGATIVE": "Normalmente no alcanza"
+        }
+      },
+      "CTRL-14": {
+        "text": "Si tus ingresos bajaran un poco el próximo mes, ¿sabrías qué gastos podrías ajustar primero?",
+        "whyAsk": "Mide preparación operativa ante variaciones, útil especialmente con ingresos variables.",
+        "options": {
+          "HIGH": "Sí, lo tendría claro",
+          "MODERATE": "Tengo una idea",
+          "LOW": "Me costaría decidir",
+          "NONE": "No sabría por dónde empezar"
+        }
+      },
+      "CTRL-15": {
+        "text": "¿Sientes que el principal reto está en que entra poco dinero, en que sale demasiado o en ambas cosas?",
+        "whyAsk": "Pregunta de resolución cuando el motor todavía no identifica con confianza la causa del déficit.",
+        "options": {
+          "INCOME_GAP": "Principalmente entra poco dinero",
+          "SPENDING": "Principalmente gasto más de lo que debería",
+          "MIXED_DRIVER": "Ambas cosas",
+          "UNKNOWN": "No estoy seguro"
+        }
+      },
+      "RES-01": {
+        "text": "Si dejaras de recibir ingresos hoy, ¿por cuánto tiempo podrías cubrir tus gastos esenciales con recursos disponibles?",
+        "whyAsk": "Ancla principal de cobertura; evita depender de la etiqueta 'fondo de emergencia'.",
+        "options": {
+          "VERY_LOW": "Menos de 1 semana",
+          "LOW": "Entre 1 y 3 semanas",
+          "PARTIAL": "Entre 1 y 2 meses",
+          "GOOD": "Entre 3 y 5 meses",
+          "STRONG": "6 meses o más"
+        }
+      },
+      "RES-02": {
+        "text": "Si mañana tuvieras un gasto importante inesperado, ¿podrías cubrirlo sin endeudarte ni dejar de pagar algo importante?",
+        "whyAsk": "Mide capacidad efectiva ante shock, complementaria a cobertura.",
+        "options": {
+          "FULL": "Sí, completamente",
+          "MOSTLY": "Sí, en gran parte",
+          "PARTIAL": "Solo una parte",
+          "DEBT_REQUIRED": "Tendría que endeudarme o pedir ayuda",
+          "UNABLE": "No podría cubrirlo"
+        }
+      },
+      "RES-03": {
+        "text": "¿Qué parte de esos recursos podrías usar rápidamente si los necesitaras, sin una penalidad importante?",
+        "whyAsk": "Aclara cobertura efectiva cuando hay recursos acumulados.",
+        "options": {
+          "FULLY_LIQUID": "Prácticamente todos",
+          "MOSTLY_LIQUID": "La mayor parte",
+          "PARTIALLY_LIQUID": "Solo una parte",
+          "RESTRICTED": "Muy poco; están restringidos o comprometidos",
+          "UNKNOWN": "No estoy seguro"
+        }
+      },
+      "RES-04": {
+        "text": "En los últimos 6 meses, ¿con qué frecuencia has tenido que usar tu reserva para cubrir gastos habituales?",
+        "whyAsk": "Detecta si la reserva se está erosionando por problemas de flujo.",
+        "options": {
+          "STABLE": "Nunca",
+          "OCCASIONAL_USE": "Rara vez",
+          "RECURRENT_USE": "Algunos meses",
+          "DEPLETING": "Frecuentemente; viene disminuyendo"
+        }
+      },
+      "RES-05": {
+        "text": "Cuando aparece una emergencia que no puedes cubrir con tus recursos, ¿qué sueles hacer?",
+        "whyAsk": "Identifica dependencia externa y posibles safety flags.",
+        "options": {
+          "NEW_DEBT": "Uso crédito o tomo una deuda nueva",
+          "FAMILY_SUPPORT": "Pido ayuda a familiares o personas cercanas",
+          "DEFER_PAYMENTS": "Aplazo algún pago",
+          "SELL_ASSETS": "Vendo o retiro otros activos",
+          "NONE": "Normalmente logro resolverlo sin depender de terceros"
+        }
+      },
+      "RES-06": {
+        "text": "¿Qué tan probable es que tus ingresos puedan reducirse o interrumpirse en los próximos 6 meses?",
+        "whyAsk": "Contextualiza cuánto colchón necesita la persona sin penalizar la variabilidad por sí misma.",
+        "options": {
+          "LOW": "Muy poco probable",
+          "MODERATE": "Poco probable",
+          "HIGH": "Es posible",
+          "VERY_HIGH": "Es bastante probable"
+        }
+      },
+      "RES-07": {
+        "text": "Además de tus ahorros, ¿cuentas con alguna protección que te ayudaría ante una emergencia importante?",
+        "whyAsk": "Identifica amortiguadores complementarios sin equipararlos a reserva.",
+        "options": {
+          "STRONG": "Sí, tengo protecciones suficientes",
+          "PARTIAL": "Tengo algunas protecciones, pero no cubrirían todo",
+          "LOW": "Muy poca protección adicional",
+          "NONE": "No cuento con otra protección"
+        }
+      },
+      "RES-08": {
+        "text": "Si tuvieras que cubrir de repente un gasto equivalente a aproximadamente un mes de tus gastos esenciales, ¿cómo lo resolverías?",
+        "whyAsk": "Pregunta aclaratoria de shock cuando la capacidad declarada es ambigua.",
+        "options": {
+          "FULL": "Lo cubriría con recursos disponibles",
+          "MOSTLY": "Cubriría la mayor parte y ajustaría el resto",
+          "PARTIAL": "Solo podría cubrir una parte",
+          "DEBT_REQUIRED": "Usaría crédito o pediría ayuda",
+          "UNABLE": "No sabría cómo cubrirlo"
+        }
+      },
+      "RES-09": {
+        "text": "Si necesitaras tu reserva hoy, ¿en cuánto tiempo podrías tener disponible la mayor parte?",
+        "whyAsk": "Refina liquidez sin preguntar por productos financieros específicos.",
+        "options": {
+          "FULLY_LIQUID": "El mismo día",
+          "MOSTLY_LIQUID": "En 1 a 3 días",
+          "PARTIALLY_LIQUID": "En una semana o más",
+          "RESTRICTED": "No podría acceder fácilmente"
+        }
+      },
+      "RES-10": {
+        "text": "Después de usar parte de tu reserva, ¿sueles poder reconstruirla?",
+        "whyAsk": "Mide capacidad de recuperación y estabilidad de la reserva.",
+        "options": {
+          "RECOVERS_FAST": "Sí, normalmente la repongo rápido",
+          "RECOVERS_SLOW": "La repongo poco a poco",
+          "RECOVERY_DIFFICULT": "Me cuesta volver a construirla",
+          "DEPLETING": "No he logrado reconstruirla"
+        }
+      },
+      "RES-11": {
+        "text": "¿Qué explica mejor que tu reserva sea menor de lo que quisieras?",
+        "whyAsk": "Distingue falta de margen, shock reciente, deuda, hábito o etapa temprana de construcción.",
+        "options": {
+          "LOW_SAVING_CAPACITY": "No me queda suficiente margen después de lo esencial",
+          "RECENT_SHOCK": "Tuve un gasto o emergencia reciente",
+          "DEBT_BURDEN": "La deuda absorbe una parte importante de mis ingresos",
+          "INCOME_VOLATILITY": "Mis ingresos cambian mucho",
+          "EARLY_BUILDING_STAGE": "Todavía estoy empezando a construirla",
+          "LOW_SAVING_HABIT": "No he tenido constancia para ahorrar"
+        }
+      },
+      "RES-12": {
+        "text": "¿Tu reserva bajó recientemente por un gasto extraordinario importante?",
+        "whyAsk": "Evita confundir una situación transitoria con falta estructural de hábito.",
+        "options": {
+          "RECENT_SHOCK": "Sí, claramente",
+          "MIXED": "En parte",
+          "STRUCTURAL": "No"
+        }
+      },
+      "RES-13": {
+        "text": "Si tuvieras una emergencia médica importante, ¿tendrías que usar una parte significativa de tus ahorros para cubrirla?",
+        "whyAsk": "Evalúa exposición financiera real, no simplemente existencia de seguro.",
+        "options": {
+          "STRONG": "No; mi protección cubriría casi todo",
+          "PARTIAL": "Usaría una parte manejable",
+          "LOW": "Usaría una parte importante",
+          "NONE": "Tendría que usar casi todos mis recursos o endeudarme"
+        }
+      },
+      "RES-14": {
+        "text": "Si dejaras de recibir ingresos durante un mes, ¿dependerías de otra persona para cubrir lo esencial?",
+        "whyAsk": "Detecta dependencia externa cuando la cobertura es baja.",
+        "options": {
+          "NONE": "No",
+          "FAMILY_SUPPORT_PARTIAL": "Sí, parcialmente",
+          "FAMILY_SUPPORT": "Sí, principalmente"
+        }
+      },
+      "RES-15": {
+        "text": "Hoy, ¿tu reserva está creciendo, se mantiene parecida o viene disminuyendo?",
+        "whyAsk": "Añade una lectura de trayectoria sin confundir stock con hábito de ahorro.",
+        "options": {
+          "GROWING": "Está creciendo",
+          "STABLE": "Se mantiene bastante estable",
+          "RECURRENT_USE": "Ha disminuido un poco",
+          "DEPLETING": "Viene disminuyendo claramente"
+        }
+      },
+      "DEBT-00": {
+        "text": "¿Actualmente tienes alguna deuda o saldo pendiente que debas pagar?",
+        "whyAsk": "Gate absoluto de la dimensión. Si no hay deuda, se cierra la rama y Deuda pasa a N/A.",
+        "options": {
+          "APPLICABLE": "Sí",
+          "NONE": "No"
+        }
+      },
+      "DEBT-01": {
+        "text": "Pensando en los pagos de tus deudas, ¿qué tan manejables son hoy dentro de tus ingresos?",
+        "whyAsk": "Mide sostenibilidad del servicio de deuda sin usar montos absolutos.",
+        "options": {
+          "COMFORTABLE": "Son cómodos dentro de mis ingresos",
+          "MANAGEABLE": "Son manejables",
+          "TIGHT": "Me dejan bastante justo",
+          "DIFFICULT": "Me cuesta cumplir",
+          "UNMANAGEABLE": "No logro mantenerlos bajo control"
+        }
+      },
+      "DEBT-02": {
+        "text": "¿Hasta qué punto tus pagos de deuda limitan otras prioridades como ahorrar, cubrir imprevistos o avanzar hacia tus metas?",
+        "whyAsk": "Mide presión financiera, diferente de capacidad de pago.",
+        "options": {
+          "NONE": "No limitan otras prioridades",
+          "LOW": "Las limitan un poco",
+          "MODERATE": "Las limitan de forma moderada",
+          "HIGH": "Las limitan mucho",
+          "SEVERE": "Prácticamente no puedo avanzar en otras prioridades"
+        }
+      },
+      "DEBT-03": {
+        "text": "En los últimos 3 meses, ¿has tenido algún pago de deuda vencido porque no pudiste cubrirlo a tiempo?",
+        "whyAsk": "Detecta estrés de deuda y safety sin confundir olvido administrativo.",
+        "options": {
+          "NONE": "No",
+          "ONE_TIME": "Una vez",
+          "RECURRENT": "Varias veces",
+          "CURRENT": "Sí, tengo pagos vencidos ahora"
+        }
+      },
+      "DEBT-04": {
+        "text": "¿Has usado una deuda nueva para pagar otra deuda o mantener sus pagos?",
+        "whyAsk": "Detecta ciclo de rollover con impacto directo en safety.",
+        "options": {
+          "NONE": "Nunca",
+          "ONE_TIME": "Una vez por una situación puntual",
+          "OCCASIONAL": "Ocurre algunas veces",
+          "RECURRENT": "Ocurre con frecuencia"
+        }
+      },
+      "DEBT-05": {
+        "text": "¿Usas crédito o nueva deuda para cubrir gastos esenciales habituales, como comida, vivienda o servicios?",
+        "whyAsk": "Detecta dependencia de crédito para sostener el flujo cotidiano.",
+        "options": {
+          "NONE": "No",
+          "OCCASIONAL": "Ocasionalmente",
+          "RECURRENT": "Sí, de forma recurrente"
+        }
+      },
+      "DEBT-06": {
+        "text": "En los últimos 6 meses, tu deuda total ha tendido a…",
+        "whyAsk": "Distingue deterioro no planificado de aumento planificado.",
+        "options": {
+          "DECREASING": "Ha disminuido",
+          "STABLE": "Se ha mantenido bastante estable",
+          "INCREASING_PLANNED": "Ha aumentado, pero por algo planificado",
+          "INCREASING_UNPLANNED": "Ha aumentado sin que fuera parte de un plan",
+          "UNKNOWN": "No estoy seguro"
+        }
+      },
+      "DEBT-07": {
+        "text": "¿Tienes claro cuáles de tus deudas son las más costosas?",
+        "whyAsk": "Sirve para elegir intervención; no penaliza directamente la salud de deuda.",
+        "options": {
+          "CLEAR": "Sí, claramente",
+          "PARTIAL": "Tengo una idea general",
+          "LOW": "No realmente",
+          "UNKNOWN": "No estoy seguro"
+        }
+      },
+      "DEBT-08": {
+        "text": "¿Qué tipos de deuda tienes actualmente?",
+        "whyAsk": "Solo se pregunta cuando la estructura puede cambiar la intervención.",
+        "options": {
+          "REVOLVING": "Tarjetas de crédito",
+          "PERSONAL": "Préstamo personal",
+          "AUTO": "Préstamo de vehículo",
+          "MORTGAGE": "Hipoteca",
+          "OTHER": "Otra"
+        }
+      },
+      "DEBT-09": {
+        "text": "Después de pagar tus deudas cada mes, ¿te queda suficiente para cubrir tus gastos esenciales sin volver a usar crédito?",
+        "whyAsk": "Aclara sostenibilidad cuando la respuesta de manejabilidad es ambigua.",
+        "options": {
+          "COMFORTABLE": "Sí, con margen",
+          "TIGHT": "Sí, pero quedo justo",
+          "DIFFICULT": "No siempre; a veces vuelvo a usar crédito",
+          "UNMANAGEABLE": "No"
+        }
+      },
+      "DEBT-10": {
+        "text": "¿Qué está haciendo más difícil manejar tus deudas en este momento?",
+        "whyAsk": "Identifica causa raíz del estrés de deuda.",
+        "options": {
+          "PAYMENT_BURDEN": "Los pagos son demasiado altos para mis ingresos",
+          "INCOME_SHOCK": "Mis ingresos bajaron o se interrumpieron",
+          "EMERGENCY": "Tuve una emergencia o gasto extraordinario",
+          "ROLLOVER_CYCLE": "He ido usando deuda para cubrir otras deudas",
+          "MULTIPLE_OBLIGATIONS": "Tengo demasiadas obligaciones al mismo tiempo",
+          "OVERSPENDING": "Estoy gastando más de lo que puedo sostener"
+        }
+      },
+      "DEBT-11": {
+        "text": "Si tus ingresos bajaran un poco el próximo mes, ¿podrías mantener tus pagos de deuda al día?",
+        "whyAsk": "Mide fragilidad de la capacidad de pago, útil en ingresos variables.",
+        "options": {
+          "COMFORTABLE": "Sí, sin problema",
+          "TIGHT": "Sí, pero quedaría muy justo",
+          "DIFFICULT": "Probablemente me atrasaría",
+          "UNMANAGEABLE": "No podría mantenerlos"
+        }
+      },
+      "DEBT-12": {
+        "text": "Si has tenido atrasos, ¿fue algo puntual o se ha repetido?",
+        "whyAsk": "Refina severidad de atrasos cuando el estado previo no es claro.",
+        "options": {
+          "ONE_TIME": "Fue algo puntual",
+          "RECURRENT": "Se ha repetido algunas veces",
+          "CURRENT": "Actualmente sigo con atrasos"
+        }
+      },
+      "DEBT-13": {
+        "text": "¿Qué has tenido que posponer o reducir principalmente por los pagos de deuda?",
+        "whyAsk": "Aclara dónde se manifiesta la presión y mejora causalidad.",
+        "options": {
+          "SAVING_DISPLACED": "Ahorro o reserva",
+          "DISCRETIONARY_CUT": "Gastos no esenciales",
+          "ESSENTIALS_PRESSURED": "Gastos esenciales",
+          "GOALS_DELAYED": "Mis metas financieras"
+        }
+      },
+      "DEBT-14": {
+        "text": "Cuando usas nueva deuda para cubrir otra, ¿con qué frecuencia ocurre?",
+        "whyAsk": "Distingue evento excepcional de ciclo recurrente.",
+        "options": {
+          "ONE_TIME": "Fue una sola vez",
+          "OCCASIONAL": "Ocurre algunos meses",
+          "RECURRENT": "Ocurre con frecuencia"
+        }
+      },
+      "DEBT-15": {
+        "text": "¿Tienes alguna deuda que esperas terminar de pagar en los próximos 6 meses?",
+        "whyAsk": "Identifica alivio próximo de carga para no sobreestimar presión estructural.",
+        "options": {
+          "RELIEF_SOON": "Sí, una parte importante",
+          "MINOR_RELIEF": "Sí, pero será poca",
+          "NO_RELIEF": "No",
+          "UNKNOWN": "No estoy seguro"
+        }
+      },
+      "SAV-01": {
+        "text": "En los últimos 6 meses, ¿con qué frecuencia has logrado separar parte de tus ingresos para ahorrar?",
+        "whyAsk": "Pregunta pivote de Ahorro; distingue conducta real de intención.",
+        "options": {
+          "EVERY_MONTH": "Todos los meses",
+          "MOST_MONTHS": "La mayoría de los meses",
+          "SOMETIMES": "Algunos meses",
+          "RARELY": "Rara vez",
+          "NEVER": "Nunca o casi nunca"
+        }
+      },
+      "SAV-02": {
+        "text": "Si quisieras ahorrar algo este mes, ¿tendrías margen para hacerlo sin dejar de cubrir lo esencial?",
+        "whyAsk": "Distingue falta de capacidad de fricción conductual.",
+        "options": {
+          "CONSTRAINED": "No; ahora mismo no tengo margen",
+          "LIMITED": "Muy poco margen",
+          "AVAILABLE": "Sí, podría separar algo",
+          "STRONG": "Sí, tengo un margen cómodo"
+        }
+      },
+      "SAV-03": {
+        "text": "En los meses en que no logras ahorrar, ¿qué suele pasar?",
+        "whyAsk": "Identifica qué rompe la constancia cuando el ahorro ocurre solo algunos meses.",
+        "options": {
+          "INCOME_VARIABLE": "Mis ingresos varían",
+          "UNEXPECTED_EXPENSES": "Aparecen gastos inesperados",
+          "SPENDING": "Gasto más de lo previsto",
+          "NO_SYSTEM": "No separo el dinero con anticipación",
+          "NO_PRIORITY": "Otras prioridades terminan ganando"
+        }
+      },
+      "SAV-04": {
+        "text": "Cuando ahorras, ¿cómo suele ocurrir?",
+        "whyAsk": "Mide sistematicidad sin premiar automáticamente la automatización.",
+        "options": {
+          "AUTOMATED": "Lo separo automáticamente o apenas recibo ingresos",
+          "PLANNED_MANUAL": "Lo separo manualmente, pero con una regla clara",
+          "AD_HOC": "Ahorro cuando puedo o cuando queda algo",
+          "NONE": "No tengo una forma definida"
+        }
+      },
+      "SAV-05": {
+        "text": "¿Tu ahorro está destinado principalmente a algo específico o lo mantienes para el futuro en general?",
+        "whyAsk": "Conecta ahorro con planificación sin convertir propósito en score directo.",
+        "options": {
+          "EMERGENCY": "Emergencias",
+          "SPECIFIC_GOAL": "Una meta específica",
+          "GENERAL_FUTURE": "El futuro en general",
+          "MULTIPLE": "Varias cosas",
+          "NO_DEFINED_PURPOSE": "No tiene un propósito definido"
+        }
+      },
+      "SAV-06": {
+        "text": "Cuando aparece un mes más difícil de lo normal, ¿qué suele pasar con tu ahorro?",
+        "whyAsk": "Mide persistencia y detecta si la reserva se erosiona.",
+        "options": {
+          "MAINTAINED": "Lo mantengo casi igual",
+          "REDUCED": "Ahorro menos",
+          "PAUSED": "Lo pauso ese mes",
+          "REVERSED": "Además tengo que retirar ahorro previo"
+        }
+      },
+      "SAV-07": {
+        "text": "En un mes normal, aproximadamente ¿qué parte de tus ingresos logras ahorrar?",
+        "whyAsk": "Aporta intensidad relativa; no se interpreta con una regla universal aislada.",
+        "options": {
+          "VERY_LOW": "Menos del 5%",
+          "LOW": "Entre 5% y 10%",
+          "MODERATE": "Entre 10% y 20%",
+          "HIGH": "Más del 20%",
+          "UNKNOWN": "No sabría estimarlo"
+        }
+      },
+      "SAV-08": {
+        "text": "Si tienes margen para ahorrar pero no siempre lo haces, ¿qué lo hace más difícil?",
+        "whyAsk": "Solo aparece cuando existe capacidad material y falta de ejecución.",
+        "options": {
+          "PROCRASTINATION": "Lo voy dejando para después",
+          "FORGETTING": "Se me olvida o no tengo un momento definido",
+          "COMPLEXITY": "No tengo una forma sencilla de hacerlo",
+          "TOO_MANY_CHOICES": "Hay demasiadas cosas compitiendo por ese dinero",
+          "NO_GOAL": "No tengo una meta que me motive"
+        }
+      },
+      "SAV-09": {
+        "text": "¿Cuál describe mejor dónde estás hoy con el ahorro?",
+        "whyAsk": "Determina etapa conductual para no preguntar por inicio a quien ya está repitiendo.",
+        "options": {
+          "CONSTRAINED": "No puedo ahorrar por mi situación actual",
+          "INTENDING": "Quiero empezar, pero todavía no lo hago",
+          "STARTED": "Ya empecé",
+          "REPEATING": "Lo hago con cierta repetición",
+          "SYSTEMATIC": "Ya tengo un sistema bastante estable",
+          "MAINTAINING": "Lo mantengo de forma consistente"
+        }
+      },
+      "SAV-10": {
+        "text": "¿Sueles separar el ahorro al recibir ingresos o esperas a ver qué queda al final?",
+        "whyAsk": "Distingue sistema planificado de ahorro residual.",
+        "options": {
+          "PLANNED_MANUAL": "Lo separo al recibir ingresos",
+          "AUTOMATED": "Tengo transferencia automática",
+          "AD_HOC": "Espero a ver qué queda",
+          "NONE": "No tengo una regla"
+        }
+      },
+      "SAV-11": {
+        "text": "De lo que ya tienes ahorrado, ¿una parte está reservada para emergencias?",
+        "whyAsk": "Informa vínculo con Resiliencia sin inferir frecuencia de ahorro.",
+        "options": {
+          "EMERGENCY": "Sí, claramente",
+          "MIXED": "Una parte",
+          "NO_EMERGENCY_BUCKET": "No"
+        }
+      },
+      "SAV-12": {
+        "text": "Después de cubrir lo esencial y tus compromisos, ¿normalmente te queda algún monto que podrías destinar a ahorro?",
+        "whyAsk": "Pregunta aclaratoria de capacidad cuando Control no resolvió suficientemente el margen.",
+        "options": {
+          "CONSTRAINED": "No me queda nada",
+          "LIMITED": "Me queda muy poco",
+          "AVAILABLE": "Sí, algo",
+          "STRONG": "Sí, un margen cómodo"
+        }
+      },
+      "SAV-13": {
+        "text": "En los últimos 6 meses, ¿has tenido que retirar ahorro para cubrir gastos habituales?",
+        "whyAsk": "Detecta reversión del hábito y riesgo sobre la reserva.",
+        "options": {
+          "MAINTAINED": "No",
+          "REDUCED": "Una vez",
+          "PAUSED": "Varias veces",
+          "REVERSED": "Frecuentemente"
+        }
+      },
+      "SAV-14": {
+        "text": "¿Qué suele pasar justo antes de que decidas no ahorrar ese mes?",
+        "whyAsk": "Pregunta conductual de profundización cuando la barrera sigue siendo inespecífica.",
+        "options": {
+          "PROCRASTINATION": "Pienso que puedo hacerlo después",
+          "PRESENT_BIAS": "Aparece otra compra o gasto más inmediato",
+          "UNCERTAINTY": "No tengo claro cuánto separar",
+          "NO_CLEAR_TRIGGER": "No tengo un momento o sistema definido",
+          "EMOTIONAL_AVOIDANCE": "Prefiero no pensar en el tema"
+        }
+      },
+      "SAV-15": {
+        "text": "Cuando tus ingresos varían, ¿cómo decides cuánto puedes ahorrar?",
+        "whyAsk": "Identifica diseño de ahorro adecuado para ingresos variables; no penaliza la variabilidad.",
+        "options": {
+          "PERCENT_RULE": "Ahorro un porcentaje cuando recibo ingresos",
+          "MINIMUM_RULE": "Ahorro una cantidad mínima cuando puedo",
+          "GOOD_MONTHS_ONLY": "Ahorro solo en meses buenos",
+          "NO_SYSTEM": "No tengo una regla"
+        }
+      },
+      "SAV-16": {
+        "text": "¿Ya tienes una cantidad o regla que intentas repetir cada vez que recibes ingresos?",
+        "whyAsk": "Distingue intención de sistema repetible.",
+        "options": {
+          "SYSTEMATIC": "Sí, una regla clara",
+          "REPEATING": "Tengo una idea, pero varía",
+          "INTENDING": "Todavía no"
+        }
+      },
+      "SAV-17": {
+        "text": "Mirando los últimos 6 meses, ¿tu patrón de ahorro se ha vuelto más constante, menos constante o se mantiene parecido?",
+        "whyAsk": "Añade trayectoria del hábito cuando hay suficiente historial.",
+        "options": {
+          "STABLE": "Más constante",
+          "MOSTLY_STABLE": "Parecido",
+          "INTERRUPTED": "Menos constante",
+          "IRREGULAR": "Muy irregular"
+        }
+      },
+      "SAV-18": {
+        "text": "Si quisieras fortalecer tu ahorro, ¿cuál sería el siguiente paso más realista para ti?",
+        "whyAsk": "Apoya readiness y selección de intervención; solo aparece cuando el diagnóstico ya es suficiente.",
+        "options": {
+          "MICRO_START": "Separar una cantidad pequeña en mi próximo ingreso",
+          "SET_RULE": "Definir una regla simple para cada ingreso",
+          "AUTOMATE": "Automatizar una transferencia",
+          "CLARIFY_CAPACITY": "Primero entender mejor cuánto puedo separar"
+        }
+      },
+      "PLAN-01": {
+        "text": "¿Tienes actualmente algún objetivo financiero que te gustaría alcanzar?",
+        "whyAsk": "Ancla de dirección; evita preguntar monto/plazo cuando no existe meta.",
+        "options": {
+          "NONE": "No tengo ninguno definido",
+          "VAGUE": "Tengo una idea general",
+          "ONE_OR_MORE": "Sí, tengo uno o más objetivos claros"
+        }
+      },
+      "PLAN-02": {
+        "text": "De tus objetivos financieros, ¿cuál te gustaría trabajar primero?",
+        "whyAsk": "Identifica objetivo del usuario sin confundirlo con prioridad del sistema.",
+        "options": {
+          "EMERGENCY": "Construir o fortalecer mi reserva",
+          "DEBT": "Reducir o estabilizar deuda",
+          "HOME": "Comprar una vivienda",
+          "EDUCATION": "Educación",
+          "RETIREMENT": "Retiro",
+          "INVESTMENT": "Invertir o hacer crecer patrimonio",
+          "OTHER": "Otra meta"
+        }
+      },
+      "PLAN-03": {
+        "text": "Pensando en ese objetivo, ¿qué tan claro tienes exactamente qué quieres lograr?",
+        "whyAsk": "Mide especificidad sin exigir todavía monto ni fecha.",
+        "options": {
+          "ASPIRATION": "Es todavía una aspiración general",
+          "GENERAL": "Sé qué quiero lograr",
+          "SPECIFIC": "Está bastante definido",
+          "CLEAR": "Lo tengo muy claro"
+        }
+      },
+      "PLAN-04": {
+        "text": "¿Tienes una idea de cuánto necesitas para alcanzar ese objetivo?",
+        "whyAsk": "Cuantifica solo cuando aporta valor para planificar.",
+        "options": {
+          "UNKNOWN": "No",
+          "ROUGH_ESTIMATE": "Tengo una estimación aproximada",
+          "DEFINED": "Sí, tengo un monto definido"
+        }
+      },
+      "PLAN-05": {
+        "text": "¿Tienes definido aproximadamente para cuándo te gustaría lograrlo?",
+        "whyAsk": "Establece horizonte sin exigir una fecha exacta innecesaria.",
+        "options": {
+          "NONE": "No tengo plazo",
+          "OPEN": "Lo veo a futuro, sin una fecha",
+          "APPROXIMATE": "Tengo un plazo aproximado",
+          "DEFINED": "Sí, tengo una fecha o plazo definido"
+        }
+      },
+      "PLAN-06": {
+        "text": "¿Ya tienes definido qué necesitas hacer de forma regular para avanzar hacia ese objetivo?",
+        "whyAsk": "Distingue objetivo de plan de acción.",
+        "options": {
+          "NONE": "No, todavía no",
+          "IDEA": "Tengo una idea general",
+          "PARTIAL": "Tengo algunos pasos definidos",
+          "DEFINED": "Sí, sé qué hacer regularmente"
+        }
+      },
+      "PLAN-07": {
+        "text": "¿Ya comenzaste a poner ese plan en práctica?",
+        "whyAsk": "Gate de etapa: si ya comenzó, elimina preguntas sobre barreras de inicio.",
+        "options": {
+          "NOT_STARTED": "No he comenzado",
+          "STARTED": "Ya di el primer paso",
+          "REPEATING": "Lo estoy repitiendo",
+          "CONSISTENT": "Lo ejecuto con constancia"
+        }
+      },
+      "PLAN-08": {
+        "text": "¿Con qué frecuencia revisas cómo vas avanzando hacia ese objetivo?",
+        "whyAsk": "Mide seguimiento solo si la ejecución ya existe.",
+        "options": {
+          "SYSTEMATIC": "Con frecuencia o mensualmente",
+          "OCCASIONAL": "Cada varios meses",
+          "RARE": "Rara vez",
+          "NEVER": "Nunca"
+        }
+      },
+      "PLAN-09": {
+        "text": "Según lo que esperabas, ¿cómo sientes que vas avanzando?",
+        "whyAsk": "Evalúa progreso percibido y detecta necesidad de ajuste.",
+        "options": {
+          "AHEAD": "Voy por delante",
+          "ON_TRACK": "Voy según lo esperado",
+          "SLIGHTLY_BEHIND": "Voy un poco detrás",
+          "SIGNIFICANTLY_BEHIND": "Voy bastante detrás",
+          "UNKNOWN": "No sabría decirlo"
+        }
+      },
+      "PLAN-10": {
+        "text": "Cuando tu realidad cambia, ¿sueles ajustar el monto, el plazo o la forma de avanzar?",
+        "whyAsk": "Mide flexibilidad del plan sin penalizar por no usar una herramienta formal.",
+        "options": {
+          "ADAPTIVE": "Sí, ajusto cuando hace falta",
+          "SOMEWHAT_ADAPTIVE": "A veces",
+          "RIGID": "Me cuesta cambiar el plan",
+          "NO_PROCESS": "No tengo una forma de revisarlo"
+        }
+      },
+      "PLAN-11": {
+        "text": "Si tienes varias metas, ¿cómo decides cuál atender primero?",
+        "whyAsk": "Evalúa priorización cuando existen múltiples objetivos.",
+        "options": {
+          "URGENCY": "Por urgencia o necesidad",
+          "PERSONAL_IMPORTANCE": "Por importancia personal",
+          "DEADLINE": "Por plazo",
+          "UNDEFINED": "No tengo una forma clara de priorizarlas"
+        }
+      },
+      "PLAN-12": {
+        "text": "¿Podrías describir tu objetivo en una sola frase concreta?",
+        "whyAsk": "Pregunta aclaratoria cuando la meta sigue siendo vaga.",
+        "options": {
+          "CLEAR": "Sí, fácilmente",
+          "SPECIFIC": "Más o menos",
+          "GENERAL": "Me cuesta concretarlo",
+          "ASPIRATION": "No todavía"
+        }
+      },
+      "PLAN-13": {
+        "text": "¿Sabes cuál es el próximo paso concreto que deberías dar?",
+        "whyAsk": "Determina si el plan puede convertirse en acción inmediata.",
+        "options": {
+          "DEFINED": "Sí, está claro",
+          "PARTIAL": "Tengo una idea, pero no está del todo definida",
+          "NONE": "No, todavía no"
+        }
+      },
+      "PLAN-14": {
+        "text": "¿Cuál describe mejor dónde estás hoy con este objetivo?",
+        "whyAsk": "Consolida la etapa cuando varias respuestas parciales no son suficientes.",
+        "options": {
+          "NO_DIRECTION": "No tengo una dirección clara",
+          "ASPIRATION": "Tengo una aspiración",
+          "GOAL_DEFINED": "Tengo el objetivo definido",
+          "PLAN_DEFINED": "Tengo un plan definido",
+          "READY_TO_ACT": "Estoy listo para actuar",
+          "STARTED": "Ya empecé",
+          "REPEATING": "Lo estoy repitiendo",
+          "TRACKING": "Le doy seguimiento",
+          "MAINTAINING": "Ya es parte de mi rutina"
+        }
+      },
+      "PLAN-15": {
+        "text": "En las últimas 4 semanas, ¿realizaste al menos una acción concreta relacionada con ese objetivo?",
+        "whyAsk": "Valida ejecución con evidencia reciente cuando 'ya empecé' es ambiguo.",
+        "options": {
+          "STARTED_CONFIRMED": "Sí",
+          "NOT_STARTED": "No"
+        }
+      },
+      "PLAN-16": {
+        "text": "¿Tus aportes o acciones actuales parecen suficientes para llegar en el plazo que te propusiste?",
+        "whyAsk": "Evalúa suficiencia de ejecución cuando monto y horizonte son conocidos.",
+        "options": {
+          "ON_TRACK": "Sí, parecen suficientes",
+          "UNKNOWN": "Tal vez; no estoy seguro",
+          "BEHIND": "No, probablemente no sean suficientes"
+        }
+      },
+      "PLAN-17": {
+        "text": "Si todavía no has comenzado, ¿qué hace más difícil dar el primer paso?",
+        "whyAsk": "Pregunta conductual válida solo en NOT_STARTED/READY_TO_ACT; nunca después de ejecución.",
+        "options": {
+          "UNCERTAINTY": "No sé exactamente qué hacer",
+          "PROCRASTINATION": "Lo voy dejando para después",
+          "COMPLEXITY": "Se siente demasiado complicado",
+          "NO_CLEAR_TRIGGER": "No tengo un momento concreto para hacerlo",
+          "FINANCIAL_CONSTRAINT": "Ahora mismo no tengo capacidad financiera"
+        }
+      },
+      "PLAN-18": {
+        "text": "¿Cuándo fue la última vez que revisaste si tu plan todavía tiene sentido para tu situación actual?",
+        "whyAsk": "Mide ajuste y vigencia del plan en etapas de tracking/maintaining.",
+        "options": {
+          "ADAPTIVE": "Este mes",
+          "SOMEWHAT_ADAPTIVE": "En los últimos 3 meses",
+          "RIGID": "Hace más de 3 meses",
+          "NO_PROCESS": "No recuerdo haberlo revisado"
+        }
+      },
+      "BEH-01": {
+        "text": "¿Con qué frecuencia las preocupaciones de dinero afectan tu tranquilidad o concentración?",
+        "whyAsk": "Calibra carga cognitiva y complejidad de la intervención; no puntúa CFHI.",
+        "options": {
+          "LOW": "Nunca",
+          "LOW_MODERATE": "Rara vez",
+          "MODERATE": "Algunas veces",
+          "HIGH": "Frecuentemente",
+          "VERY_HIGH": "Casi siempre"
+        }
+      },
+      "BEH-02": {
+        "text": "Pensando en el siguiente paso que Caudall te propone, ¿qué tan capaz te sientes de hacerlo?",
+        "whyAsk": "Calibra dificultad de acción y necesidad de microacción.",
+        "options": {
+          "HIGH": "Muy capaz",
+          "HIGH_MODERATE": "Bastante capaz",
+          "MODERATE": "No estoy seguro",
+          "LOW": "Me resultaría difícil"
+        }
+      },
+      "BEH-03": {
+        "text": "¿Qué tan importante es para ti trabajar en este tema ahora?",
+        "whyAsk": "Distingue prioridad conductual de prioridad financiera.",
+        "options": {
+          "STRONG": "Es una prioridad ahora",
+          "MODERATE": "Es importante, pero no urgente",
+          "WEAK": "Me gustaría hacerlo más adelante",
+          "NONE": "No es prioridad ahora"
+        }
+      },
+      "BEH-04": {
+        "text": "¿Qué haría más difícil que completes este paso?",
+        "whyAsk": "Identifica fricción concreta para elegir técnica conductual.",
+        "options": {
+          "FORGETTING": "Acordarme de hacerlo",
+          "UNCERTAINTY": "Saber exactamente qué hacer",
+          "COMPLEXITY": "Que se siente complicado",
+          "TOO_MANY_CHOICES": "Tener demasiadas opciones",
+          "PROCRASTINATION": "Que lo voy dejando para después",
+          "NONE": "Nada en particular"
+        }
+      },
+      "BEH-05": {
+        "text": "Cuando quieres hacer algo importante con tu dinero, ¿sueles hacerlo de una vez o lo vas dejando para después?",
+        "whyAsk": "Detecta procrastinación solo cuando importa para la acción.",
+        "options": {
+          "NONE": "Normalmente lo hago cuando decido",
+          "PROCRASTINATION_MODERATE": "A veces lo pospongo",
+          "PROCRASTINATION": "Lo pospongo con frecuencia"
+        }
+      },
+      "BEH-06": {
+        "text": "¿Sueles recordar hacer estas acciones financieras sin necesitar un recordatorio?",
+        "whyAsk": "Detecta fricción de olvido para seleccionar trigger/reminder.",
+        "options": {
+          "NONE": "Sí, casi siempre",
+          "FORGETTING_MODERATE": "A veces necesito recordatorio",
+          "FORGETTING": "Sí, normalmente se me olvida"
+        }
+      },
+      "BEH-07": {
+        "text": "¿Este paso te parece sencillo o tiene demasiadas cosas que decidir?",
+        "whyAsk": "Detecta complejidad y choice overload.",
+        "options": {
+          "NONE": "Muy sencillo",
+          "LOW_COMPLEXITY": "Algo sencillo",
+          "COMPLEXITY": "Tiene demasiadas decisiones",
+          "HIGH_COMPLEXITY": "Se siente abrumador"
+        }
+      },
+      "BEH-08": {
+        "text": "Cuando tienes varias opciones financieras, ¿te resulta fácil elegir una?",
+        "whyAsk": "Detecta choice overload en journeys con varias alternativas.",
+        "options": {
+          "NONE": "Sí, normalmente",
+          "CHOICE_OVERLOAD_MODERATE": "A veces me cuesta",
+          "TOO_MANY_CHOICES": "Sí, muchas opciones me frenan"
+        }
+      },
+      "BEH-09": {
+        "text": "¿Qué momento te resultaría más natural para hacer este paso?",
+        "whyAsk": "Permite crear un trigger estable y específico.",
+        "options": {
+          "NEXT_INCOME": "Cuando reciba mi próximo ingreso",
+          "SPECIFIC_DATE": "En una fecha específica",
+          "MONTH_START": "Al inicio del mes",
+          "EVENT_BASED": "Después de otro evento o rutina"
+        }
+      },
+      "BEH-10": {
+        "text": "¿Quieres dejar este paso definido ahora para que sea más fácil cumplirlo?",
+        "whyAsk": "Convierte intención alta en compromiso explícito cuando corresponde.",
+        "options": {
+          "COMMIT": "Sí",
+          "NO_COMMIT": "Prefiero pensarlo después"
+        }
+      },
+      "BEH-11": {
+        "text": "¿Qué tan posible te parece hacer este paso con tu situación actual?",
+        "whyAsk": "Distingue capacidad percibida de capacidad financiera objetiva.",
+        "options": {
+          "HIGH": "Muy posible",
+          "MODERATE_HIGH": "Bastante posible",
+          "MODERATE_LOW": "Algo difícil",
+          "LOW": "Muy difícil"
+        }
+      },
+      "BEH-12": {
+        "text": "¿Qué pasó con el paso que habías decidido hacer?",
+        "whyAsk": "Cierra el ciclo de aprendizaje y permite personalizar próximos pasos.",
+        "options": {
+          "COMPLETED": "Lo completé",
+          "PARTIALLY_COMPLETED": "Lo hice parcialmente",
+          "NOT_COMPLETED_TOO_DIFFICULT": "No lo hice porque fue demasiado difícil",
+          "NOT_COMPLETED_FORGOT": "No lo hice porque se me olvidó",
+          "NOT_COMPLETED_OTHER": "No lo hice por otra razón",
+          "SKIPPED": "Decidí no hacerlo"
+        }
+      }
+    },
+    "result": {
+      "title": "Tu Índice de Salud Financiera",
+      "outOf100": "de 100",
+      "dimensionsTitle": "Tus 5 dimensiones",
+      "debtNotApplicable": "No aplica — nos dijiste que no tienes deudas",
+      "bands": {
+        "CRITICAL": "Crítico",
+        "UNMET": "En riesgo",
+        "PARTIAL": "En construcción",
+        "MET": "Saludable",
+        "NA": "No aplica"
+      },
+      "ctaNextStep": "Ver mi próximo paso"
+    },
+    "action": {
+      "eyebrow": "Tu próximo paso",
+      "whyThisStep": "¿Por qué este paso?",
+      "commit": "Me comprometo",
+      "dismiss": "Ahora no",
+      "committedNotice": "Te comprometiste a este paso.",
+      "didYouDoIt": "¿Ya lo hiciste?",
+      "achieved": "Sí, lo hice",
+      "partial": "En parte",
+      "notAchieved": "No todavía",
+      "none": "Por ahora no tenemos una recomendación nueva para ti."
+    }
+  },
+  "interventions": {
+    "control": {
+      "lackOfSystem": {
+        "title": "Crea una regla automática para tus gastos fijos",
+        "description": "Cuando no hay un sistema claro para organizar tus ingresos y gastos, es fácil perder el control mes a mes. Automatizar una regla simple reduce el esfuerzo de decidir cada vez.",
+        "actionText": "Configura una transferencia automática que separe tus gastos fijos apenas recibas tu ingreso.",
+        "whyThisStep": "Vimos que no tienes un sistema definido para organizar tu dinero — automatizar una regla simple quita esa carga de decidir cada mes."
+      },
+      "procrastination": {
+        "title": "Decide ahora cuándo vas a revisar tus gastos",
+        "description": "Tener la intención de organizar tus finanzas no siempre es suficiente — ayuda fijar un momento y una acción concretos.",
+        "actionText": "Elige un día fijo cada semana, por ejemplo todos los lunes, para revisar cuánto gastaste.",
+        "whyThisStep": "Notamos que sueles posponer la revisión de tus gastos — un momento fijo ayuda a que realmente ocurra."
+      }
+    },
+    "resilience": {
+      "freshStart": {
+        "title": "Aprovecha tu próximo ingreso para empezar tu reserva",
+        "description": "Los momentos naturales, como el inicio de un nuevo ingreso, son una buena oportunidad para comenzar algo nuevo sin que se sienta forzado.",
+        "actionText": "En tu próximo ingreso, aparta un monto pequeño para comenzar tu fondo de emergencia.",
+        "whyThisStep": "Tu reserva de emergencia es baja — tu próximo ingreso es un buen punto natural para empezar a construirla."
+      },
+      "lowSelfEfficacy": {
+        "title": "Empieza con un monto pequeño para tu reserva",
+        "description": "No hace falta ahorrar mucho de una vez — empezar con algo pequeño y lograrlo genera confianza para seguir.",
+        "actionText": "Aparta hoy un monto pequeño para tu reserva, aunque sea simbólico.",
+        "whyThisStep": "Construir una reserva puede sentirse difícil de lograr — empezar en pequeño ayuda a demostrarte que sí puedes."
+      }
+    },
+    "debt": {
+      "complexity": {
+        "title": "Da un solo paso para entender tu deuda",
+        "description": "Cuando la deuda se siente complicada, es más fácil avanzar con un solo paso pequeño en vez de resolver todo de una vez.",
+        "actionText": "Dedica 2 minutos hoy a anotar cuánto debes y a quién, sin resolver nada más por ahora.",
+        "whyThisStep": "Tu situación de deuda puede sentirse compleja — un solo paso pequeño ayuda a empezar a moverla."
+      },
+      "weakTracking": {
+        "title": "Registra tu avance en el pago de tu deuda",
+        "description": "Ver el progreso, aunque sea pequeño, ayuda a mantener el rumbo cuando se está pagando una deuda.",
+        "actionText": "Anota cada pago que hagas a tu deuda este mes, aunque sea en una nota simple.",
+        "whyThisStep": "Estás pagando tu deuda, pero sin llevar un registro es difícil ver que sí estás avanzando."
+      }
+    },
+    "saving": {
+      "procrastination": {
+        "title": "Decide cuándo y cuánto vas a ahorrar",
+        "description": "Definir el momento exacto y el monto hace mucho más probable que el ahorro realmente ocurra.",
+        "actionText": "En tu próximo ingreso, separa un monto fijo antes de gastar en cualquier otra cosa.",
+        "whyThisStep": "Sueles posponer el ahorro — fijar un momento y un monto concretos ayuda a que no se quede solo en intención."
+      },
+      "lackOfSystem": {
+        "title": "Automatiza tu ahorro",
+        "description": "Ahorrar de forma manual cada mes requiere acordarte y decidir — automatizarlo lo hace parte de tu rutina sin esfuerzo extra.",
+        "actionText": "Configura una transferencia automática hacia tu ahorro cada vez que recibas tu ingreso.",
+        "whyThisStep": "No tienes todavía un sistema para ahorrar de forma constante — automatizarlo resuelve eso sin que tengas que acordarte cada vez."
+      }
+    },
+    "planning": {
+      "distantGoal": {
+        "title": "Divide tu meta en un hito cercano",
+        "description": "Las metas lejanas pierden fuerza con el tiempo — tener un hito cercano ayuda a mantener el enfoque.",
+        "actionText": "Define cuál sería tu primer hito, alcanzable en las próximas semanas, hacia tu meta.",
+        "whyThisStep": "Tu meta puede sentirse lejana todavía — dividirla en un hito cercano la hace más manejable."
+      },
+      "noClearTrigger": {
+        "title": "Fija un momento concreto para avanzar en tu plan",
+        "description": "Una intención sin un momento definido es fácil de posponer indefinidamente.",
+        "actionText": "Elige un día del mes fijo para revisar y avanzar en tu plan financiero.",
+        "whyThisStep": "Tu plan no tiene todavía un momento definido para avanzar — fijar uno ayuda a que realmente suceda."
+      }
     }
   }
 }

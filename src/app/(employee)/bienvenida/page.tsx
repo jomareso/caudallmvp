@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth/auth';
@@ -5,7 +6,7 @@ import { prisma } from '@/lib/db/prisma';
 
 export default async function BienvenidaPage() {
   const session = await auth();
-  if (!session?.user) redirect('/');
+  if (!session?.user?.id) redirect('/');
 
   const employee = await prisma.employee.findUnique({
     where: { id: session.user.id },
@@ -24,7 +25,19 @@ export default async function BienvenidaPage() {
         <h1 className="text-lg font-medium text-quartz mb-2">
           {t('title', { tenantName: employee.tenant.name })}
         </h1>
-        <p className="text-sm text-nickel">{t('subtitle')}</p>
+        <p className="text-sm text-nickel mb-6">{t('subtitle')}</p>
+
+        <div className="bg-picton/10 border border-cola/30 rounded-lg p-4 text-left mb-6">
+          <p className="text-xs font-medium text-quartz mb-1">{t('beforeStart.title')}</p>
+          <p className="text-xs text-nickel">{t('beforeStart.body')}</p>
+        </div>
+
+        <Link
+          href="/diagnostico"
+          className="inline-block bg-yale text-white rounded-lg py-2.5 px-6 text-sm"
+        >
+          {t('ctaStart')}
+        </Link>
       </div>
     </main>
   );

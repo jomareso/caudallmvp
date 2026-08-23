@@ -11,12 +11,9 @@ function getSecretKey() {
   return new TextEncoder().encode(secret);
 }
 
-export type MagicLinkPayload = {
-  type: 'employee';
-  tenantId: string;
-  employeeId: string;
-  email: string;
-};
+export type MagicLinkPayload =
+  | { type: 'employee'; tenantId: string; employeeId: string; email: string }
+  | { type: 'admin'; adminUserId: string; email: string };
 
 export async function createMagicLinkToken(payload: MagicLinkPayload): Promise<string> {
   return new SignJWT({ ...payload })
@@ -29,6 +26,12 @@ export async function createMagicLinkToken(payload: MagicLinkPayload): Promise<s
 export async function verifyMagicLinkToken(token: string): Promise<MagicLinkPayload | null> {
   try {
     const { payload } = await jwtVerify(token, getSecretKey());
+
+    if (payload.type === 'admin') {
+      if (typeof payload.adminUserId !== 'string' || typeof payload.email !== 'string') return null;
+      return { type: 'admin', adminUserId: payload.adminUserId, email: payload.email };
+    }
+
     if (
       payload.type !== 'employee' ||
       typeof payload.tenantId !== 'string' ||
