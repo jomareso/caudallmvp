@@ -6,7 +6,7 @@
 //
 // Seguro de correr varias veces (usa upsert en todo).
 
-import { PrismaClient, DimensionCode, VersionStatus, QuestionRole, InferenceType } from '@prisma/client';
+import { PrismaClient, DimensionCode, VersionStatus, QuestionRole, InferenceType, InterventionType } from '@prisma/client';
 import bancoMaestro from './seed-data/banco-maestro-v3.json';
 import interventionCatalogDraft from './seed-data/intervention-catalog-draft.json';
 
@@ -321,7 +321,7 @@ async function main() {
 
     const data = {
       catalogId: interventionCatalog.id,
-      type: i.type as 'BEHAVIORAL_ACTION',
+      type: i.type as InterventionType,
       dimensionId,
       appliesToStates: i.appliesToStates,
       appliesToStages: [] as string[],
@@ -331,7 +331,8 @@ async function main() {
       titleI18nKey: `interventions.${i.i18nKeyBase}.title`,
       descriptionI18nKey: `interventions.${i.i18nKeyBase}.description`,
       actionTextI18nKey: `interventions.${i.i18nKeyBase}.actionText`,
-      whyThisStepI18nKey: `interventions.${i.i18nKeyBase}.whyThisStep`
+      whyThisStepI18nKey: `interventions.${i.i18nKeyBase}.whyThisStep`,
+      videoUrl: i.videoUrl ?? null
     };
 
     if (existing) {

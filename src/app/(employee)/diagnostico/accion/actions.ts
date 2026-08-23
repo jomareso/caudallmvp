@@ -20,6 +20,7 @@ export type ActionSuggestion = {
   descriptionI18nKey: string;
   actionTextI18nKey: string | null;
   whyThisStepI18nKey: string | null;
+  videoUrl: string | null;
 };
 
 export async function getActionSuggestion(): Promise<ActionSuggestion | null> {
@@ -38,7 +39,8 @@ export async function getActionSuggestion(): Promise<ActionSuggestion | null> {
       titleI18nKey: existing.intervention.titleI18nKey,
       descriptionI18nKey: existing.intervention.descriptionI18nKey,
       actionTextI18nKey: existing.intervention.actionTextI18nKey,
-      whyThisStepI18nKey: existing.intervention.whyThisStepI18nKey
+      whyThisStepI18nKey: existing.intervention.whyThisStepI18nKey,
+      videoUrl: existing.intervention.videoUrl
     };
   }
 
@@ -74,7 +76,8 @@ export async function getActionSuggestion(): Promise<ActionSuggestion | null> {
     titleI18nKey: nba.intervention.titleI18nKey,
     descriptionI18nKey: nba.intervention.descriptionI18nKey,
     actionTextI18nKey: nba.intervention.actionTextI18nKey,
-    whyThisStepI18nKey: nba.intervention.whyThisStepI18nKey
+    whyThisStepI18nKey: nba.intervention.whyThisStepI18nKey,
+    videoUrl: nba.intervention.videoUrl
   };
 }
 

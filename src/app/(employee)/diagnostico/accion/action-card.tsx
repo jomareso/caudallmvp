@@ -13,6 +13,7 @@ export function ActionCard({
   description,
   actionText,
   whyThisStep,
+  videoUrl,
   labels
 }: {
   employeeInterventionId: string;
@@ -21,6 +22,7 @@ export function ActionCard({
   description: string;
   actionText: string;
   whyThisStep: string | null;
+  videoUrl: string | null;
   labels: {
     whyThisStep: string;
     commit: string;
@@ -30,6 +32,7 @@ export function ActionCard({
     achieved: string;
     partial: string;
     notAchieved: string;
+    watchVideo: string;
   };
 }) {
   const router = useRouter();
@@ -65,6 +68,17 @@ export function ActionCard({
       <div className="bg-picton/10 border border-cola/40 rounded-lg p-3 mb-3">
         <p className="text-sm text-quartz">{actionText}</p>
       </div>
+
+      {videoUrl ? (
+        <a
+          href={videoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-sm text-yale mb-3 underline"
+        >
+          {labels.watchVideo}
+        </a>
+      ) : null}
 
       {whyThisStep ? (
         <button

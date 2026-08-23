@@ -617,6 +617,7 @@ model Intervention {
   descriptionI18nKey          String
   actionTextI18nKey           String?
   whyThisStepI18nKey          String?
+  videoUrl                    String?
 
   catalog           InterventionCatalog          @relation(fields: [catalogId], references: [id])
   dimension         Dimension                    @relation(fields: [dimensionId], references: [id])
@@ -631,6 +632,10 @@ enum InterventionType {
   BEHAVIORAL_ACTION
   COMMITMENT
   REMINDER
+  // Contenido de mantenimiento (video corto) para cuando una dimensión ya
+  // está MET — a diferencia de los demás tipos, no responde a una fricción
+  // (regla CORE 19), es contenido educativo general para reforzar el hábito.
+  COURSE
 }
 
 model TenantInterventionOverride {

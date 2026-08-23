@@ -1128,7 +1128,8 @@
       "achieved": "Sí, lo hice",
       "partial": "En parte",
       "notAchieved": "No todavía",
-      "none": "Vas bien — no hay ninguna acción pendiente que necesites atender ahora."
+      "none": "Vas bien — no hay ninguna acción pendiente que necesites atender ahora.",
+      "watchVideo": "Ver video corto"
     }
   },
   "interventions": {
@@ -1200,6 +1201,14 @@
         "description": "Una intención sin un momento definido es fácil de posponer indefinidamente.",
         "actionText": "Elige un día del mes fijo para revisar y avanzar en tu plan financiero.",
         "whyThisStep": "Tu plan no tiene todavía un momento definido para avanzar — fijar uno ayuda a que realmente suceda."
+      }
+    },
+    "maintenance": {
+      "shortCourse01": {
+        "title": "Un video corto para seguir por buen camino",
+        "description": "Tu salud financiera está en buen estado — este contenido es para reforzar lo que ya vienes haciendo bien, no porque haya un problema que resolver.",
+        "actionText": "Míralo cuando tengas unos minutos.",
+        "whyThisStep": "Ninguna de tus dimensiones necesita atención ahora mismo, así que en vez de una tarea correctiva te dejamos algo breve de refuerzo."
       }
     }
   }

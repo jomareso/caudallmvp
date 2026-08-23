@@ -25,6 +25,7 @@ export default async function AccionPage() {
             description={t(suggestion.descriptionI18nKey)}
             actionText={suggestion.actionTextI18nKey ? t(suggestion.actionTextI18nKey) : ''}
             whyThisStep={suggestion.whyThisStepI18nKey ? t(suggestion.whyThisStepI18nKey) : null}
+            videoUrl={suggestion.videoUrl}
             labels={{
               whyThisStep: tAction('whyThisStep'),
               commit: tAction('commit'),
@@ -33,7 +34,8 @@ export default async function AccionPage() {
               didYouDoIt: tAction('didYouDoIt'),
               achieved: tAction('achieved'),
               partial: tAction('partial'),
-              notAchieved: tAction('notAchieved')
+              notAchieved: tAction('notAchieved'),
+              watchVideo: tAction('watchVideo')
             }}
           />
         ) : (
