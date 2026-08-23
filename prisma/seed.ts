@@ -26,6 +26,17 @@ function toQuestionRole(raw: string): QuestionRole {
   return (known as string[]).includes(raw) ? (raw as QuestionRole) : 'ADAPTIVE';
 }
 
+// El banco v3.6 introduce ítems "reserve" (variantes de respaldo de un
+// sesgo conductual, solo por si el ítem primario/confirmatorio no encaja
+// en el contexto) marcados DRAFT en el Excel — no deben ofrecerse en un
+// diagnóstico real todavía. loadBankAndState() ya filtra por
+// `status: 'ACTIVE'`, así que basta con no forzar ACTIVE a todo: cualquier
+// valor que no sea el "ACTIVA" del Excel se trata como DRAFT (por defecto
+// seguro, igual que toQuestionRole).
+function toQuestionStatus(raw: string): VersionStatus {
+  return raw === 'ACTIVA' ? VersionStatus.ACTIVE : VersionStatus.DRAFT;
+}
+
 async function main() {
   const methodology = await prisma.methodology.upsert({
     where: { version: bancoMaestro.methodologyVersion },
@@ -153,7 +164,7 @@ async function main() {
         benchmarkSource: q.benchmarkSource,
         methodologicalFunction: q.methodologicalFunction,
         behavioralConstructCode: q.behavioralConstruct,
-        status: VersionStatus.ACTIVE
+        status: toQuestionStatus(q.status)
       },
       create: {
         bankId: questionBank.id,
@@ -182,7 +193,7 @@ async function main() {
         benchmarkSource: q.benchmarkSource,
         methodologicalFunction: q.methodologicalFunction,
         behavioralConstructCode: q.behavioralConstruct,
-        status: VersionStatus.ACTIVE
+        status: toQuestionStatus(q.status)
       }
     });
 
