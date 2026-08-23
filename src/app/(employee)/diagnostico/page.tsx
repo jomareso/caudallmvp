@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
 import { getNextQuestion, countAnsweredAndTotal } from '@/lib/engines/diagnostic';
+import { finalizeDiagnostic } from '@/lib/engines/diagnostic-completion';
 import { QuestionForm } from './question-form';
 
 export default async function DiagnosticoPage() {
@@ -13,6 +14,15 @@ export default async function DiagnosticoPage() {
   const question = await getNextQuestion(employeeId);
 
   if (!question) {
+    // Causa raíz/Prioridad/Eligibility solo se calculan la primera vez que
+    // el diagnóstico queda completo. Si alguien ya había respondido todo
+    // antes de que estos motores existieran (o por cualquier otra razón
+    // ese cálculo no llegó a correr), se completa aquí — no solo al
+    // responder la última pregunta en actions.ts.
+    const financialState = await prisma.financialState.findUnique({ where: { employeeId } });
+    if (!financialState?.systemPriority) {
+      await finalizeDiagnostic(employeeId);
+    }
     redirect('/diagnostico/resultado');
   }
 
