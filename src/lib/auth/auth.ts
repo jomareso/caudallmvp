@@ -40,6 +40,13 @@ type AppJwt = {
 // `type` dentro del token (spec: MagicLinkPayload) decide cuál.
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: 'jwt' },
+  // NextAuth v5 solo confía en el header Host de la petición automáticamente
+  // en Vercel. En cualquier otro host (Netlify incluido) hay que decirlo
+  // explícito, si no falla con "There was a problem with the server
+  // configuration" aunque todo lo demás esté bien configurado. Hoy esto se
+  // cubre con la variable de entorno AUTH_TRUST_HOST=true en Netlify; fijarlo
+  // aquí evita depender de que alguien la recuerde en el próximo entorno.
+  trustHost: true,
   pages: {
     signIn: '/'
   },
