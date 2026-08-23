@@ -115,6 +115,22 @@ export async function reportOutcome(
   const found = await requireOwnEmployeeIntervention(employeeInterventionId);
   if (!found) return { ok: false, message: 'No encontramos esa recomendación.' };
 
+  // "No todavía" no cierra el ciclo — el empleado sigue comprometido, solo
+  // no lo ha hecho *aún*. Si se marcara como COMPLETED igual que "lo hice"
+  // o "en parte", quedaría excluida para siempre de futuras sugerencias
+  // (ver alreadyResolved en getActionSuggestion) y el empleado se quedaría
+  // sin nada que ver la próxima vez, en vez de que se le siga preguntando.
+  if (outcome === 'NOT_ACHIEVED') {
+    const employee = await prisma.employee.findUniqueOrThrow({ where: { id: found.employeeId } });
+    await logLearningEvent({
+      eventType: 'OUTCOME_REPORTED',
+      tenantId: employee.tenantId,
+      employeeId: found.employeeId,
+      context: { employeeInterventionId, outcome }
+    });
+    return { ok: true };
+  }
+
   await reportInterventionOutcome(employeeInterventionId, outcome);
   return { ok: true };
 }
