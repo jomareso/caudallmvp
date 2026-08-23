@@ -8,6 +8,7 @@ import { getNextQuestion } from '@/lib/engines/diagnostic';
 import { evaluateSafety } from '@/lib/engines/safety';
 import { computeRootCause } from '@/lib/engines/root-cause';
 import { computePriority } from '@/lib/engines/priority';
+import { computeEligibility } from '@/lib/engines/eligibility';
 
 async function requireEmployeeId(): Promise<string> {
   const session = await auth();
@@ -91,24 +92,33 @@ export async function submitDiagnosticAnswer(input: {
   const done = !nextQuestion;
 
   if (done) {
-    // Causa raíz (spec §25) y Prioridad (spec §26) requieren el panorama
-    // completo de dimensiones, así que se calculan una sola vez al
-    // terminar, no en cada respuesta. Priority reutiliza Root Cause
-    // internamente, así que se computa aparte para no duplicar el cálculo.
+    // Causa raíz (§25), Prioridad (§26) y Eligibility/Readiness (§18, §27)
+    // requieren el panorama completo de dimensiones, así que se calculan
+    // una sola vez al terminar, no en cada respuesta. Eligibility ya
+    // recalcula Priority (y Priority recalcula Root Cause) puertas adentro
+    // — es redundante pero barato (un diagnóstico completo por empleado),
+    // y mantiene cada motor simple y con una sola responsabilidad.
     const rootCauseResult = await computeRootCause(employeeId);
     const priorityResult = await computePriority(employeeId);
+    const eligibilityResult = await computeEligibility(employeeId);
     const rootCause = JSON.stringify(rootCauseResult);
     const systemPriority = JSON.stringify(priorityResult);
+    const finReadiness = eligibilityResult.financialReadiness.state;
+    const behReadiness = eligibilityResult.behavioralReadiness.state;
+    const eligibility = eligibilityResult;
     await prisma.financialState.upsert({
       where: { employeeId },
-      update: { lastDiagnosticCompletedAt: new Date(), rootCause, systemPriority },
+      update: { lastDiagnosticCompletedAt: new Date(), rootCause, systemPriority, finReadiness, behReadiness, eligibility },
       create: {
         employeeId,
         cfhiScore: 0,
         cfhiConfidence: 0,
         lastDiagnosticCompletedAt: new Date(),
         rootCause,
-        systemPriority
+        systemPriority,
+        finReadiness,
+        behReadiness,
+        eligibility
       }
     });
   }
