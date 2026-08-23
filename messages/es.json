@@ -74,6 +74,54 @@
       "uploadErrorType": "El archivo debe ser una imagen (PNG, JPG, WEBP o SVG).",
       "uploadErrorSize": "El archivo es muy grande — el máximo es 2 MB.",
       "uploadErrorGeneric": "No pudimos guardar el logo. Intenta de nuevo."
+    },
+    "panel": {
+      "title": "Panel de Caudall",
+      "settingsLink": "Configuración",
+      "settingsDescription": "Logo de Caudall y ajustes de la plataforma.",
+      "adminsLink": "Administradores",
+      "adminsDescription": "Crear y ver los usuarios con acceso al panel."
+    },
+    "administradores": {
+      "title": "Administradores",
+      "existingTitle": "Administradores actuales",
+      "emailLabel": "Correo",
+      "emailPlaceholder": "correo@caudall.com",
+      "profileTypeLabel": "Perfil",
+      "profileTypeAdm": "ADM — control total de la plataforma",
+      "profileTypeEmpresa": "EMPRESA — RRHH de una empresa cliente",
+      "profileTypeFuncional": "FUNCIONAL — equipo de Caudall con un rol específico",
+      "tenantLabel": "Empresa",
+      "tenantPlaceholder": "Selecciona una empresa",
+      "functionalRoleLabel": "Rol",
+      "functionalRoleMethodologist": "Metodólogo",
+      "functionalRoleProductAdmin": "Product admin",
+      "functionalRoleAnalyst": "Analista",
+      "functionalRoleViewer": "Solo lectura",
+      "cta": "Crear administrador",
+      "creating": "Creando...",
+      "success": "Administrador creado.",
+      "errorEmailExists": "Ya existe un administrador con ese correo.",
+      "errorTenantRequired": "Selecciona una empresa para el perfil EMPRESA.",
+      "errorFunctionalRoleRequired": "Selecciona un rol para el perfil FUNCIONAL.",
+      "errorGeneric": "No pudimos crear el administrador. Intenta de nuevo.",
+      "colEmail": "Correo",
+      "colProfile": "Perfil",
+      "colDetail": "Detalle",
+      "colCreated": "Creado"
+    },
+    "empresa": {
+      "title": "Salud financiera de {tenantName}",
+      "employeeCount": "{count} empleados con diagnóstico completo",
+      "averageCfhiLabel": "Índice de Salud Financiera promedio",
+      "dimensionsTitle": "Tus 5 dimensiones (promedio)",
+      "insufficientTitle": "Todavía no hay suficientes datos",
+      "insufficientBody": "Necesitas al menos {minRequired} empleados con el diagnóstico completo para ver agregados anónimos. Hoy tienes {count}. Esto protege la privacidad individual de tus empleados (nunca vemos datos de uno solo).",
+      "privacyNote": "Estos son promedios y conteos de tu empresa — nunca vemos las respuestas de un empleado en particular."
+    },
+    "funcional": {
+      "title": "Todavía no hay herramientas para tu rol",
+      "body": "El editor del banco de preguntas y las demás herramientas del equipo de Caudall son una fase posterior del panel administrativo. Por ahora tu cuenta existe, pero no hay nada que gestionar aquí."
     }
   },
   "diagnostic": {
