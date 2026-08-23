@@ -78,7 +78,17 @@
       "uploadSuccess": "Logo actualizado.",
       "uploadErrorType": "El archivo debe ser una imagen (PNG, JPG, WEBP o SVG).",
       "uploadErrorSize": "El archivo es muy grande — el máximo es 2 MB.",
-      "uploadErrorGeneric": "No pudimos guardar el logo. Intenta de nuevo."
+      "uploadErrorGeneric": "No pudimos guardar el logo. Intenta de nuevo.",
+      "syncTitle": "Banco de preguntas",
+      "syncDescription": "Aplica el contenido más reciente (constructos, variables, preguntas, opciones, reglas) que ya está en el código de la app.",
+      "syncCta": "Sincronizar banco de preguntas",
+      "syncing": "Sincronizando...",
+      "syncConfirm": "Esto reemplaza el banco de preguntas activo con el que está en el código ahora mismo. ¿Continuar?",
+      "syncResultActive": "Preguntas activas",
+      "syncResultDraft": "En DRAFT",
+      "syncResultConstructs": "Constructos",
+      "syncResultVariables": "Variables",
+      "syncError": "No pudimos sincronizar el banco de preguntas. Intenta de nuevo."
     },
     "panel": {
       "title": "Panel de Caudall",

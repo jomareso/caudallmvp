@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
 import { LogoUploadForm } from './upload-form';
+import { SyncBancoMaestroButton } from './sync-banco-maestro-button';
 
 export default async function AdminConfiguracionPage() {
   const session = await auth();
@@ -49,6 +50,21 @@ export default async function AdminConfiguracionPage() {
             }}
           />
         </div>
+
+        <SyncBancoMaestroButton
+          labels={{
+            title: t('syncTitle'),
+            description: t('syncDescription'),
+            cta: t('syncCta'),
+            syncing: t('syncing'),
+            confirm: t('syncConfirm'),
+            resultActive: t('syncResultActive'),
+            resultDraft: t('syncResultDraft'),
+            resultConstructs: t('syncResultConstructs'),
+            resultVariables: t('syncResultVariables'),
+            error: t('syncError')
+          }}
+        />
       </div>
     </main>
   );
