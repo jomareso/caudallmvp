@@ -5,6 +5,8 @@ import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
 import { recomputeCfhi, recomputeConstructScore, recomputeDimensionScore, type EvidencePayload } from '@/lib/engines/cfhi';
 import { getNextQuestion } from '@/lib/engines/diagnostic';
+import { evaluateSafety } from '@/lib/engines/safety';
+import { computeRootCause } from '@/lib/engines/root-cause';
 
 async function requireEmployeeId(): Promise<string> {
   const session = await auth();
@@ -82,15 +84,19 @@ export async function submitDiagnosticAnswer(input: {
   }
 
   await recomputeCfhi(employeeId);
+  await evaluateSafety(employeeId);
 
   const nextQuestion = await getNextQuestion(employeeId);
   const done = !nextQuestion;
 
   if (done) {
+    // Causa raíz (spec §25) requiere el panorama completo de dimensiones,
+    // así que se calcula una sola vez al terminar, no en cada respuesta.
+    const rootCause = JSON.stringify(await computeRootCause(employeeId));
     await prisma.financialState.upsert({
       where: { employeeId },
-      update: { lastDiagnosticCompletedAt: new Date() },
-      create: { employeeId, cfhiScore: 0, cfhiConfidence: 0, lastDiagnosticCompletedAt: new Date() }
+      update: { lastDiagnosticCompletedAt: new Date(), rootCause },
+      create: { employeeId, cfhiScore: 0, cfhiConfidence: 0, lastDiagnosticCompletedAt: new Date(), rootCause }
     });
   }
 

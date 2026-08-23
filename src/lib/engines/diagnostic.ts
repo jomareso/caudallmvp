@@ -13,7 +13,7 @@ import { evaluateRule, type Facts } from './rules';
 
 export type QuestionWithOptions = Question & { answerOptions: AnswerOption[] };
 
-async function buildFacts(employeeId: string): Promise<Facts> {
+export async function buildFacts(employeeId: string): Promise<Facts> {
   const states = await prisma.variableState.findMany({
     where: { employeeId },
     include: { variable: true }
