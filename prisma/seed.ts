@@ -1,8 +1,9 @@
-// Carga el Banco Maestro Caudall v3.0 (prisma/seed-data/banco-maestro-v3.json),
+// Carga el Banco Maestro Caudall (prisma/seed-data/banco-maestro-v3.json),
 // convertido desde el Excel real que diseñó la fundadora — no es contenido de
-// desarrollo. Ver prisma/seed-data/README.md para el origen y las 220
-// preguntas de sesgos conductuales que quedaron fuera (falta su construct/
-// variable en el catálogo).
+// desarrollo. Ver prisma/seed-data/README.md para el origen. Las 314
+// preguntas del banco están completas desde la corrección v3.1 del Excel
+// (antes solo 94 de 314 cargaban, por constructos/variables de sesgos
+// conductuales que faltaban).
 //
 // Seguro de correr varias veces (usa upsert en todo).
 
@@ -369,7 +370,9 @@ async function main() {
   console.log(`- Methodology ${methodology.version} (ACTIVE)`);
   console.log(`- ${bancoMaestro.constructs.length} constructos, ${bancoMaestro.variables.length} variables`);
   console.log(`- QuestionBank ${questionBank.version} con ${bancoMaestro.questions.length} preguntas cargadas`);
-  console.log(`  (${bancoMaestro.questionsPendingIds.length} preguntas de sesgos conductuales pendientes — ver README)`);
+  if (bancoMaestro.questionsPendingIds.length > 0) {
+    console.log(`  (${bancoMaestro.questionsPendingIds.length} preguntas todavía pendientes — ver README)`);
+  }
   console.log(
     `- ${bancoMaestro.inferenceRules.length} inference rules, ${bancoMaestro.forbiddenInferences.length} forbidden inferences, ${bancoMaestro.qaScenarios.length} QA scenarios`
   );
