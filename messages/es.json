@@ -50,7 +50,7 @@
     }
   },
   "diagnostic": {
-    "progress": "Pregunta {current} de {total}",
+    "progressStep": "Pregunta {current}",
     "ctaContinue": "Continuar",
     "ctaFinish": "Ver mi resultado",
     "errorSelectOption": "Selecciona una opción antes de continuar.",

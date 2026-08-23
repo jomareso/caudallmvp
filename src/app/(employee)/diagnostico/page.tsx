@@ -29,7 +29,18 @@ export default async function DiagnosticoPage() {
   const dimension = question.dimensionId
     ? await prisma.dimension.findUnique({ where: { id: question.dimensionId } })
     : null;
-  const { answered, total } = await countAnsweredAndTotal(employeeId);
+  const { answered } = await countAnsweredAndTotal(employeeId);
+
+  // El banco es adaptativo (spec §23): cuántas preguntas "faltan" cambia
+  // según lo que se responde, porque respuestas nuevas desbloquean
+  // preguntas que antes no aplicaban. Mostrar ese total real hace que la
+  // barra de progreso parezca ir hacia atrás o nunca terminar. En vez de
+  // eso, se usa la meta fija del STOP ENGINE (spec §24: "target 8–12
+  // preguntas") solo para la barra visual — no afecta cuándo el
+  // diagnóstico realmente termina, eso lo decide getNextQuestion.
+  const PROGRESS_TARGET = 12;
+  const current = answered + 1;
+  const progressPercent = Math.min(92, Math.round((answered / PROGRESS_TARGET) * 100));
 
   const t = await getTranslations('diagnostic');
   const tDim = await getTranslations('diagnostic.dimensions');
@@ -49,13 +60,13 @@ export default async function DiagnosticoPage() {
     <main className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
         <div className="flex justify-between text-[11px] text-nickel mb-1">
-          <span>{t('progress', { current: answered + 1, total: Math.max(total, answered + 1) })}</span>
+          <span>{t('progressStep', { current })}</span>
           <span>{dimension ? tDim(dimension.code) : tDim('BEHAVIORAL')}</span>
         </div>
         <div className="h-1 bg-silver/40 rounded-full overflow-hidden mb-5">
           <div
             className="h-full bg-gradient-to-r from-picton to-cola"
-            style={{ width: `${Math.round((answered / Math.max(total, answered + 1)) * 100)}%` }}
+            style={{ width: `${progressPercent}%` }}
           />
         </div>
 
