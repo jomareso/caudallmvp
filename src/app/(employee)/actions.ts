@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { createMagicLinkToken } from '@/lib/auth/magic-link';
 import { sendMagicLinkEmail } from '@/lib/email/send-magic-link';
+import { getRequestOrigin } from '@/lib/http/request-origin';
 
 type ActionResult<T = undefined> =
   | ({ ok: true } & (T extends undefined ? object : T))
@@ -75,8 +76,7 @@ export async function requestMagicLink(input: { enrollmentCode: string; email: s
     email
   });
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
-  const verifyUrl = `${appUrl}/api/auth/verify?token=${encodeURIComponent(token)}`;
+  const verifyUrl = `${getRequestOrigin()}/api/auth/verify?token=${encodeURIComponent(token)}`;
 
   try {
     await sendMagicLinkEmail({ to: email, verifyUrl, tenantName: tenant.name });
