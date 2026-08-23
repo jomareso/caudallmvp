@@ -45,14 +45,17 @@ export async function getActionSuggestion(): Promise<ActionSuggestion | null> {
   const nba = await computeNextBestAction(employeeId);
   if (!nba.intervention) return null;
 
-  // No volver a ofrecer algo que el empleado ya descartó explícitamente —
-  // el motor todavía no busca "la siguiente mejor opción tras un descarte",
-  // así que por ahora se prefiere no sugerir nada antes que repetir la
-  // misma tarjeta que el empleado ya dijo "ahora no".
-  const alreadyDismissed = await prisma.employeeIntervention.findFirst({
-    where: { employeeId, interventionId: nba.intervention.id, status: 'DISMISSED' }
+  // No volver a ofrecer algo que el empleado ya resolvió (lo descartó, o ya
+  // reportó un resultado) — el motor todavía no busca "la siguiente mejor
+  // opción" ni ajusta la sugerencia según si le fue bien o mal (eso es
+  // Learning Fase 8, spec §31, pendiente), así que por ahora se prefiere
+  // no sugerir nada antes que repetir en bucle la misma tarjeta que el
+  // empleado ya dijo "ahora no" o que ya marcó como hecha/en parte/no
+  // hecha.
+  const alreadyResolved = await prisma.employeeIntervention.findFirst({
+    where: { employeeId, interventionId: nba.intervention.id, status: { in: ['DISMISSED', 'COMPLETED'] } }
   });
-  if (alreadyDismissed) return null;
+  if (alreadyResolved) return null;
 
   const employee = await prisma.employee.findUniqueOrThrow({ where: { id: employeeId } });
   const created = await prisma.employeeIntervention.create({
