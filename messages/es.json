@@ -32,7 +32,11 @@
     "welcome": {
       "title": "Ya estás dentro, bienvenido a {tenantName}",
       "subtitle": "Ahora sí, vamos a conocer tu salud financiera.",
-      "ctaStart": "Empezar mi diagnóstico"
+      "ctaStart": "Empezar mi diagnóstico",
+      "beforeStart": {
+        "title": "Antes de empezar",
+        "body": "Te tomará unos 5–8 minutos. Busca un momento donde puedas concentrarte — entre más honestas sean tus respuestas, más útil va a ser tu diagnóstico."
+      }
     },
     "trust": {
       "privacyGuarantee": "Tu empresa nunca verá tus respuestas individuales. Solo métricas agregadas y anónimas."
