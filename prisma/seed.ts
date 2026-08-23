@@ -8,6 +8,7 @@
 
 import { PrismaClient, DimensionCode, VersionStatus, QuestionRole, InferenceType } from '@prisma/client';
 import bancoMaestro from './seed-data/banco-maestro-v3.json';
+import interventionCatalogDraft from './seed-data/intervention-catalog-draft.json';
 
 const prisma = new PrismaClient();
 
@@ -298,6 +299,48 @@ async function main() {
     });
   }
 
+  // Catálogo de intervenciones — BORRADOR (spec §28/Decisión 2: contenido
+  // educativo/conductual, no productos financieros). Redactado a partir de
+  // los ejemplos reales de BehavioralTechnique.example de la fundadora, no
+  // inventado desde cero. Status DRAFT a propósito: no se activa solo por
+  // estar cargado, queda pendiente de que Reynoso lo revise y apruebe
+  // antes de promoverlo a ACTIVE (ver prisma/seed-data/README.md).
+  const interventionCatalog = await prisma.interventionCatalog.upsert({
+    where: { version: interventionCatalogDraft.version },
+    update: { status: 'DRAFT' },
+    create: { version: interventionCatalogDraft.version, status: 'DRAFT' }
+  });
+
+  for (const i of interventionCatalogDraft.interventions) {
+    const dimensionId = dimensionIdByCode.get(i.dimension);
+    if (!dimensionId) continue;
+
+    const existing = await prisma.intervention.findFirst({
+      where: { catalogId: interventionCatalog.id, titleI18nKey: `interventions.${i.i18nKeyBase}.title` }
+    });
+
+    const data = {
+      catalogId: interventionCatalog.id,
+      type: i.type as 'BEHAVIORAL_ACTION',
+      dimensionId,
+      appliesToStates: i.appliesToStates,
+      appliesToStages: [] as string[],
+      financialReadinessRequired: i.financialReadinessRequired,
+      behavioralReadinessRequired: null,
+      behavioralTechniqueCode: i.frictionCode,
+      titleI18nKey: `interventions.${i.i18nKeyBase}.title`,
+      descriptionI18nKey: `interventions.${i.i18nKeyBase}.description`,
+      actionTextI18nKey: `interventions.${i.i18nKeyBase}.actionText`,
+      whyThisStepI18nKey: `interventions.${i.i18nKeyBase}.whyThisStep`
+    };
+
+    if (existing) {
+      await prisma.intervention.update({ where: { id: existing.id }, data });
+    } else {
+      await prisma.intervention.create({ data });
+    }
+  }
+
   const tenant = await prisma.tenant.upsert({
     where: { enrollmentCode: 'ACME2026' },
     update: {
@@ -321,6 +364,9 @@ async function main() {
     `- ${bancoMaestro.inferenceRules.length} inference rules, ${bancoMaestro.forbiddenInferences.length} forbidden inferences, ${bancoMaestro.qaScenarios.length} QA scenarios`
   );
   console.log(`- Tenant demo: ${tenant.name} (código ${tenant.enrollmentCode})`);
+  console.log(
+    `- Catálogo de intervenciones ${interventionCatalog.version} (${interventionCatalog.status}) con ${interventionCatalogDraft.interventions.length} intervenciones — pendiente de tu revisión`
+  );
 }
 
 main()

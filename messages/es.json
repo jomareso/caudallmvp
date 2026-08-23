@@ -1043,5 +1043,77 @@
         "NA": "No aplica"
       }
     }
+  },
+  "interventions": {
+    "control": {
+      "lackOfSystem": {
+        "title": "Crea una regla automática para tus gastos fijos",
+        "description": "Cuando no hay un sistema claro para organizar tus ingresos y gastos, es fácil perder el control mes a mes. Automatizar una regla simple reduce el esfuerzo de decidir cada vez.",
+        "actionText": "Configura una transferencia automática que separe tus gastos fijos apenas recibas tu ingreso.",
+        "whyThisStep": "Vimos que no tienes un sistema definido para organizar tu dinero — automatizar una regla simple quita esa carga de decidir cada mes."
+      },
+      "procrastination": {
+        "title": "Decide ahora cuándo vas a revisar tus gastos",
+        "description": "Tener la intención de organizar tus finanzas no siempre es suficiente — ayuda fijar un momento y una acción concretos.",
+        "actionText": "Elige un día fijo cada semana, por ejemplo todos los lunes, para revisar cuánto gastaste.",
+        "whyThisStep": "Notamos que sueles posponer la revisión de tus gastos — un momento fijo ayuda a que realmente ocurra."
+      }
+    },
+    "resilience": {
+      "freshStart": {
+        "title": "Aprovecha tu próximo ingreso para empezar tu reserva",
+        "description": "Los momentos naturales, como el inicio de un nuevo ingreso, son una buena oportunidad para comenzar algo nuevo sin que se sienta forzado.",
+        "actionText": "En tu próximo ingreso, aparta un monto pequeño para comenzar tu fondo de emergencia.",
+        "whyThisStep": "Tu reserva de emergencia es baja — tu próximo ingreso es un buen punto natural para empezar a construirla."
+      },
+      "lowSelfEfficacy": {
+        "title": "Empieza con un monto pequeño para tu reserva",
+        "description": "No hace falta ahorrar mucho de una vez — empezar con algo pequeño y lograrlo genera confianza para seguir.",
+        "actionText": "Aparta hoy un monto pequeño para tu reserva, aunque sea simbólico.",
+        "whyThisStep": "Construir una reserva puede sentirse difícil de lograr — empezar en pequeño ayuda a demostrarte que sí puedes."
+      }
+    },
+    "debt": {
+      "complexity": {
+        "title": "Da un solo paso para entender tu deuda",
+        "description": "Cuando la deuda se siente complicada, es más fácil avanzar con un solo paso pequeño en vez de resolver todo de una vez.",
+        "actionText": "Dedica 2 minutos hoy a anotar cuánto debes y a quién, sin resolver nada más por ahora.",
+        "whyThisStep": "Tu situación de deuda puede sentirse compleja — un solo paso pequeño ayuda a empezar a moverla."
+      },
+      "weakTracking": {
+        "title": "Registra tu avance en el pago de tu deuda",
+        "description": "Ver el progreso, aunque sea pequeño, ayuda a mantener el rumbo cuando se está pagando una deuda.",
+        "actionText": "Anota cada pago que hagas a tu deuda este mes, aunque sea en una nota simple.",
+        "whyThisStep": "Estás pagando tu deuda, pero sin llevar un registro es difícil ver que sí estás avanzando."
+      }
+    },
+    "saving": {
+      "procrastination": {
+        "title": "Decide cuándo y cuánto vas a ahorrar",
+        "description": "Definir el momento exacto y el monto hace mucho más probable que el ahorro realmente ocurra.",
+        "actionText": "En tu próximo ingreso, separa un monto fijo antes de gastar en cualquier otra cosa.",
+        "whyThisStep": "Sueles posponer el ahorro — fijar un momento y un monto concretos ayuda a que no se quede solo en intención."
+      },
+      "lackOfSystem": {
+        "title": "Automatiza tu ahorro",
+        "description": "Ahorrar de forma manual cada mes requiere acordarte y decidir — automatizarlo lo hace parte de tu rutina sin esfuerzo extra.",
+        "actionText": "Configura una transferencia automática hacia tu ahorro cada vez que recibas tu ingreso.",
+        "whyThisStep": "No tienes todavía un sistema para ahorrar de forma constante — automatizarlo resuelve eso sin que tengas que acordarte cada vez."
+      }
+    },
+    "planning": {
+      "distantGoal": {
+        "title": "Divide tu meta en un hito cercano",
+        "description": "Las metas lejanas pierden fuerza con el tiempo — tener un hito cercano ayuda a mantener el enfoque.",
+        "actionText": "Define cuál sería tu primer hito, alcanzable en las próximas semanas, hacia tu meta.",
+        "whyThisStep": "Tu meta puede sentirse lejana todavía — dividirla en un hito cercano la hace más manejable."
+      },
+      "noClearTrigger": {
+        "title": "Fija un momento concreto para avanzar en tu plan",
+        "description": "Una intención sin un momento definido es fácil de posponer indefinidamente.",
+        "actionText": "Elige un día del mes fijo para revisar y avanzar en tu plan financiero.",
+        "whyThisStep": "Tu plan no tiene todavía un momento definido para avanzar — fijar uno ayuda a que realmente suceda."
+      }
+    }
   }
 }
