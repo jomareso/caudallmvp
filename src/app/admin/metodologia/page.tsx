@@ -70,8 +70,11 @@ export default async function AdminMetodologiaPage() {
             }}
           />
 
-          <Link href="/admin/metodologia/contenido" className="inline-block mt-4 text-xs text-yale underline">
+          <Link href="/admin/metodologia/contenido" className="block mt-4 text-xs text-yale underline">
             {t('viewContentLink')}
+          </Link>
+          <Link href="/admin/metodologia/reglas" className="block mt-1 text-xs text-yale underline">
+            {t('viewRulesLink')}
           </Link>
         </div>
       </div>

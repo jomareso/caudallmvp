@@ -3,6 +3,11 @@ import bancoMaestro from '../../../prisma/seed-data/banco-maestro-v3.json';
 export type BancoMaestroConstruct = (typeof bancoMaestro)['constructs'][number];
 export type BancoMaestroVariable = (typeof bancoMaestro)['variables'][number];
 export type BancoMaestroQuestion = (typeof bancoMaestro)['questions'][number];
+export type BancoMaestroInferenceRule = (typeof bancoMaestro)['inferenceRules'][number];
+export type BancoMaestroForbiddenInference = (typeof bancoMaestro)['forbiddenInferences'][number];
+export type BancoMaestroQaScenario = (typeof bancoMaestro)['qaScenarios'][number];
+export type BancoMaestroBehavioralTechnique = (typeof bancoMaestro)['behavioralTechniques'][number];
+export type BancoMaestroBehavioralBiasMapEntry = (typeof bancoMaestro)['behavioralBiasMap'][number];
 
 // Misma fuente que aplica el botón "Sincronizar banco de preguntas"
 // (ver sync-banco-maestro.ts). La vista de solo lectura en
