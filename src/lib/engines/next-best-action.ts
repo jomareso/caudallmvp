@@ -28,6 +28,11 @@ import { computeEligibility, type EligibilityResult } from './eligibility';
 // ella, se sigue devolviendo NONE en vez de tapar el hueco) se ofrece
 // contenido de tipo COURSE sin importar a qué dimensión esté asociado en
 // el catálogo — es refuerzo general, no responde a una fricción concreta.
+//
+// Todas las consultas de Intervention exigen catalog.status = 'ACTIVE':
+// el contenido nace en DRAFT (seed.ts) hasta que Reynoso revisa el copy
+// real que verá el empleado; sin este filtro cualquier borrador cargado
+// ya sería elegible en producción.
 
 const FIN_READINESS_ORDER: Record<string, number> = { NOT_ELIGIBLE: 0, CONSTRAINED: 1, ELIGIBLE: 2, STRONG: 3 };
 const BEH_READINESS_ORDER: Record<string, number> = { LOW: 0, MODERATE: 1, HIGH: 2 };
@@ -75,7 +80,9 @@ async function eligibleMaintenanceCourse(
   employeeId: string,
   eligibility: EligibilityResult
 ): Promise<Intervention | null> {
-  const courses = await prisma.intervention.findMany({ where: { type: 'COURSE' } });
+  const courses = await prisma.intervention.findMany({
+    where: { type: 'COURSE', catalog: { status: 'ACTIVE' } }
+  });
 
   const finRank = eligibility.financialReadiness.state ? FIN_READINESS_ORDER[eligibility.financialReadiness.state] : -1;
   const behRank = eligibility.behavioralReadiness.state ? BEH_READINESS_ORDER[eligibility.behavioralReadiness.state] : -1;
@@ -106,7 +113,11 @@ async function eligibleCandidatesForDimension(
   if (!dimension || !dimensionScore) return [];
 
   const candidates = await prisma.intervention.findMany({
-    where: { dimensionId: dimension.id, appliesToStates: { has: dimensionScore.state } }
+    where: {
+      dimensionId: dimension.id,
+      appliesToStates: { has: dimensionScore.state },
+      catalog: { status: 'ACTIVE' }
+    }
   });
 
   const finRank = eligibility.financialReadiness.state ? FIN_READINESS_ORDER[eligibility.financialReadiness.state] : -1;
