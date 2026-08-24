@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
 import { recomputeCfhi, recomputeConstructScore, recomputeDimensionScore, type EvidencePayload } from '@/lib/engines/cfhi';
+import { recomputeBehavioralBiasState } from '@/lib/engines/behavioral-state';
 import { getNextQuestion } from '@/lib/engines/diagnostic';
 import { evaluateSafety } from '@/lib/engines/safety';
 import { finalizeDiagnostic } from '@/lib/engines/diagnostic-completion';
@@ -81,6 +82,13 @@ export async function submitDiagnosticAnswer(input: {
     // constructo propio, pero igual pueden definir el estado N/A de su
     // dimensión (regla CORE #7 / #21).
     await recomputeDimensionScore(employeeId, variable.dimensionId);
+  }
+
+  // Variables *_RESPONSE de sesgos conductuales: recalcula el *_STATE
+  // derivado (ver behavioral-state.ts) que el motor de reglas usa para
+  // decidir si hace falta un ítem de confirmación.
+  if (variable.code.endsWith('_RESPONSE')) {
+    await recomputeBehavioralBiasState(employeeId, variable.code);
   }
 
   await recomputeCfhi(employeeId);

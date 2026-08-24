@@ -49,8 +49,77 @@
     "aggregationNotice": "Todos los datos son agregados y anónimos. Segmentos con menos de {min} personas no se muestran, para proteger la confidencialidad de tus empleados."
   },
   "admin": {
-    "methodology": {
-      "title": "Metodología"
+    "nav": {
+      "settings": "Configuración",
+      "admins": "Administradores",
+      "methodology": "Metodología",
+      "logout": "Cerrar sesión"
+    },
+    "metodologia": {
+      "title": "Metodología",
+      "currentVersion": "Versión vigente",
+      "lastSync": "Última actualización",
+      "lastSyncNone": "Todavía no se ha sincronizado desde este panel.",
+      "syncTitle": "Banco de preguntas",
+      "syncDescription": "Aplica el contenido más reciente (constructos, variables, preguntas, opciones, reglas) que ya está en el código de la app.",
+      "syncCta": "Sincronizar banco de preguntas",
+      "syncing": "Sincronizando...",
+      "syncConfirm": "Esto reemplaza el banco de preguntas activo con el que está en el código ahora mismo. ¿Continuar?",
+      "syncSuccess": "Banco de preguntas actualizado correctamente.",
+      "syncResultActive": "Preguntas activas",
+      "syncResultDraft": "En DRAFT",
+      "syncResultConstructs": "Constructos",
+      "syncResultVariables": "Variables",
+      "syncError": "No pudimos sincronizar el banco de preguntas. Intenta de nuevo.",
+      "viewContentLink": "Ver contenido completo",
+      "viewContentDescription": "Constructos, variables y preguntas del banco vigente, de solo lectura.",
+      "viewRulesLink": "Ver reglas y contenido conductual",
+      "viewRulesDescription": "Reglas de inferencia, inferencias prohibidas, escenarios QA, técnicas conductuales y mapa de sesgos.",
+      "reglas": {
+        "title": "Reglas y contenido conductual",
+        "intro": "Vista de solo lectura de las reglas y el contenido conductual del banco vigente.",
+        "inferenceRulesTitle": "Reglas de inferencia",
+        "confidenceLabel": "Confianza",
+        "ifLabel": "Si:",
+        "thenLabel": "Entonces:",
+        "forbiddenTitle": "Inferencias prohibidas",
+        "doesNotImply": "no implica",
+        "qaTitle": "Escenarios QA",
+        "preconditionLabel": "Precondición",
+        "expectedResultLabel": "Resultado esperado",
+        "techniquesTitle": "Técnicas conductuales",
+        "useWhenLabel": "Usar cuando",
+        "avoidWhenLabel": "Evitar cuando",
+        "copyTransformationLabel": "Transformación de copy",
+        "biasMapTitle": "Mapa de sesgos conductuales",
+        "whatItDetectsLabel": "Qué detecta",
+        "whenToAskLabel": "Cuándo preguntar",
+        "whatNotToConcludeLabel": "Qué NO concluir",
+        "candidateInterventionLabel": "Intervención candidata"
+      },
+      "contenido": {
+        "title": "Contenido del banco de preguntas",
+        "intro": "Vista de solo lectura de constructos, variables y preguntas del banco vigente. Para actualizar el contenido, edita el Excel y usa \"Sincronizar banco de preguntas\".",
+        "constructsInDimension": "{count} constructos",
+        "variablesInConstruct": "{count} variables",
+        "questionsInVariable": "{count} preguntas",
+        "definitionLabel": "Definición",
+        "possibleStatesLabel": "Estados posibles",
+        "noQuestions": "Sin preguntas para esta variable todavía.",
+        "unownedVariables": "Variables sin constructo asignado",
+        "searchPlaceholder": "Buscar por nombre, código o texto de pregunta...",
+        "searchNoResults": "No se encontraron resultados para esa búsqueda.",
+        "statusActive": "Activa",
+        "statusDraft": "Borrador",
+        "roles": {
+          "ANCHOR": "Ancla",
+          "ADAPTIVE": "Adaptativa",
+          "GATE": "Filtro",
+          "BEHAVIORAL": "Conductual",
+          "CONTEXT": "Contexto",
+          "FOLLOWUP": "Seguimiento"
+        }
+      }
     },
     "login": {
       "subtitle": "Panel administrativo",
@@ -74,6 +143,47 @@
       "uploadErrorType": "El archivo debe ser una imagen (PNG, JPG, WEBP o SVG).",
       "uploadErrorSize": "El archivo es muy grande — el máximo es 2 MB.",
       "uploadErrorGeneric": "No pudimos guardar el logo. Intenta de nuevo."
+    },
+    "administradores": {
+      "title": "Administradores",
+      "existingTitle": "Administradores actuales",
+      "emailLabel": "Correo",
+      "emailPlaceholder": "correo@caudall.com",
+      "profileTypeLabel": "Perfil",
+      "profileTypeAdm": "ADM — control total de la plataforma",
+      "profileTypeEmpresa": "EMPRESA — RRHH de una empresa cliente",
+      "profileTypeFuncional": "FUNCIONAL — equipo de Caudall con un rol específico",
+      "tenantLabel": "Empresa",
+      "tenantPlaceholder": "Selecciona una empresa",
+      "functionalRoleLabel": "Rol",
+      "functionalRoleMethodologist": "Metodólogo",
+      "functionalRoleProductAdmin": "Product admin",
+      "functionalRoleAnalyst": "Analista",
+      "functionalRoleViewer": "Solo lectura",
+      "cta": "Crear administrador",
+      "creating": "Creando...",
+      "success": "Administrador creado.",
+      "errorEmailExists": "Ya existe un administrador con ese correo.",
+      "errorTenantRequired": "Selecciona una empresa para el perfil EMPRESA.",
+      "errorFunctionalRoleRequired": "Selecciona un rol para el perfil FUNCIONAL.",
+      "errorGeneric": "No pudimos crear el administrador. Intenta de nuevo.",
+      "colEmail": "Correo",
+      "colProfile": "Perfil",
+      "colDetail": "Detalle",
+      "colCreated": "Creado"
+    },
+    "empresa": {
+      "title": "Salud financiera de {tenantName}",
+      "employeeCount": "{count} empleados con diagnóstico completo",
+      "averageCfhiLabel": "Índice de Salud Financiera promedio",
+      "dimensionsTitle": "Tus 5 dimensiones (promedio)",
+      "insufficientTitle": "Todavía no hay suficientes datos",
+      "insufficientBody": "Necesitas al menos {minRequired} empleados con el diagnóstico completo para ver agregados anónimos. Hoy tienes {count}. Esto protege la privacidad individual de tus empleados (nunca vemos datos de uno solo).",
+      "privacyNote": "Estos son promedios y conteos de tu empresa — nunca vemos las respuestas de un empleado en particular."
+    },
+    "funcional": {
+      "title": "Todavía no hay herramientas para tu rol",
+      "body": "El editor del banco de preguntas y las demás herramientas del equipo de Caudall son una fase posterior del panel administrativo. Por ahora tu cuenta existe, pero no hay nada que gestionar aquí."
     }
   },
   "diagnostic": {
@@ -1080,7 +1190,8 @@
       "achieved": "Sí, lo hice",
       "partial": "En parte",
       "notAchieved": "No todavía",
-      "none": "Por ahora no tenemos una recomendación nueva para ti."
+      "none": "Vas bien — no hay ninguna acción pendiente que necesites atender ahora.",
+      "watchVideo": "Ver video corto"
     }
   },
   "interventions": {
@@ -1152,6 +1263,14 @@
         "description": "Una intención sin un momento definido es fácil de posponer indefinidamente.",
         "actionText": "Elige un día del mes fijo para revisar y avanzar en tu plan financiero.",
         "whyThisStep": "Tu plan no tiene todavía un momento definido para avanzar — fijar uno ayuda a que realmente suceda."
+      }
+    },
+    "maintenance": {
+      "shortCourse01": {
+        "title": "Un video corto para seguir por buen camino",
+        "description": "Tu salud financiera está en buen estado — este contenido es para reforzar lo que ya vienes haciendo bien, no porque haya un problema que resolver.",
+        "actionText": "Míralo cuando tengas unos minutos.",
+        "whyThisStep": "Ninguna de tus dimensiones necesita atención ahora mismo, así que en vez de una tarea correctiva te dejamos algo breve de refuerzo."
       }
     }
   }

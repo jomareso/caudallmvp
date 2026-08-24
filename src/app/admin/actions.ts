@@ -1,9 +1,12 @@
 'use server';
 
+import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
+import { signOut } from '@/lib/auth/auth';
 import { createMagicLinkToken } from '@/lib/auth/magic-link';
 import { sendAdminMagicLinkEmail } from '@/lib/email/send-magic-link';
+import { getRequestOrigin } from '@/lib/http/request-origin';
 
 const emailSchema = z.string().trim().toLowerCase().email('Ingresa un correo válido.');
 
@@ -26,8 +29,7 @@ export async function requestAdminMagicLink(
   }
 
   const token = await createMagicLinkToken({ type: 'admin', adminUserId: admin.id, email: admin.email });
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
-  const verifyUrl = `${appUrl}/api/auth/verify?token=${encodeURIComponent(token)}`;
+  const verifyUrl = `${getRequestOrigin()}/api/auth/verify?token=${encodeURIComponent(token)}`;
 
   try {
     await sendAdminMagicLinkEmail({ to: admin.email, verifyUrl });
@@ -37,4 +39,9 @@ export async function requestAdminMagicLink(
   }
 
   return { ok: true };
+}
+
+export async function logoutAdmin(): Promise<void> {
+  await signOut({ redirect: false });
+  redirect('/admin');
 }

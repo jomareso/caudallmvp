@@ -19,15 +19,84 @@ import { computeEligibility, type EligibilityResult } from './eligibility';
 // que necesitan mejorar. Si la dimensión que Priority señaló no tiene
 // ninguna intervención elegible, se cae a la dimensión con peor severidad
 // (la que sí tiene algo accionable) en vez de no mostrar nada.
+//
+// Mantenimiento: si NINGUNA dimensión evaluable tiene una brecha real
+// (todas MET o NA), no hay ninguna causa raíz que atender — mostrar "sin
+// recomendación" ahí se siente como una limitación del producto en vez de
+// reconocer que a la persona le está yendo bien. En ese caso (y solo en
+// ese caso; si sí hay una brecha real pero falta contenido cargado para
+// ella, se sigue devolviendo NONE en vez de tapar el hueco) se ofrece
+// contenido de tipo COURSE sin importar a qué dimensión esté asociado en
+// el catálogo — es refuerzo general, no responde a una fricción concreta.
+//
+// Todas las consultas de Intervention exigen catalog.status = 'ACTIVE':
+// el contenido nace en DRAFT (seed.ts) hasta que Reynoso revisa el copy
+// real que verá el empleado; sin este filtro cualquier borrador cargado
+// ya sería elegible en producción.
 
 const FIN_READINESS_ORDER: Record<string, number> = { NOT_ELIGIBLE: 0, CONSTRAINED: 1, ELIGIBLE: 2, STRONG: 3 };
 const BEH_READINESS_ORDER: Record<string, number> = { LOW: 0, MODERATE: 1, HIGH: 2 };
 
 export type NextBestActionResult = {
   intervention: Intervention | null;
-  method: 'FRICTION_MATCH' | 'FALLBACK' | 'NONE';
+  method: 'FRICTION_MATCH' | 'FALLBACK' | 'MAINTENANCE' | 'NONE';
   explanation: string;
 };
+
+const GAP_STATES = ['CRITICAL', 'UNMET', 'PARTIAL'];
+
+// Compartida entre la ruta de mantenimiento (sin brecha real) y la ruta
+// normal por dimensión: una intervención nunca se ofrece si exige más
+// disposición financiera o conductual de la que el empleado tiene hoy.
+// finRank/behRank en -1 (readiness todavía desconocida) bloquea cualquier
+// intervención que declare un requisito — regla CORE #13: no exigir más
+// certeza de la que hay.
+export function meetsReadinessGate(
+  intervention: Pick<Intervention, 'financialReadinessRequired' | 'behavioralReadinessRequired'>,
+  finRank: number,
+  behRank: number
+): boolean {
+  if (
+    intervention.financialReadinessRequired &&
+    finRank < (FIN_READINESS_ORDER[intervention.financialReadinessRequired] ?? 0)
+  ) {
+    return false;
+  }
+  if (
+    intervention.behavioralReadinessRequired &&
+    behRank < (BEH_READINESS_ORDER[intervention.behavioralReadinessRequired] ?? 0)
+  ) {
+    return false;
+  }
+  return true;
+}
+
+async function hasNoRealGap(employeeId: string): Promise<boolean> {
+  const scores = await prisma.dimensionScore.findMany({ where: { employeeId, state: { not: 'NA' } } });
+  return scores.length > 0 && scores.every((s) => !GAP_STATES.includes(s.state));
+}
+
+async function eligibleMaintenanceCourse(
+  employeeId: string,
+  eligibility: EligibilityResult
+): Promise<Intervention | null> {
+  const courses = await prisma.intervention.findMany({
+    where: { type: 'COURSE', catalog: { status: 'ACTIVE' } }
+  });
+
+  const finRank = eligibility.financialReadiness.state ? FIN_READINESS_ORDER[eligibility.financialReadiness.state] : -1;
+  const behRank = eligibility.behavioralReadiness.state ? BEH_READINESS_ORDER[eligibility.behavioralReadiness.state] : -1;
+
+  const alreadyShown = await prisma.employeeIntervention.findMany({
+    where: { employeeId, status: { in: ['DISMISSED', 'COMPLETED'] } },
+    select: { interventionId: true }
+  });
+  const shownIds = new Set(alreadyShown.map((e) => e.interventionId));
+
+  const eligible = courses.filter((c) => !shownIds.has(c.id) && meetsReadinessGate(c, finRank, behRank));
+
+  return eligible[0] ?? null;
+}
 
 async function eligibleCandidatesForDimension(
   employeeId: string,
@@ -44,17 +113,17 @@ async function eligibleCandidatesForDimension(
   if (!dimension || !dimensionScore) return [];
 
   const candidates = await prisma.intervention.findMany({
-    where: { dimensionId: dimension.id, appliesToStates: { has: dimensionScore.state } }
+    where: {
+      dimensionId: dimension.id,
+      appliesToStates: { has: dimensionScore.state },
+      catalog: { status: 'ACTIVE' }
+    }
   });
 
   const finRank = eligibility.financialReadiness.state ? FIN_READINESS_ORDER[eligibility.financialReadiness.state] : -1;
   const behRank = eligibility.behavioralReadiness.state ? BEH_READINESS_ORDER[eligibility.behavioralReadiness.state] : -1;
 
-  return candidates.filter((c) => {
-    if (c.financialReadinessRequired && finRank < (FIN_READINESS_ORDER[c.financialReadinessRequired] ?? 0)) return false;
-    if (c.behavioralReadinessRequired && behRank < (BEH_READINESS_ORDER[c.behavioralReadinessRequired] ?? 0)) return false;
-    return true;
-  });
+  return candidates.filter((c) => meetsReadinessGate(c, finRank, behRank));
 }
 
 export async function computeNextBestAction(employeeId: string): Promise<NextBestActionResult> {
@@ -66,6 +135,17 @@ export async function computeNextBestAction(employeeId: string): Promise<NextBes
 
   if (!priority.dimensionCode) {
     return { intervention: null, method: 'NONE', explanation: 'Sin dimensión prioritaria todavía.' };
+  }
+
+  if (await hasNoRealGap(employeeId)) {
+    const course = await eligibleMaintenanceCourse(employeeId, eligibility);
+    if (course) {
+      return {
+        intervention: course,
+        method: 'MAINTENANCE',
+        explanation: 'Ninguna dimensión tiene una brecha real (todas MET o N/A) — se ofrece contenido de mantenimiento en vez de una acción correctiva.'
+      };
+    }
   }
 
   let dimensionCode = priority.dimensionCode;

@@ -12,7 +12,8 @@
         "PARTIAL"
       ],
       "i18nKeyBase": "control.lackOfSystem",
-      "financialReadinessRequired": "CONSTRAINED"
+      "financialReadinessRequired": "CONSTRAINED",
+      "videoUrl": "https://www.youtube.com/watch?v=CmDe0rQS_rE"
     },
     {
       "code": "CONTROL-PROCRASTINATION-01",
@@ -25,7 +26,8 @@
         "PARTIAL"
       ],
       "i18nKeyBase": "control.procrastination",
-      "financialReadinessRequired": "CONSTRAINED"
+      "financialReadinessRequired": "CONSTRAINED",
+      "videoUrl": "https://www.youtube.com/watch?v=CmDe0rQS_rE"
     },
     {
       "code": "RESILIENCE-FRESH_START-01",
@@ -38,7 +40,8 @@
         "PARTIAL"
       ],
       "i18nKeyBase": "resilience.freshStart",
-      "financialReadinessRequired": null
+      "financialReadinessRequired": null,
+      "videoUrl": "https://www.youtube.com/watch?v=CmDe0rQS_rE"
     },
     {
       "code": "RESILIENCE-LOW_SELF_EFFICACY-01",
@@ -51,7 +54,8 @@
         "PARTIAL"
       ],
       "i18nKeyBase": "resilience.lowSelfEfficacy",
-      "financialReadinessRequired": "CONSTRAINED"
+      "financialReadinessRequired": "CONSTRAINED",
+      "videoUrl": "https://www.youtube.com/watch?v=CmDe0rQS_rE"
     },
     {
       "code": "DEBT-COMPLEXITY-01",
@@ -64,7 +68,8 @@
         "PARTIAL"
       ],
       "i18nKeyBase": "debt.complexity",
-      "financialReadinessRequired": null
+      "financialReadinessRequired": null,
+      "videoUrl": "https://www.youtube.com/watch?v=CmDe0rQS_rE"
     },
     {
       "code": "DEBT-WEAK_TRACKING-01",
@@ -77,7 +82,8 @@
         "PARTIAL"
       ],
       "i18nKeyBase": "debt.weakTracking",
-      "financialReadinessRequired": null
+      "financialReadinessRequired": null,
+      "videoUrl": "https://www.youtube.com/watch?v=CmDe0rQS_rE"
     },
     {
       "code": "SAVING-PROCRASTINATION-01",
@@ -90,7 +96,8 @@
         "PARTIAL"
       ],
       "i18nKeyBase": "saving.procrastination",
-      "financialReadinessRequired": "CONSTRAINED"
+      "financialReadinessRequired": "CONSTRAINED",
+      "videoUrl": "https://www.youtube.com/watch?v=CmDe0rQS_rE"
     },
     {
       "code": "SAVING-LACK_OF_SYSTEM-01",
@@ -103,7 +110,8 @@
         "PARTIAL"
       ],
       "i18nKeyBase": "saving.lackOfSystem",
-      "financialReadinessRequired": "CONSTRAINED"
+      "financialReadinessRequired": "CONSTRAINED",
+      "videoUrl": "https://www.youtube.com/watch?v=CmDe0rQS_rE"
     },
     {
       "code": "PLANNING-DISTANT_GOAL-01",
@@ -116,7 +124,8 @@
         "PARTIAL"
       ],
       "i18nKeyBase": "planning.distantGoal",
-      "financialReadinessRequired": null
+      "financialReadinessRequired": null,
+      "videoUrl": "https://www.youtube.com/watch?v=CmDe0rQS_rE"
     },
     {
       "code": "PLANNING-NO_CLEAR_TRIGGER-01",
@@ -129,7 +138,20 @@
         "PARTIAL"
       ],
       "i18nKeyBase": "planning.noClearTrigger",
-      "financialReadinessRequired": null
+      "financialReadinessRequired": null,
+      "videoUrl": "https://www.youtube.com/watch?v=CmDe0rQS_rE"
+    },
+    {
+      "code": "MAINTENANCE-SHORT_COURSE-01",
+      "dimension": "PLANNING",
+      "type": "COURSE",
+      "frictionCode": null,
+      "appliesToStates": [
+        "MET"
+      ],
+      "i18nKeyBase": "maintenance.shortCourse01",
+      "financialReadinessRequired": null,
+      "videoUrl": "https://www.youtube.com/watch?v=CmDe0rQS_rE"
     }
   ]
 }

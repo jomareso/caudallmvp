@@ -37,12 +37,25 @@ describe('evaluateRule', () => {
     expect(evaluateRule('CTRL_DRIVER = VARIABLE_INCOME OR CTX_INCOME_PATTERN = VARIABLE', facts({}))).toBe(false);
   });
 
-  it('"VARIABLE < número" sin la palabra confidence no se soporta (CTRL_CONFIDENCE es una variable propia, no un modificador) — false seguro', () => {
+  it('"IDENT < número" sin la palabra confidence: si el estado no es numérico, no se soporta -> false seguro', () => {
     const f = facts({
       CTRL_VISIBILITY: { state: 'PARTIAL', confidenceRatio: 1 },
       CTRL_CONFIDENCE: { state: 'x', confidenceRatio: 0.5 }
     });
     expect(evaluateRule('CTRL_VISIBILITY IN {PARTIAL,LOW,UNKNOWN} AND CTRL_CONFIDENCE < 0.80', f)).toBe(false);
+  });
+
+  it('"IDENT >=/< número" SÍ se soporta cuando el estado es un valor numérico "0..1" (ej. SAV_CONFIDENCE) — caso real de SAV-18', () => {
+    expect(evaluateRule('SAV_CONFIDENCE >= 0.80', facts({}))).toBe(false);
+    expect(evaluateRule('SAV_CONFIDENCE >= 0.80', facts({ SAV_CONFIDENCE: { state: '0.85', confidenceRatio: 1 } }))).toBe(
+      true
+    );
+    expect(evaluateRule('SAV_CONFIDENCE >= 0.80', facts({ SAV_CONFIDENCE: { state: '0.65', confidenceRatio: 1 } }))).toBe(
+      false
+    );
+    expect(evaluateRule('CTRL_CONFIDENCE < 0.80', facts({ CTRL_CONFIDENCE: { state: '0.60', confidenceRatio: 1 } }))).toBe(
+      true
+    );
   });
 
   it('confidence sin evidencia se trata como 0 (SKIP_IF típico)', () => {

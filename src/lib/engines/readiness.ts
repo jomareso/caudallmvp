@@ -29,7 +29,7 @@ export type BehavioralReadinessResult = {
 // SAV_CAPACITY (spec §12/13, ya cargada y respondida en el banco real) es el
 // mejor proxy disponible hoy de FIN_CAPACITY: sus estados fueron diseñados
 // con semántica prácticamente paralela a la de Financial Readiness.
-const FIN_CAPACITY_TO_READINESS: Record<string, FinancialReadinessState> = {
+export const FIN_CAPACITY_TO_READINESS: Record<string, FinancialReadinessState> = {
   NONE: 'NOT_ELIGIBLE',
   CONSTRAINED: 'CONSTRAINED',
   LIMITED: 'CONSTRAINED',
@@ -63,9 +63,9 @@ export async function computeFinancialReadiness(employeeId: string): Promise<Fin
   };
 }
 
-const SELF_EFFICACY_TIER: Record<string, number> = { LOW: 0, MODERATE: 1, HIGH: 2 };
-const INTENTION_TIER: Record<string, number> = { NONE: 0, WEAK: 0, MODERATE: 1, STRONG: 2 };
-const PLAN_STAGE_TIER: Record<string, number> = {
+export const SELF_EFFICACY_TIER: Record<string, number> = { LOW: 0, MODERATE: 1, HIGH: 2 };
+export const INTENTION_TIER: Record<string, number> = { NONE: 0, WEAK: 0, MODERATE: 1, STRONG: 2 };
+export const PLAN_STAGE_TIER: Record<string, number> = {
   NO_DIRECTION: 0,
   ASPIRATION: 0,
   GOAL_DEFINED: 1,
@@ -78,6 +78,14 @@ const PLAN_STAGE_TIER: Record<string, number> = {
 };
 
 const TIER_TO_STATE: BehavioralReadinessState[] = ['LOW', 'MODERATE', 'HIGH'];
+
+export type ReadinessSignal = { code: string; tier: number };
+
+// Principio del eslabón más débil (ver comentario arriba): "listo para
+// actuar" es tan fuerte como su señal más frágil, no un promedio.
+export function pickWeakestSignal(signals: ReadinessSignal[]): ReadinessSignal {
+  return signals.reduce((min, s) => (s.tier < min.tier ? s : min));
+}
 
 export async function computeBehavioralReadiness(employeeId: string): Promise<BehavioralReadinessResult> {
   const facts = await buildFacts(employeeId);
@@ -105,7 +113,7 @@ export async function computeBehavioralReadiness(employeeId: string): Promise<Be
     };
   }
 
-  const weakest = signals.reduce((min, s) => (s.tier < min.tier ? s : min));
+  const weakest = pickWeakestSignal(signals);
 
   return {
     state: TIER_TO_STATE[weakest.tier],

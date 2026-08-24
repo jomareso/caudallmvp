@@ -33,7 +33,7 @@ export type RootCauseResult = {
   explanation: string;
 };
 
-type ActiveEdge = {
+export type ActiveEdge = {
   ruleCode: string;
   sourceVariables: string[];
   targetVariableCode: string;
@@ -42,7 +42,7 @@ type ActiveEdge = {
   type: 'STRONG' | 'WEAK';
 };
 
-function extractSourceVariables(conditionRaw: string): string[] {
+export function extractSourceVariables(conditionRaw: string): string[] {
   const matches = conditionRaw.matchAll(/([A-Za-z_][A-Za-z0-9_]*)\s*(?:=|!=|\bIN\b)/g);
   const codes = [...matches].map((m) => m[1]).filter((code) => code.toUpperCase() !== 'CONFIDENCE');
   return [...new Set(codes)];
@@ -99,7 +99,7 @@ async function lowestScoreFallback(employeeId: string): Promise<RootCauseResult>
   };
 }
 
-function pickBest(edges: ActiveEdge[]): ActiveEdge {
+export function pickBest(edges: ActiveEdge[]): ActiveEdge {
   return [...edges].sort((a, b) => {
     if (a.type !== b.type) return a.type === 'STRONG' ? -1 : 1;
     return b.confidence - a.confidence;

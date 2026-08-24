@@ -9,7 +9,7 @@ import { prisma } from '@/lib/db/prisma';
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']);
 const MAX_SIZE_BYTES = 2 * 1024 * 1024;
 
-async function requireAdm(): Promise<void> {
+async function requireAdm() {
   const session = await auth();
   // Ver src/lib/auth/auth.ts sobre por qué el cast local.
   const sessionUser = session?.user as { id?: string; role?: 'employee' | 'admin' } | undefined;
@@ -17,6 +17,7 @@ async function requireAdm(): Promise<void> {
 
   const admin = await prisma.adminUser.findUnique({ where: { id: sessionUser.id } });
   if (!admin || admin.profileType !== 'ADM') redirect('/admin');
+  return admin;
 }
 
 export async function uploadLogo(formData: FormData): Promise<{ ok: true } | { ok: false; message: string }> {

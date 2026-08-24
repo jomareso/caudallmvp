@@ -1,7 +1,9 @@
 // Intérprete de las expresiones ASK_IF / SKIP_IF del Banco Maestro real
 // (prisma/seed-data/banco-maestro-v3.json). Cubre la gramática que
-// realmente aparece en las 94 preguntas cargadas: TRUE, comparaciones de
-// igualdad, IN {..}, confidence >=/<, "not known" / "known", y AND/OR con
+// realmente aparece en las preguntas cargadas: TRUE, comparaciones de
+// igualdad, IN {..}, "IDENT confidence >=/< X" (confianza de OTRA
+// variable), "IDENT >=/< X" (valor numérico de una variable DERIVED tipo
+// "0..1", ej. SAV_CONFIDENCE), "not known" / "known", y AND/OR con
 // paréntesis. NO es el motor NBQ completo de la spec (§22) — es lo mínimo
 // para que el banco real navegue correctamente con lo que ya sabemos del
 // empleado.
@@ -177,14 +179,34 @@ class Parser {
       return options.includes(facts.get(ident)!.state);
     }
 
-    // Comparaciones numéricas directas sobre "variables" que no son
-    // Variable en nuestro catálogo (ej. ELIGIBLE_ACTIONS_COUNT > 2): no
-    // tenemos ese hecho, así que no se puede evaluar -> false seguro.
+    // Comparación numérica directa sobre el propio valor de la variable
+    // (ej. SAV_CONFIDENCE >= 0.80, CTRL_CONFIDENCE < 0.80): estas son
+    // variables DERIVED cuyo estado es un float "0..1", no una categoría —
+    // a diferencia de "IDENT confidence >= X" (arriba), que lee la
+    // confianza de OTRA variable. Si el hecho existe y su estado es un
+    // número, se compara; si no (variable fuera de catálogo, ej.
+    // ELIGIBLE_ACTIONS_COUNT > 2, o categórica sin ese hecho todavía), no
+    // se puede evaluar -> false seguro.
     if (op?.type === '>' || op?.type === '<' || op?.type === '>=' || op?.type === '<=') {
       this.next();
-      this.next();
-      this.unsupported = true;
-      return false;
+      const numTok = this.next();
+      const threshold = numTok ? parseFloat(numTok.value) : NaN;
+      const rawState = facts.get(ident)?.state;
+      const value = rawState !== undefined ? parseFloat(rawState) : NaN;
+      if (Number.isNaN(threshold) || Number.isNaN(value)) {
+        this.unsupported = true;
+        return false;
+      }
+      switch (op.type) {
+        case '>=':
+          return value >= threshold;
+        case '<=':
+          return value <= threshold;
+        case '>':
+          return value > threshold;
+        case '<':
+          return value < threshold;
+      }
     }
 
     this.unsupported = true;
