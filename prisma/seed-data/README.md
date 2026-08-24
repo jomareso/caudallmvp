@@ -67,59 +67,60 @@ cualquier otra cosa → `DRAFT`, por defecto seguro). `loadBankAndState()` en
 `diagnostic.ts` ya filtraba por `status: 'ACTIVE'`, así que los 110 ítems
 reserve quedan cargados pero inertes automáticamente, sin tocar el motor.
 
-## Cargadas pero todavía no todas "vivas": el intérprete de ASK_IF/SKIP_IF
+## El intérprete de ASK_IF/SKIP_IF y el motor de estados derivados (resuelto 24 ago 2026)
 
 Las 314 preguntas están en la base y el seed corre limpio (probado con
-simulaciones completas de diagnóstico, sin errores ni bucles). Pero
-`src/lib/engines/rules.ts` es un intérprete deliberadamente mínimo,
-construido solo para la gramática de las 94 preguntas originales (ver su
-comentario de cabecera). La v3.6 ya corrigió la sintaxis de confianza para
-usar variables `*_STATE` derivadas con la forma que el intérprete sí
-entiende (`CTRL_PRESENT_BIAS_STATE confidence < 0.80`, en vez de la
-`CTRL_CONFIDENCE < 0.85` de v3.1) — pero varios `ASK_IF`/`SKIP_IF` siguen
-combinando eso con fragmentos en inglés llano sin gramática formal (ej.
-`"behavior explanation needed"`, `"behavior explanation still needed"`).
-Como cualquier fragmento no reconocido en una condición hace que **toda**
-la expresión evalúe a `false` (diseño intencional del intérprete: "no
-preguntar de más" antes que "adivinar"), esas preguntas quedan cargadas
-pero no se activan todavía en un diagnóstico real.
+simulaciones completas de diagnóstico, sin errores ni bucles).
+`src/lib/engines/rules.ts` es un intérprete de una gramática concreta (ver
+su comentario de cabecera), y varios `ASK_IF`/`SKIP_IF` combinaban
+condiciones sobre variables `*_STATE`/`*_CONFIDENCE` derivadas
+(`CTRL_PRESENT_BIAS_STATE confidence < 0.80`, `SAV_CONFIDENCE >= 0.80`)
+que nadie calculaba — las preguntas quedaban cargadas pero esas ramas
+nunca se activaban en un diagnóstico real.
 
-Además, varias de estas condiciones apuntan a una variable `*_STATE`
-"derivada" (ej. `CTRL_PRESENT_BIAS_STATE`) que ahora tiene su propia regla
-de agregación documentada en la columna "Regla de agregación" de
-`01_METODOLOGIA` ("agregar evidencia de ítems solo cuando exista
-información suficiente/confidence; nunca sumar preguntas directamente")
-— pero el motor que calcule esa variable derivada a partir de las
-respuestas `_RESPONSE` (R1–R4) todavía no existe en el código.
+Esto ya se resolvió:
 
-Ninguna de las dos cosas se tocó en esta carga: extender `rules.ts` y
-construir el motor de agregación conductual son piezas de trabajo reales,
-no un ajuste rápido, y requieren confirmar el diseño exacto con la
-fundadora antes de escribir código — inventar esa semántica sería un
-riesgo metodológico.
+- Las 5 `_STATE`/`_CONFIDENCE` de dimensión (CTRL/RES/DEBT/SAV/PLAN) se
+  calculaban desde siempre en `DimensionScore` — solo faltaba publicarlas
+  como hechos para el motor de reglas (`syncDimensionStateFacts` en
+  `cfhi.ts`).
+- Los 55 `_STATE` de sesgo conductual (uno por sesgo × dimensión) no tenían
+  ningún cálculo. Fórmula confirmada por Reynoso: mapeo directo de la
+  respuesta ordinal a un balde (bajo/moderado/alto/muy alto), confianza
+  60% con 1 ítem respondido, 100% si el ítem de confirmación coincide con
+  el mismo balde (`src/lib/engines/behavioral-state.ts`).
+- `rules.ts` ahora también soporta comparaciones numéricas directas del
+  tipo `SAV_CONFIDENCE >= 0.80` (antes cualquier `IDENT >= número` sin la
+  palabra `confidence` se marcaba no soportado y evaluaba falso siempre).
 
-## Catálogo de intervenciones (`intervention-catalog-draft.json`) — BORRADOR
+Los fragmentos en inglés llano sin gramática formal que quedan en algunos
+`ASK_IF` (ej. `"behavior explanation needed"`) siguen sin resolverse — no
+son un cálculo pendiente, son texto que todavía no se tradujo a una
+condición formal, y como cualquier fragmento no reconocido hace que toda
+la expresión evalúe a `false` (diseño intencional: "no preguntar de más"
+antes que "adivinar"), esas ramas específicas siguen inertes.
 
-10 intervenciones (2 por dimensión), redactadas a partir de los ejemplos
-reales de `BehavioralTechnique.example`/`copyTransformation` del Excel
-(columna "Técnicas exploradas"), **no inventadas desde cero** — pero el
-copy final (título, descripción, texto de la acción) sí lo redactó Claude
-como primer borrador, no la fundadora.
+## Catálogo de intervenciones (`intervention-catalog-draft.json`) — aprobado 24 ago 2026
 
-Se carga con `InterventionCatalog.status = DRAFT` a propósito: existir en
-la base de datos no lo activa. Antes de que Next Best Action lo use en
-producción, Reynoso debe:
+11 intervenciones (2 por dimensión + 1 de mantenimiento), redactadas a
+partir de los ejemplos reales de `BehavioralTechnique.example`/
+`copyTransformation` del Excel (columna "Técnicas exploradas"), **no
+inventadas desde cero** — pero el copy final (título, descripción, texto
+de la acción) sí lo redactó Claude como primer borrador, no la fundadora.
 
-1. Revisar el texto de las 10 intervenciones en `messages/es.json` bajo la
-   clave `interventions.*` (título, descripción, acción, "por qué este
-   paso").
-2. Corregir tono/redacción si hace falta.
-3. Confirmar que se promueva `InterventionCatalog.status` a `ACTIVE`.
+Reynoso revisó el texto completo (artifact con las 11 tarjetas tal como
+las vería un empleado) y aprobó activarlo. `InterventionCatalog.status`
+pasa a `ACTIVE` en este seed — antes de esto existía en la base pero no
+se usaba: `src/lib/engines/next-best-action.ts` no filtraba por el status
+del catálogo, así que el contenido en `DRAFT` ya era elegible en la
+práctica. Se corrigió al mismo tiempo que se activó (ver el commit que
+agrega `catalog: { status: 'ACTIVE' }` a sus queries de `Intervention`).
 
 Cobertura actual: 2 técnicas por dimensión (de las 10 técnicas conductuales
 reales, excluyendo las 2 entradas de guía de estilo `COPY_CORE`/
-`COPY_MOBILE` que no son intervenciones). Ampliar a más fricciones por
-dimensión es trabajo futuro, no un bloqueo para probar el flujo completo.
+`COPY_MOBILE` que no son intervenciones) + 1 de mantenimiento. Ampliar a
+más fricciones por dimensión es trabajo futuro, no un bloqueo para probar
+el flujo completo.
 
 ## Cómo correr el seed
 

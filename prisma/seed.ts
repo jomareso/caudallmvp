@@ -22,16 +22,17 @@ async function main() {
     (await prisma.dimension.findMany({ where: { methodologyId: methodology.id } })).map((d) => [d.code, d.id])
   );
 
-  // Catálogo de intervenciones — BORRADOR (spec §28/Decisión 2: contenido
+  // Catálogo de intervenciones (spec §28/Decisión 2: contenido
   // educativo/conductual, no productos financieros). Redactado a partir de
   // los ejemplos reales de BehavioralTechnique.example de la fundadora, no
-  // inventado desde cero. Status DRAFT a propósito: no se activa solo por
-  // estar cargado, queda pendiente de que Reynoso lo revise y apruebe
-  // antes de promoverlo a ACTIVE (ver prisma/seed-data/README.md).
+  // inventado desde cero. Revisado y aprobado por Reynoso (24 ago 2026) —
+  // Next Best Action solo considera intervenciones de un catálogo ACTIVE
+  // (ver next-best-action.ts), así que este status es lo que realmente
+  // las pone o no en producción, no solo una etiqueta.
   const interventionCatalog = await prisma.interventionCatalog.upsert({
     where: { version: interventionCatalogDraft.version },
-    update: { status: 'DRAFT' },
-    create: { version: interventionCatalogDraft.version, status: 'DRAFT' }
+    update: { status: 'ACTIVE' },
+    create: { version: interventionCatalogDraft.version, status: 'ACTIVE' }
   });
 
   for (const i of interventionCatalogDraft.interventions) {
@@ -102,7 +103,7 @@ async function main() {
   );
   console.log(`- Tenant demo: ${tenant.name} (código ${tenant.enrollmentCode})`);
   console.log(
-    `- Catálogo de intervenciones ${interventionCatalog.version} (${interventionCatalog.status}) con ${interventionCatalogDraft.interventions.length} intervenciones — pendiente de tu revisión`
+    `- Catálogo de intervenciones ${interventionCatalog.version} (${interventionCatalog.status}) con ${interventionCatalogDraft.interventions.length} intervenciones`
   );
   console.log(`- Admin inicial (ADM): ${founderAdmin.email}`);
 }
