@@ -28,7 +28,11 @@ export default async function AdminMetodologiaPage() {
 
   const lastSyncWho = lastSync?.whoData as { email?: string } | null;
   const lastSyncWhen = lastSync
-    ? new Intl.DateTimeFormat('es-DO', { dateStyle: 'medium', timeStyle: 'short' }).format(lastSync.when)
+    ? new Intl.DateTimeFormat('es-DO', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+        timeZone: 'America/Santo_Domingo'
+      }).format(lastSync.when)
     : null;
 
   return (

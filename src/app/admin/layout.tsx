@@ -32,7 +32,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           <Link
             href={
               admin.profileType === 'ADM'
-                ? '/admin/panel'
+                ? '/admin/configuracion'
                 : admin.profileType === 'EMPRESA'
                   ? '/admin/empresa'
                   : '/admin/funcional'
@@ -44,10 +44,10 @@ export default async function AdminLayout({ children }: { children: ReactNode })
               <img
                 src="/api/branding/logo"
                 alt="Caudall"
-                className="h-12 mix-blend-multiply"
+                className="h-20 mix-blend-multiply"
               />
             ) : (
-              <span className="text-xl font-medium text-yale">caudall</span>
+              <span className="text-2xl font-medium text-yale">caudall</span>
             )}
           </Link>
 
@@ -65,7 +65,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                 </Link>
               </>
             ) : null}
-            <span className="text-silver">{admin.email}</span>
             <LogoutButton label={t('logout')} />
           </nav>
         </div>

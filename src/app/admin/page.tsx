@@ -12,7 +12,7 @@ export default async function AdminLoginPage() {
     // Cada perfil aterriza en su propia área — ADM controla la plataforma,
     // EMPRESA (RRHH) solo ve agregados de su propio tenant, FUNCIONAL
     // todavía no tiene herramientas propias.
-    if (admin?.profileType === 'ADM') redirect('/admin/panel');
+    if (admin?.profileType === 'ADM') redirect('/admin/configuracion');
     if (admin?.profileType === 'EMPRESA') redirect('/admin/empresa');
     if (admin?.profileType === 'FUNCIONAL') redirect('/admin/funcional');
   }

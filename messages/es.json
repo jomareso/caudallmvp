@@ -95,15 +95,6 @@
       "uploadErrorSize": "El archivo es muy grande — el máximo es 2 MB.",
       "uploadErrorGeneric": "No pudimos guardar el logo. Intenta de nuevo."
     },
-    "panel": {
-      "title": "Panel de Caudall",
-      "settingsLink": "Configuración",
-      "settingsDescription": "Logo de Caudall y ajustes de la plataforma.",
-      "methodologyLink": "Metodología",
-      "methodologyDescription": "Sincronizar el banco de preguntas con el código.",
-      "adminsLink": "Administradores",
-      "adminsDescription": "Crear y ver los usuarios con acceso al panel."
-    },
     "administradores": {
       "title": "Administradores",
       "existingTitle": "Administradores actuales",

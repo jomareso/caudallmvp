@@ -6,6 +6,32 @@ import { commitToAction, dismissAction, reportOutcome } from './actions';
 
 type Status = 'SUGGESTED' | 'COMMITTED' | 'IN_PROGRESS' | 'COMPLETED' | 'DISMISSED';
 
+// El contenido debe sentirse parte de Caudall, no un salto a YouTube: se
+// incrusta con youtube-nocookie.com (sin cookies de seguimiento) en vez de
+// abrir el link en una pestaña nueva. Si la URL no es de YouTube, no hay
+// forma segura de incrustarla — cae de vuelta al link externo.
+function getYouTubeEmbedUrl(url: string): string | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+
+  let videoId: string | null = null;
+  if (parsed.hostname === 'youtu.be') {
+    videoId = parsed.pathname.slice(1);
+  } else if (parsed.hostname.endsWith('youtube.com')) {
+    if (parsed.pathname === '/watch') {
+      videoId = parsed.searchParams.get('v');
+    } else if (parsed.pathname.startsWith('/embed/')) {
+      videoId = parsed.pathname.slice('/embed/'.length);
+    }
+  }
+
+  return videoId ? `https://www.youtube-nocookie.com/embed/${videoId}?modestbranding=1&rel=0` : null;
+}
+
 export function ActionCard({
   employeeInterventionId,
   status,
@@ -38,6 +64,7 @@ export function ActionCard({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showWhy, setShowWhy] = useState(false);
+  const embedUrl = videoUrl ? getYouTubeEmbedUrl(videoUrl) : null;
 
   function handleCommit() {
     startTransition(async () => {
@@ -69,7 +96,17 @@ export function ActionCard({
         <p className="text-sm text-quartz">{actionText}</p>
       </div>
 
-      {videoUrl ? (
+      {embedUrl ? (
+        <div className="mb-3 aspect-video rounded-lg overflow-hidden">
+          <iframe
+            src={embedUrl}
+            title={labels.watchVideo}
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      ) : videoUrl ? (
         <a
           href={videoUrl}
           target="_blank"
