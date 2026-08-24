@@ -11,6 +11,76 @@ export type EvidencePayload = {
   score?: number;
 };
 
+// El código de Dimension (CONTROL/RESILIENCE/DEBT/SAVING/PLANNING) no es el
+// mismo prefijo que usan sus variables en el Banco Maestro (CTRL/RES/DEBT/
+// SAV/PLAN) — confirmado contra las 174 variables reales.
+export const DIMENSION_VARIABLE_PREFIX: Record<string, string> = {
+  CONTROL: 'CTRL',
+  RESILIENCE: 'RES',
+  DEBT: 'DEBT',
+  SAVING: 'SAV',
+  PLANNING: 'PLAN'
+};
+
+// Publica el estado/confianza ya calculados de una dimensión como hechos
+// consultables por el motor de reglas (src/lib/engines/rules.ts) bajo las
+// variables {DIM}_STATE y {DIM}_CONFIDENCE del Banco Maestro — spec §10-14
+// las declara, pero no define su fórmula; la fórmula real es este mismo
+// weightedAverageExcludingNA que ya usa el resto del CFHI. {DIM}_STATE es
+// categórico (MET/PARTIAL/UNMET/CRITICAL/NA); {DIM}_CONFIDENCE es la misma
+// confianza pero expresada como el valor numérico "0..1" que esa variable
+// declara en el banco, para que "SAV_CONFIDENCE >= 0.80" se pueda evaluar.
+async function syncDimensionStateFacts(
+  employeeId: string,
+  dimensionCode: string,
+  state: string,
+  confidence: number
+): Promise<void> {
+  const prefix = DIMENSION_VARIABLE_PREFIX[dimensionCode];
+  if (!prefix) return;
+
+  const [stateVariable, confidenceVariable] = await Promise.all([
+    prisma.variable.findUnique({ where: { code: `${prefix}_STATE` } }),
+    prisma.variable.findUnique({ where: { code: `${prefix}_CONFIDENCE` } })
+  ]);
+
+  if (stateVariable) {
+    await prisma.variableState.upsert({
+      where: { employeeId_variableId: { employeeId, variableId: stateVariable.id } },
+      update: { value: { variableCode: stateVariable.code, state }, confidence, state, derivedFromEvidenceIds: [] },
+      create: {
+        employeeId,
+        variableId: stateVariable.id,
+        value: { variableCode: stateVariable.code, state },
+        confidence,
+        state,
+        derivedFromEvidenceIds: []
+      }
+    });
+  }
+
+  if (confidenceVariable) {
+    const confidenceState = (confidence / 100).toFixed(2);
+    await prisma.variableState.upsert({
+      where: { employeeId_variableId: { employeeId, variableId: confidenceVariable.id } },
+      update: {
+        value: { variableCode: confidenceVariable.code, state: confidenceState },
+        confidence: 100,
+        state: confidenceState,
+        derivedFromEvidenceIds: []
+      },
+      create: {
+        employeeId,
+        variableId: confidenceVariable.id,
+        value: { variableCode: confidenceVariable.code, state: confidenceState },
+        confidence: 100,
+        state: confidenceState,
+        derivedFromEvidenceIds: []
+      }
+    });
+  }
+}
+
 async function isDebtNotApplicable(employeeId: string): Promise<boolean> {
   const variable = await prisma.variable.findUnique({ where: { code: 'DEBT_APPLICABILITY' } });
   if (!variable) return false;
@@ -77,6 +147,7 @@ export async function recomputeDimensionScore(
       update: { score: 0, state: 'NA', confidence: 100, driverVariableId: null },
       create: { employeeId, dimensionId, score: 0, state: 'NA', confidence: 100 }
     });
+    await syncDimensionStateFacts(employeeId, dimension.code, 'NA', 100);
     return { score: null, state: 'NA' };
   }
 
@@ -106,6 +177,7 @@ export async function recomputeDimensionScore(
     update: { score: result.score, state, confidence },
     create: { employeeId, dimensionId, score: result.score, state, confidence }
   });
+  await syncDimensionStateFacts(employeeId, dimension.code, state, confidence);
 
   return { score: result.score, state };
 }
