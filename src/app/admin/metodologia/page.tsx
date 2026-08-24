@@ -41,7 +41,7 @@ export default async function AdminMetodologiaPage() {
       <div className="w-full max-w-sm">
         <h1 className="text-lg font-medium text-quartz mb-6">{t('title')}</h1>
 
-        <div className="bg-white border border-silver/60 rounded-xl p-6 mb-4">
+        <div className="bg-white border border-silver/60 rounded-xl p-6">
           <p className="text-xs text-nickel mb-1">
             {t('currentVersion')}: <span className="text-quartz font-medium">{methodology?.version ?? '—'}</span>
             {questionBank ? ` (${questionBank.version})` : ''}
@@ -53,31 +53,27 @@ export default async function AdminMetodologiaPage() {
           ) : (
             <p className="text-xs text-nickel">{t('lastSyncNone')}</p>
           )}
+
+          <SyncBancoMaestroButton
+            labels={{
+              title: t('syncTitle'),
+              description: t('syncDescription'),
+              cta: t('syncCta'),
+              syncing: t('syncing'),
+              confirm: t('syncConfirm'),
+              success: t('syncSuccess'),
+              resultActive: t('syncResultActive'),
+              resultDraft: t('syncResultDraft'),
+              resultConstructs: t('syncResultConstructs'),
+              resultVariables: t('syncResultVariables'),
+              error: t('syncError')
+            }}
+          />
+
+          <Link href="/admin/metodologia/contenido" className="inline-block mt-4 text-xs text-yale underline">
+            {t('viewContentLink')}
+          </Link>
         </div>
-
-        <Link
-          href="/admin/metodologia/contenido"
-          className="block bg-white border border-silver/60 rounded-xl p-4 mb-4 hover:border-cola"
-        >
-          <p className="text-sm font-medium text-quartz">{t('viewContentLink')}</p>
-          <p className="text-xs text-nickel">{t('viewContentDescription')}</p>
-        </Link>
-
-        <SyncBancoMaestroButton
-          labels={{
-            title: t('syncTitle'),
-            description: t('syncDescription'),
-            cta: t('syncCta'),
-            syncing: t('syncing'),
-            confirm: t('syncConfirm'),
-            success: t('syncSuccess'),
-            resultActive: t('syncResultActive'),
-            resultDraft: t('syncResultDraft'),
-            resultConstructs: t('syncResultConstructs'),
-            resultVariables: t('syncResultVariables'),
-            error: t('syncError')
-          }}
-        />
       </div>
     </main>
   );

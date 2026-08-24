@@ -10,6 +10,7 @@ import {
 
 const DIMENSION_ORDER = ['CONTROL', 'RESILIENCE', 'DEBT', 'SAVING', 'PLANNING', 'BEHAVIORAL'] as const;
 const NO_CONSTRUCT_KEY = '__SIN_CONSTRUCTO__';
+const MIN_QUERY_LENGTH = 2;
 
 function groupBy<T>(items: T[], keyFn: (item: T) => string): Map<string, T[]> {
   const map = new Map<string, T[]>();
@@ -22,7 +23,15 @@ function groupBy<T>(items: T[], keyFn: (item: T) => string): Map<string, T[]> {
   return map;
 }
 
-export default async function AdminMetodologiaContenidoPage() {
+function matches(haystack: (string | null | undefined)[], query: string): boolean {
+  return haystack.some((h) => h?.toLowerCase().includes(query));
+}
+
+export default async function AdminMetodologiaContenidoPage({
+  searchParams
+}: {
+  searchParams: { q?: string };
+}) {
   const session = await auth();
   // Ver src/lib/auth/auth.ts sobre por qué el cast local.
   const sessionUser = session?.user as { id?: string; role?: 'employee' | 'admin' } | undefined;
@@ -40,10 +49,45 @@ export default async function AdminMetodologiaContenidoPage() {
   const variablesByConstruct = groupBy(content.variables, (v) => v.construct ?? NO_CONSTRUCT_KEY);
   const questionsByVariable = groupBy<BancoMaestroQuestion>(content.questions, (q) => q.variable);
 
+  const rawQuery = searchParams.q?.trim() ?? '';
+  const hasQuery = rawQuery.length >= MIN_QUERY_LENGTH;
+  const query = rawQuery.toLowerCase();
+
+  // Constructos que matchean directamente se muestran completos (todas sus
+  // variables/preguntas); constructos que solo aparecen porque una de sus
+  // variables o preguntas matcheó se muestran, pero solo con esa variable.
+  const constructsFullyShown = new Set<string>();
+  const variablesShown = new Set<string>();
+
+  if (hasQuery) {
+    for (const c of content.constructs) {
+      if (matches([c.code, c.name, c.definition], query)) constructsFullyShown.add(c.code);
+    }
+    for (const v of content.variables) {
+      if (matches([v.code, v.description], query)) {
+        variablesShown.add(v.code);
+      }
+    }
+    for (const q of content.questions) {
+      if (matches([q.id, q.textUX, ...q.options.map((o) => o.text)], query)) {
+        variablesShown.add(q.variable);
+      }
+    }
+  }
+
   function renderVariable(variable: BancoMaestroVariable) {
-    const questions = questionsByVariable.get(variable.code) ?? [];
+    const allQuestions = questionsByVariable.get(variable.code) ?? [];
+    const questions = hasQuery
+      ? allQuestions.filter(
+          (q) =>
+            constructsFullyShown.has(q.construct ?? '') ||
+            variablesShown.has(q.variable) ||
+            matches([q.id, q.textUX, ...q.options.map((o) => o.text)], query)
+        )
+      : allQuestions;
+
     return (
-      <details key={variable.code} className="ml-4 border-l border-silver/60 pl-4 py-2">
+      <details key={variable.code} open={hasQuery} className="ml-4 border-l border-silver/60 pl-4 py-2">
         <summary className="text-sm text-quartz cursor-pointer">
           <span className="font-medium">{variable.code}</span> — {variable.description}{' '}
           <span className="text-nickel">({t('questionsInVariable', { count: questions.length })})</span>
@@ -88,60 +132,88 @@ export default async function AdminMetodologiaContenidoPage() {
     );
   }
 
-  return (
-    <main className="flex-1 p-6">
-      <div className="w-full max-w-2xl">
-        <h1 className="text-lg font-medium text-quartz mb-2">{t('title')}</h1>
-        <p className="text-xs text-nickel mb-6">{t('intro')}</p>
+  let totalShown = 0;
 
-        <div className="space-y-4">
-          {DIMENSION_ORDER.filter((d) => constructsByDimension.has(d)).map((dimensionCode) => {
-            const constructs = constructsByDimension.get(dimensionCode) ?? [];
+  const dimensionSections = DIMENSION_ORDER.filter((d) => constructsByDimension.has(d)).map((dimensionCode) => {
+    const allConstructs = constructsByDimension.get(dimensionCode) ?? [];
+    const constructs = hasQuery
+      ? allConstructs.filter(
+          (c) =>
+            constructsFullyShown.has(c.code) ||
+            (variablesByConstruct.get(c.code) ?? []).some((v) => variablesShown.has(v.code))
+        )
+      : allConstructs;
+
+    const orphanVariables = (variablesByConstruct.get(NO_CONSTRUCT_KEY) ?? []).filter(
+      (v) => v.dimension === dimensionCode && (!hasQuery || variablesShown.has(v.code))
+    );
+
+    if (hasQuery && constructs.length === 0 && orphanVariables.length === 0) return null;
+    totalShown += constructs.length + orphanVariables.length;
+
+    return (
+      <details key={dimensionCode} open={hasQuery} className="bg-white border border-silver/60 rounded-xl p-4">
+        <summary className="text-sm font-medium text-quartz cursor-pointer">
+          {tDim(dimensionCode)}{' '}
+          <span className="text-nickel font-normal">({t('constructsInDimension', { count: constructs.length })})</span>
+        </summary>
+        <div className="mt-3 space-y-2">
+          {constructs.map((construct) => {
+            const allVariables = variablesByConstruct.get(construct.code) ?? [];
+            const variables =
+              hasQuery && !constructsFullyShown.has(construct.code)
+                ? allVariables.filter((v) => variablesShown.has(v.code))
+                : allVariables;
             return (
-              <details key={dimensionCode} className="bg-white border border-silver/60 rounded-xl p-4">
-                <summary className="text-sm font-medium text-quartz cursor-pointer">
-                  {tDim(dimensionCode)}{' '}
-                  <span className="text-nickel font-normal">({t('constructsInDimension', { count: constructs.length })})</span>
+              <details key={construct.code} open={hasQuery} className="ml-2 border-l border-silver/60 pl-4 py-1">
+                <summary className="text-sm text-quartz cursor-pointer">
+                  <span className="font-medium">{construct.name}</span>{' '}
+                  <span className="text-nickel">
+                    ({construct.code} · {t('variablesInConstruct', { count: variables.length })})
+                  </span>
                 </summary>
-                <div className="mt-3 space-y-2">
-                  {constructs.map((construct) => {
-                    const variables = variablesByConstruct.get(construct.code) ?? [];
-                    return (
-                      <details key={construct.code} className="ml-2 border-l border-silver/60 pl-4 py-1">
-                        <summary className="text-sm text-quartz cursor-pointer">
-                          <span className="font-medium">{construct.name}</span>{' '}
-                          <span className="text-nickel">
-                            ({construct.code} · {t('variablesInConstruct', { count: variables.length })})
-                          </span>
-                        </summary>
-                        <div className="mt-2">
-                          <p className="text-xs text-nickel mb-2">
-                            {t('definitionLabel')}: {construct.definition}
-                          </p>
-                          {variables.map(renderVariable)}
-                        </div>
-                      </details>
-                    );
-                  })}
-
-                  {(() => {
-                    const orphanVariables = (variablesByConstruct.get(NO_CONSTRUCT_KEY) ?? []).filter(
-                      (v) => v.dimension === dimensionCode
-                    );
-                    if (orphanVariables.length === 0) return null;
-                    return (
-                      <details className="ml-2 border-l border-silver/60 pl-4 py-1">
-                        <summary className="text-sm text-quartz cursor-pointer">
-                          {t('unownedVariables')} <span className="text-nickel">({orphanVariables.length})</span>
-                        </summary>
-                        <div className="mt-2">{orphanVariables.map(renderVariable)}</div>
-                      </details>
-                    );
-                  })()}
+                <div className="mt-2">
+                  <p className="text-xs text-nickel mb-2">
+                    {t('definitionLabel')}: {construct.definition}
+                  </p>
+                  {variables.map(renderVariable)}
                 </div>
               </details>
             );
           })}
+
+          {orphanVariables.length > 0 ? (
+            <details open={hasQuery} className="ml-2 border-l border-silver/60 pl-4 py-1">
+              <summary className="text-sm text-quartz cursor-pointer">
+                {t('unownedVariables')} <span className="text-nickel">({orphanVariables.length})</span>
+              </summary>
+              <div className="mt-2">{orphanVariables.map(renderVariable)}</div>
+            </details>
+          ) : null}
+        </div>
+      </details>
+    );
+  });
+
+  return (
+    <main className="flex-1 p-6">
+      <div className="w-full max-w-2xl">
+        <h1 className="text-lg font-medium text-quartz mb-2">{t('title')}</h1>
+        <p className="text-xs text-nickel mb-4">{t('intro')}</p>
+
+        <form className="mb-6" action="/admin/metodologia/contenido">
+          <input
+            type="search"
+            name="q"
+            defaultValue={rawQuery}
+            placeholder={t('searchPlaceholder')}
+            className="w-full border border-silver/60 rounded-lg px-3 py-2 text-sm text-quartz"
+          />
+        </form>
+
+        <div className="space-y-4">
+          {dimensionSections}
+          {hasQuery && totalShown === 0 ? <p className="text-sm text-nickel">{t('searchNoResults')}</p> : null}
         </div>
       </div>
     </main>

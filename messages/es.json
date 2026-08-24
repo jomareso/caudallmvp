@@ -83,6 +83,8 @@
         "possibleStatesLabel": "Estados posibles",
         "noQuestions": "Sin preguntas para esta variable todavía.",
         "unownedVariables": "Variables sin constructo asignado",
+        "searchPlaceholder": "Buscar por nombre, código o texto de pregunta...",
+        "searchNoResults": "No se encontraron resultados para esa búsqueda.",
         "statusActive": "Activa",
         "statusDraft": "Borrador",
         "roles": {

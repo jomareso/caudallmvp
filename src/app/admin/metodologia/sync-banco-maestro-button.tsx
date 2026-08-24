@@ -45,7 +45,7 @@ export function SyncBancoMaestroButton({
   }
 
   return (
-    <div className="bg-white border border-silver/60 rounded-xl p-6">
+    <div className="mt-4 pt-4 border-t border-silver/60">
       <h2 className="text-sm font-medium text-quartz mb-1">{labels.title}</h2>
       <p className="text-xs text-nickel mb-4">{labels.description}</p>
 
