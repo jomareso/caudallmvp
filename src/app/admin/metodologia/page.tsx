@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth/auth';
@@ -53,6 +54,14 @@ export default async function AdminMetodologiaPage() {
             <p className="text-xs text-nickel">{t('lastSyncNone')}</p>
           )}
         </div>
+
+        <Link
+          href="/admin/metodologia/contenido"
+          className="block bg-white border border-silver/60 rounded-xl p-4 mb-4 hover:border-cola"
+        >
+          <p className="text-sm font-medium text-quartz">{t('viewContentLink')}</p>
+          <p className="text-xs text-nickel">{t('viewContentDescription')}</p>
+        </Link>
 
         <SyncBancoMaestroButton
           labels={{

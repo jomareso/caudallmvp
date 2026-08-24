@@ -70,7 +70,30 @@
       "syncResultDraft": "En DRAFT",
       "syncResultConstructs": "Constructos",
       "syncResultVariables": "Variables",
-      "syncError": "No pudimos sincronizar el banco de preguntas. Intenta de nuevo."
+      "syncError": "No pudimos sincronizar el banco de preguntas. Intenta de nuevo.",
+      "viewContentLink": "Ver contenido completo",
+      "viewContentDescription": "Constructos, variables y preguntas del banco vigente, de solo lectura.",
+      "contenido": {
+        "title": "Contenido del banco de preguntas",
+        "intro": "Vista de solo lectura de constructos, variables y preguntas del banco vigente. Para actualizar el contenido, edita el Excel y usa \"Sincronizar banco de preguntas\".",
+        "constructsInDimension": "{count} constructos",
+        "variablesInConstruct": "{count} variables",
+        "questionsInVariable": "{count} preguntas",
+        "definitionLabel": "Definición",
+        "possibleStatesLabel": "Estados posibles",
+        "noQuestions": "Sin preguntas para esta variable todavía.",
+        "unownedVariables": "Variables sin constructo asignado",
+        "statusActive": "Activa",
+        "statusDraft": "Borrador",
+        "roles": {
+          "ANCHOR": "Ancla",
+          "ADAPTIVE": "Adaptativa",
+          "GATE": "Filtro",
+          "BEHAVIORAL": "Conductual",
+          "CONTEXT": "Contexto",
+          "FOLLOWUP": "Seguimiento"
+        }
+      }
     },
     "login": {
       "subtitle": "Panel administrativo",
