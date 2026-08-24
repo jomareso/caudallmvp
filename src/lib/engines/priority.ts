@@ -35,6 +35,19 @@ export type PriorityResult = {
   explanation: string;
 };
 
+export type SeverityCandidate = { state: string; score: number };
+
+// Primero por severidad del estado (CRITICAL peor que UNMET peor que
+// PARTIAL peor que MET); a igual estado, desempata por score más bajo
+// dentro de esa misma banda.
+export function pickMostSevere<T extends SeverityCandidate>(candidates: T[]): T {
+  return [...candidates].sort((a, b) => {
+    const severityDiff = (SEVERITY_ORDER[a.state] ?? 9) - (SEVERITY_ORDER[b.state] ?? 9);
+    if (severityDiff !== 0) return severityDiff;
+    return a.score - b.score;
+  })[0];
+}
+
 export async function worstDimensionBySeverity(employeeId: string): Promise<PriorityResult> {
   const scores = await prisma.dimensionScore.findMany({ where: { employeeId, state: { not: 'NA' } } });
 
@@ -42,11 +55,7 @@ export async function worstDimensionBySeverity(employeeId: string): Promise<Prio
     return { dimensionCode: null, reason: 'NONE', explanation: 'Sin dimensiones evaluables todavía.' };
   }
 
-  const worst = [...scores].sort((a, b) => {
-    const severityDiff = (SEVERITY_ORDER[a.state] ?? 9) - (SEVERITY_ORDER[b.state] ?? 9);
-    if (severityDiff !== 0) return severityDiff;
-    return a.score - b.score;
-  })[0];
+  const worst = pickMostSevere(scores);
 
   const dimension = await prisma.dimension.findUnique({ where: { id: worst.dimensionId } });
 

@@ -23,13 +23,13 @@ export const SAFETY_FLAG_DIMENSION: Record<string, string> = {
   CRITICAL_DEBT: 'DEBT'
 };
 
-type SafetyRule = {
+export type SafetyRule = {
   flagCode: string;
   variableCode: string;
   triggerStates: string[];
 };
 
-const SAFETY_RULES: SafetyRule[] = [
+export const SAFETY_RULES: SafetyRule[] = [
   { flagCode: 'DEBT_PAYMENT_STRESS', variableCode: 'DEBT_ARREARS', triggerStates: ['CURRENT'] },
   { flagCode: 'DEBT_CYCLE_RISK', variableCode: 'DEBT_ROLLOVER', triggerStates: ['RECURRENT'] },
   { flagCode: 'CASHFLOW_CREDIT_DEPENDENCY', variableCode: 'DEBT_ESSENTIAL_DEPENDENCY', triggerStates: ['RECURRENT'] }

@@ -40,6 +40,32 @@ export type NextBestActionResult = {
 
 const GAP_STATES = ['CRITICAL', 'UNMET', 'PARTIAL'];
 
+// Compartida entre la ruta de mantenimiento (sin brecha real) y la ruta
+// normal por dimensión: una intervención nunca se ofrece si exige más
+// disposición financiera o conductual de la que el empleado tiene hoy.
+// finRank/behRank en -1 (readiness todavía desconocida) bloquea cualquier
+// intervención que declare un requisito — regla CORE #13: no exigir más
+// certeza de la que hay.
+export function meetsReadinessGate(
+  intervention: Pick<Intervention, 'financialReadinessRequired' | 'behavioralReadinessRequired'>,
+  finRank: number,
+  behRank: number
+): boolean {
+  if (
+    intervention.financialReadinessRequired &&
+    finRank < (FIN_READINESS_ORDER[intervention.financialReadinessRequired] ?? 0)
+  ) {
+    return false;
+  }
+  if (
+    intervention.behavioralReadinessRequired &&
+    behRank < (BEH_READINESS_ORDER[intervention.behavioralReadinessRequired] ?? 0)
+  ) {
+    return false;
+  }
+  return true;
+}
+
 async function hasNoRealGap(employeeId: string): Promise<boolean> {
   const scores = await prisma.dimensionScore.findMany({ where: { employeeId, state: { not: 'NA' } } });
   return scores.length > 0 && scores.every((s) => !GAP_STATES.includes(s.state));
@@ -60,12 +86,7 @@ async function eligibleMaintenanceCourse(
   });
   const shownIds = new Set(alreadyShown.map((e) => e.interventionId));
 
-  const eligible = courses.filter((c) => {
-    if (shownIds.has(c.id)) return false;
-    if (c.financialReadinessRequired && finRank < (FIN_READINESS_ORDER[c.financialReadinessRequired] ?? 0)) return false;
-    if (c.behavioralReadinessRequired && behRank < (BEH_READINESS_ORDER[c.behavioralReadinessRequired] ?? 0)) return false;
-    return true;
-  });
+  const eligible = courses.filter((c) => !shownIds.has(c.id) && meetsReadinessGate(c, finRank, behRank));
 
   return eligible[0] ?? null;
 }
@@ -91,11 +112,7 @@ async function eligibleCandidatesForDimension(
   const finRank = eligibility.financialReadiness.state ? FIN_READINESS_ORDER[eligibility.financialReadiness.state] : -1;
   const behRank = eligibility.behavioralReadiness.state ? BEH_READINESS_ORDER[eligibility.behavioralReadiness.state] : -1;
 
-  return candidates.filter((c) => {
-    if (c.financialReadinessRequired && finRank < (FIN_READINESS_ORDER[c.financialReadinessRequired] ?? 0)) return false;
-    if (c.behavioralReadinessRequired && behRank < (BEH_READINESS_ORDER[c.behavioralReadinessRequired] ?? 0)) return false;
-    return true;
-  });
+  return candidates.filter((c) => meetsReadinessGate(c, finRank, behRank));
 }
 
 export async function computeNextBestAction(employeeId: string): Promise<NextBestActionResult> {
