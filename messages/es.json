@@ -57,6 +57,9 @@
     },
     "metodologia": {
       "title": "Metodología",
+      "currentVersion": "Versión vigente",
+      "lastSync": "Última actualización",
+      "lastSyncNone": "Todavía no se ha sincronizado desde este panel.",
       "syncTitle": "Banco de preguntas",
       "syncDescription": "Aplica el contenido más reciente (constructos, variables, preguntas, opciones, reglas) que ya está en el código de la app.",
       "syncCta": "Sincronizar banco de preguntas",

@@ -50,5 +50,6 @@ export async function syncBancoMaestroContent(): Promise<
   });
 
   revalidatePath('/diagnostico');
+  revalidatePath('/admin/metodologia');
   return { ok: true, summary };
 }

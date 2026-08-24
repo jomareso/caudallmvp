@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { syncBancoMaestroContent } from './actions';
 import type { SyncBancoMaestroSummary } from '@/lib/seed/sync-banco-maestro';
 
@@ -21,6 +22,7 @@ export function SyncBancoMaestroButton({
     error: string;
   };
 }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [summary, setSummary] = useState<SyncBancoMaestroSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +38,9 @@ export function SyncBancoMaestroButton({
         return;
       }
       setSummary(result.summary);
+      // La acción ya revalida /admin/metodologia en el servidor; refresh()
+      // trae esos datos frescos (versión + trazabilidad) sin recargar la página.
+      router.refresh();
     });
   }
 

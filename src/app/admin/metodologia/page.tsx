@@ -17,10 +17,38 @@ export default async function AdminMetodologiaPage() {
 
   const t = await getTranslations('admin.metodologia');
 
+  const [methodology, questionBank, lastSync] = await Promise.all([
+    prisma.methodology.findFirst({ where: { status: 'ACTIVE' } }),
+    prisma.questionBank.findFirst({ where: { status: 'ACTIVE' } }),
+    prisma.auditLog.findFirst({
+      where: { what: 'SYNC_BANCO_MAESTRO' },
+      orderBy: { when: 'desc' }
+    })
+  ]);
+
+  const lastSyncWho = lastSync?.whoData as { email?: string } | null;
+  const lastSyncWhen = lastSync
+    ? new Intl.DateTimeFormat('es-DO', { dateStyle: 'medium', timeStyle: 'short' }).format(lastSync.when)
+    : null;
+
   return (
     <main className="flex-1 p-6">
       <div className="w-full max-w-sm">
         <h1 className="text-lg font-medium text-quartz mb-6">{t('title')}</h1>
+
+        <div className="bg-white border border-silver/60 rounded-xl p-6 mb-4">
+          <p className="text-xs text-nickel mb-1">
+            {t('currentVersion')}: <span className="text-quartz font-medium">{methodology?.version ?? '—'}</span>
+            {questionBank ? ` (${questionBank.version})` : ''}
+          </p>
+          {lastSync && lastSyncWho?.email ? (
+            <p className="text-xs text-nickel">
+              {t('lastSync')}: {lastSyncWho.email} · {lastSyncWhen}
+            </p>
+          ) : (
+            <p className="text-xs text-nickel">{t('lastSyncNone')}</p>
+          )}
+        </div>
 
         <SyncBancoMaestroButton
           labels={{
