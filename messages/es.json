@@ -84,6 +84,7 @@
       "syncCta": "Sincronizar banco de preguntas",
       "syncing": "Sincronizando...",
       "syncConfirm": "Esto reemplaza el banco de preguntas activo con el que está en el código ahora mismo. ¿Continuar?",
+      "syncSuccess": "Banco de preguntas actualizado correctamente.",
       "syncResultActive": "Preguntas activas",
       "syncResultDraft": "En DRAFT",
       "syncResultConstructs": "Constructos",

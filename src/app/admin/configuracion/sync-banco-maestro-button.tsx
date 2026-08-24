@@ -13,6 +13,7 @@ export function SyncBancoMaestroButton({
     cta: string;
     syncing: string;
     confirm: string;
+    success: string;
     resultActive: string;
     resultDraft: string;
     resultConstructs: string;
@@ -55,13 +56,16 @@ export function SyncBancoMaestroButton({
       {error ? <p className="text-xs text-bad mt-3">{error}</p> : null}
 
       {summary ? (
-        <div className="text-xs text-nickel mt-3 space-y-0.5">
-          <p>
-            {labels.resultConstructs}: {summary.constructs} · {labels.resultVariables}: {summary.variables}
-          </p>
-          <p>
-            {labels.resultActive}: {summary.questionsActive} · {labels.resultDraft}: {summary.questionsDraft}
-          </p>
+        <div className="mt-3">
+          <p className="text-xs text-ok font-medium mb-1">✓ {labels.success}</p>
+          <div className="text-xs text-nickel space-y-0.5">
+            <p>
+              {labels.resultConstructs}: {summary.constructs} · {labels.resultVariables}: {summary.variables}
+            </p>
+            <p>
+              {labels.resultActive}: {summary.questionsActive} · {labels.resultDraft}: {summary.questionsDraft}
+            </p>
+          </div>
         </div>
       ) : null}
     </div>

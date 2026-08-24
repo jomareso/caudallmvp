@@ -58,6 +58,7 @@ export default async function AdminConfiguracionPage() {
             cta: t('syncCta'),
             syncing: t('syncing'),
             confirm: t('syncConfirm'),
+            success: t('syncSuccess'),
             resultActive: t('syncResultActive'),
             resultDraft: t('syncResultDraft'),
             resultConstructs: t('syncResultConstructs'),
