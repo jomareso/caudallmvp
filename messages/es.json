@@ -52,10 +52,22 @@
     "nav": {
       "settings": "Configuración",
       "admins": "Administradores",
+      "methodology": "Metodología",
       "logout": "Cerrar sesión"
     },
-    "methodology": {
-      "title": "Metodología"
+    "metodologia": {
+      "title": "Metodología",
+      "syncTitle": "Banco de preguntas",
+      "syncDescription": "Aplica el contenido más reciente (constructos, variables, preguntas, opciones, reglas) que ya está en el código de la app.",
+      "syncCta": "Sincronizar banco de preguntas",
+      "syncing": "Sincronizando...",
+      "syncConfirm": "Esto reemplaza el banco de preguntas activo con el que está en el código ahora mismo. ¿Continuar?",
+      "syncSuccess": "Banco de preguntas actualizado correctamente.",
+      "syncResultActive": "Preguntas activas",
+      "syncResultDraft": "En DRAFT",
+      "syncResultConstructs": "Constructos",
+      "syncResultVariables": "Variables",
+      "syncError": "No pudimos sincronizar el banco de preguntas. Intenta de nuevo."
     },
     "login": {
       "subtitle": "Panel administrativo",
@@ -78,23 +90,14 @@
       "uploadSuccess": "Logo actualizado.",
       "uploadErrorType": "El archivo debe ser una imagen (PNG, JPG, WEBP o SVG).",
       "uploadErrorSize": "El archivo es muy grande — el máximo es 2 MB.",
-      "uploadErrorGeneric": "No pudimos guardar el logo. Intenta de nuevo.",
-      "syncTitle": "Banco de preguntas",
-      "syncDescription": "Aplica el contenido más reciente (constructos, variables, preguntas, opciones, reglas) que ya está en el código de la app.",
-      "syncCta": "Sincronizar banco de preguntas",
-      "syncing": "Sincronizando...",
-      "syncConfirm": "Esto reemplaza el banco de preguntas activo con el que está en el código ahora mismo. ¿Continuar?",
-      "syncSuccess": "Banco de preguntas actualizado correctamente.",
-      "syncResultActive": "Preguntas activas",
-      "syncResultDraft": "En DRAFT",
-      "syncResultConstructs": "Constructos",
-      "syncResultVariables": "Variables",
-      "syncError": "No pudimos sincronizar el banco de preguntas. Intenta de nuevo."
+      "uploadErrorGeneric": "No pudimos guardar el logo. Intenta de nuevo."
     },
     "panel": {
       "title": "Panel de Caudall",
       "settingsLink": "Configuración",
       "settingsDescription": "Logo de Caudall y ajustes de la plataforma.",
+      "methodologyLink": "Metodología",
+      "methodologyDescription": "Sincronizar el banco de preguntas con el código.",
       "adminsLink": "Administradores",
       "adminsDescription": "Crear y ver los usuarios con acceso al panel."
     },

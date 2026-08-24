@@ -57,6 +57,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                 <Link href="/admin/configuracion" className="hover:text-yale">
                   {t('settings')}
                 </Link>
+                <Link href="/admin/metodologia" className="hover:text-yale">
+                  {t('methodology')}
+                </Link>
                 <Link href="/admin/administradores" className="hover:text-yale">
                   {t('admins')}
                 </Link>

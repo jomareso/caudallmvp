@@ -30,6 +30,14 @@ export default async function AdminPanelPage() {
           </Link>
 
           <Link
+            href="/admin/metodologia"
+            className="block bg-white border border-silver/60 rounded-xl p-4 hover:border-cola"
+          >
+            <p className="text-sm font-medium text-quartz">{t('methodologyLink')}</p>
+            <p className="text-xs text-nickel">{t('methodologyDescription')}</p>
+          </Link>
+
+          <Link
             href="/admin/administradores"
             className="block bg-white border border-silver/60 rounded-xl p-4 hover:border-cola"
           >
