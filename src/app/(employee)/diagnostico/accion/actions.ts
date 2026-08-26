@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import type { EmployeeInterventionStatus, InterventionOutcome } from '@prisma/client';
 import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
-import { computeNextBestAction } from '@/lib/engines/next-best-action';
+import { computeNextBestAction, hasNoRealGap } from '@/lib/engines/next-best-action';
 import { logLearningEvent, reportInterventionOutcome } from '@/lib/engines/learning';
 
 async function requireEmployeeId(): Promise<string> {
@@ -23,7 +23,18 @@ export type ActionSuggestion = {
   videoUrl: string | null;
 };
 
-export async function getActionSuggestion(): Promise<ActionSuggestion | null> {
+// Distingue dos motivos muy distintos de no mostrar ninguna tarjeta: que el
+// empleado de verdad no tenga ninguna brecha real (HEALTHY — "vas bien"),
+// contra que el motor todavía no tenga certeza suficiente para recomendar
+// algo (PENDING — ej. una pregunta condicional de la que depende la
+// elegibilidad, como SAV_CAPACITY, nunca se disparó con sus respuestas). Antes
+// se mostraba el mismo mensaje de "vas bien" para ambos casos, lo cual es
+// engañoso cuando en realidad falta información, no que todo esté resuelto.
+export type ActionResult =
+  | { kind: 'suggestion'; suggestion: ActionSuggestion }
+  | { kind: 'none'; reason: 'HEALTHY' | 'PENDING' };
+
+export async function getActionSuggestion(): Promise<ActionResult> {
   const employeeId = await requireEmployeeId();
 
   const existing = await prisma.employeeIntervention.findFirst({
@@ -34,18 +45,24 @@ export async function getActionSuggestion(): Promise<ActionSuggestion | null> {
 
   if (existing) {
     return {
-      employeeInterventionId: existing.id,
-      status: existing.status,
-      titleI18nKey: existing.intervention.titleI18nKey,
-      descriptionI18nKey: existing.intervention.descriptionI18nKey,
-      actionTextI18nKey: existing.intervention.actionTextI18nKey,
-      whyThisStepI18nKey: existing.intervention.whyThisStepI18nKey,
-      videoUrl: existing.intervention.videoUrl
+      kind: 'suggestion',
+      suggestion: {
+        employeeInterventionId: existing.id,
+        status: existing.status,
+        titleI18nKey: existing.intervention.titleI18nKey,
+        descriptionI18nKey: existing.intervention.descriptionI18nKey,
+        actionTextI18nKey: existing.intervention.actionTextI18nKey,
+        whyThisStepI18nKey: existing.intervention.whyThisStepI18nKey,
+        videoUrl: existing.intervention.videoUrl
+      }
     };
   }
 
   const nba = await computeNextBestAction(employeeId);
-  if (!nba.intervention) return null;
+  if (!nba.intervention) {
+    const healthy = await hasNoRealGap(employeeId);
+    return { kind: 'none', reason: healthy ? 'HEALTHY' : 'PENDING' };
+  }
 
   // No volver a ofrecer algo que el empleado ya resolvió (lo descartó, o ya
   // reportó un resultado) — el motor todavía no busca "la siguiente mejor
@@ -57,7 +74,7 @@ export async function getActionSuggestion(): Promise<ActionSuggestion | null> {
   const alreadyResolved = await prisma.employeeIntervention.findFirst({
     where: { employeeId, interventionId: nba.intervention.id, status: { in: ['DISMISSED', 'COMPLETED'] } }
   });
-  if (alreadyResolved) return null;
+  if (alreadyResolved) return { kind: 'none', reason: 'HEALTHY' };
 
   const employee = await prisma.employee.findUniqueOrThrow({ where: { id: employeeId } });
   const created = await prisma.employeeIntervention.create({
@@ -71,13 +88,16 @@ export async function getActionSuggestion(): Promise<ActionSuggestion | null> {
   });
 
   return {
-    employeeInterventionId: created.id,
-    status: 'SUGGESTED',
-    titleI18nKey: nba.intervention.titleI18nKey,
-    descriptionI18nKey: nba.intervention.descriptionI18nKey,
-    actionTextI18nKey: nba.intervention.actionTextI18nKey,
-    whyThisStepI18nKey: nba.intervention.whyThisStepI18nKey,
-    videoUrl: nba.intervention.videoUrl
+    kind: 'suggestion',
+    suggestion: {
+      employeeInterventionId: created.id,
+      status: 'SUGGESTED',
+      titleI18nKey: nba.intervention.titleI18nKey,
+      descriptionI18nKey: nba.intervention.descriptionI18nKey,
+      actionTextI18nKey: nba.intervention.actionTextI18nKey,
+      whyThisStepI18nKey: nba.intervention.whyThisStepI18nKey,
+      videoUrl: nba.intervention.videoUrl
+    }
   };
 }
 

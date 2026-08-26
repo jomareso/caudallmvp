@@ -261,6 +261,7 @@
       "SAVING": "Ahorro",
       "PLANNING": "Planificación",
       "BEHAVIORAL": "Conductual",
+      "CONTEXTO": "Contexto",
       "descriptions": {
         "CONTROL": "¿Manejo sosteniblemente mis finanzas cotidianas?",
         "RESILIENCE": "¿Puedo absorber un shock financiero?",
@@ -1337,6 +1338,7 @@
       "partial": "En parte",
       "notAchieved": "No todavía",
       "none": "Vas bien — no hay ninguna acción pendiente que necesites atender ahora.",
+    "pending": "Todavía no tenemos suficiente información para sugerirte un próximo paso. Vuelve a revisar tu diagnóstico más adelante — algunas respuestas nuevas pueden desbloquear una recomendación.",
       "watchVideo": "Ver video corto"
     }
   },
