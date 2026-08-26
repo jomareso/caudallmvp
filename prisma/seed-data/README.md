@@ -1,18 +1,74 @@
-# Banco Maestro Caudall v3.6
+# Banco Maestro Caudall v4.1 (SIMPLIFICADO)
 
 `banco-maestro-v3.json` es una conversión directa (sin reescribir contenido)
-del Excel real `Banco_Maestro_Caudall_v3_6.xlsx` que diseñó la fundadora —
-no es contenido de desarrollo. El script de conversión (`scripts/convert-
-banco-maestro-v3_6.py`, requiere `openpyxl`) es un paso manual de una sola
-vez, no corre en CI; este JSON es la fuente que usa `prisma/seed.ts`. La
-v3.6 reorganiza el Excel de 8 pestañas planas a 4 con secciones internas
+del Excel real más reciente que compartió la fundadora —
+no es contenido de desarrollo. El script de conversión vigente
+(`scripts/convert-banco-maestro-v4_1.py`, requiere `openpyxl`) es un paso
+manual de una sola vez, no corre en CI; este JSON es la fuente que usa
+`prisma/seed.ts`. Misma estructura de 4 pestañas desde v3.6
 (`00_ARQUITECTURA` es un diagrama/resumen visual, no tiene datos
 estructurados y no se carga; `01_METODOLOGIA` trae A. Constructos / B.
-Variables / C. Mapa conductual / D. Behavioral & copy; `03_REGLAS_QA` trae
-A. Inferencias y prohibidas / B. QA; `02_BANCO_PREGUNTAS` fusiona preguntas
-y opciones en una fila por opción, agrupada por `QUESTION_ID`). El script
-anterior (`convert-banco-maestro-v3_1.py`) queda como registro de la
-conversión intermedia v3.1, ya superada.
+Variables / C. Mapa conductual / D. Behavioral & copy — y desde v4.0 también
+E-J: matriz de validación empírica y una "auditoría metodológica crítica"
+propuesta que **no se carga ni se implementa** (ver más abajo);
+`03_REGLAS_QA` trae A. Inferencias y prohibidas / B. QA (incluye desde v4.1
+una subsección C. Contexto con 12 escenarios nuevos); `02_BANCO_PREGUNTAS`
+fusiona preguntas y opciones en una fila por opción, agrupada por
+`QUESTION_ID`). Los scripts anteriores (`convert-banco-maestro-v3_1.py`,
+`convert-banco-maestro-v3_6.py`) quedan como registro de conversiones
+intermedias, ya superadas.
+
+## v4.1 SIMPLIFICADO (26 ago 2026): menos preguntas activas, sin tocar el motor
+
+A petición de Reynoso ("meter una versión más simplificada, menos
+constructos, menos preguntas al usuario — no la auditoría por ahora"), el
+Excel v4.1 recorta el conjunto de preguntas **activas** de 204 a **101**
+(mismos 321 candidatos, mismos constructos y estructura que v3.6/v4.0 — el
+recorte es solo la columna `Estado`, las inactivas ahora se llaman
+`RESERVA` en vez de `DRAFT`; `toQuestionStatus()` ya trata cualquier valor
+que no sea literalmente `'ACTIVA'` como `DRAFT`, así que no hizo falta
+tocar código para ese cambio de nombre).
+
+El Excel v4.0/v4.1 también trae una "Auditoría Metodológica Crítica"
+(secciones F-J: 15 decisiones D01-D15 + remapeo de constructos + capa
+conductual transversal + plan de validación de campo) — el propio Excel la
+marca como propuesta para revisión, y los constructos reales de la sección
+A **no la reflejan todavía** (siguen los 55 sesgos × 5 dimensiones y los
+constructos que la auditoría recomienda reducir). El script de conversión
+deliberadamente no lee esas secciones (igual que en v3.6/v4.0, quedan fuera
+de los rangos de fila hardcodeados) — es papel para una decisión aparte de
+Reynoso, no algo que este sync haya aplicado.
+
+### Bloque de contexto nuevo (CTX-01..07)
+
+v4.1 agrega 7 preguntas de contexto activas — el bloque "antes de ver tu
+resultado" de `Caudall_Metodologia_MVP_v1_5.docx` (edad, dependientes,
+responsabilidad del hogar, ingreso, patrón de ingreso, educación, y el
+opt-in de comparación con pares). Dos vacíos reales encontrados y resueltos
+al convertir:
+
+1. **Sin fila de `Variable objetivo` en la sección B** (mismo tipo de vacío
+   que documentó este archivo para la transición v3.0→v3.1) — el script
+   ahora completa esas 7 variables automáticamente a partir de las opciones
+   ya presentes en `02_BANCO_PREGUNTAS` (ver comentario en el script), sin
+   inventar contenido.
+2. **`ASK_IF` en inglés llano** (`"FINANCIAL_DIAGNOSTIC_COMPLETE AND ... user
+   has not skipped optional context block"`) — no es la gramática que
+   `evaluateRule()` interpreta, así que siempre evaluaba a `false` y esas
+   preguntas nunca se habrían preguntado (confirmado con una simulación
+   completa del diagnóstico antes del fix). `isApplicable()` en
+   `src/lib/engines/diagnostic.ts` ahora bypasea el `ASK_IF` de texto libre
+   específicamente para preguntas `role: CONTEXT` — el orden ya las coloca
+   después de ANCHOR/ADAPTIVE (`ROLE_ORDER`), que es justo lo que pide la
+   spec. El dedup normal de "ya respondida" sigue aplicando igual.
+
+Las traducciones de estas 7 preguntas (`messages/es.json`,
+`diagnostic.questions.CTX-0N`) se generaron directamente del `textUX`/
+opciones ya escritos en español en el Excel — no es copy nuevo.
+
+Verificado con una simulación completa del diagnóstico (29 preguntas hasta
+`/diagnostico/resultado`, incluyendo el bloque de contexto al final,
+CFHI y las 5 dimensiones visibles) contra la base local.
 
 ## Qué se cargó
 

@@ -1228,6 +1228,88 @@
           "NOT_COMPLETED_OTHER": "No lo hice por otra razón",
           "SKIPPED": "Decidí no hacerlo"
         }
+      },
+      "CTX-01": {
+        "text": "¿En qué rango de edad estás?",
+        "whyAsk": "Aporta contexto de etapa de vida para análisis y comparación, sin afectar el CFHI. No debe usarse como criterio único de prueba social ni para decisiones laborales.",
+        "options": {
+          "AGE_18_24": "18 a 24 años",
+          "AGE_25_34": "25 a 34 años",
+          "AGE_35_44": "35 a 44 años",
+          "AGE_45_54": "45 a 54 años",
+          "AGE_55_64": "55 a 64 años",
+          "AGE_65_PLUS": "65 años o más",
+          "DECLINED": "Prefiero no responder"
+        }
+      },
+      "CTX-02": {
+        "text": "Además de ti, ¿cuántas personas dependen total o parcialmente de tus ingresos?",
+        "whyAsk": "Aproxima la carga económica del hogar y mejora la comparabilidad entre personas con responsabilidades financieras similares. No afecta el CFHI.",
+        "options": {
+          "DEP_0": "Ninguna",
+          "DEP_1": "1 persona",
+          "DEP_2": "2 personas",
+          "DEP_3": "3 personas",
+          "DEP_4_PLUS": "4 o más personas",
+          "DECLINED": "Prefiero no responder"
+        }
+      },
+      "CTX-03": {
+        "text": "¿Qué parte de los gastos de tu hogar depende de tus ingresos?",
+        "whyAsk": "Contextualiza la responsabilidad económica real de la persona dentro del hogar y evita comparar situaciones con cargas muy distintas. No afecta el CFHI.",
+        "options": {
+          "RESP_ALMOST_ALL": "Prácticamente todos",
+          "RESP_MOST": "Más de la mitad",
+          "RESP_HALF": "Aproximadamente la mitad",
+          "RESP_LESS": "Menos de la mitad",
+          "RESP_NONE": "Ninguno o casi ninguno",
+          "DECLINED": "Prefiero no responder"
+        }
+      },
+      "CTX-04": {
+        "text": "Aproximadamente, ¿en qué rango está tu ingreso mensual neto personal?",
+        "whyAsk": "Permite contextualizar capacidad financiera y construir comparaciones más pertinentes. El ingreso es contexto, no puntuación de salud financiera.",
+        "options": {
+          "INC_LT_25K": "Menos de RD$25,000",
+          "INC_25_49K": "RD$25,000 a RD$49,999",
+          "INC_50_74K": "RD$50,000 a RD$74,999",
+          "INC_75_99K": "RD$75,000 a RD$99,999",
+          "INC_100_149K": "RD$100,000 a RD$149,999",
+          "INC_150_199K": "RD$150,000 a RD$199,999",
+          "INC_200K_PLUS": "RD$200,000 o más",
+          "DECLINED": "Prefiero no responder"
+        }
+      },
+      "CTX-05": {
+        "text": "Pensando en los últimos meses, ¿cómo describirías tus ingresos de un mes a otro?",
+        "whyAsk": "Distingue estabilidad y variabilidad del ingreso para comparar contextos financieros semejantes. La variabilidad por sí sola no implica mala salud financiera.",
+        "options": {
+          "INC_STABLE": "Son bastante estables de un mes a otro",
+          "INC_MOSTLY_STABLE": "Son mayormente estables, con algunas variaciones",
+          "INC_VARIABLE_PREDICTABLE": "Varían, pero normalmente puedo anticipar cuánto recibiré",
+          "INC_VARIABLE_UNPREDICTABLE": "Varían bastante y es difícil anticipar cuánto recibiré",
+          "DECLINED": "Prefiero no responder"
+        }
+      },
+      "CTX-06": {
+        "text": "¿Cuál es el nivel educativo más alto que has alcanzado?",
+        "whyAsk": "Aporta contexto adicional para segmentación y análisis, sin asumir que un mayor nivel educativo implica mejor salud financiera. No afecta el CFHI.",
+        "options": {
+          "EDU_PRIMARY_OR_LESS": "Primaria o menos",
+          "EDU_SECONDARY": "Secundaria",
+          "EDU_TECHNICAL": "Técnico / vocacional",
+          "EDU_UNIVERSITY": "Universitario",
+          "EDU_POSTGRAD": "Posgrado",
+          "DECLINED": "Prefiero no responder"
+        }
+      },
+      "CTX-07": {
+        "text": "¿Quieres comparar tus resultados con personas que tienen un contexto financiero similar al tuyo?",
+        "whyAsk": "Registra la decisión explícita del participante de ver o no una comparación contextual. La respuesta no modifica su puntuación ni sus recomendaciones.",
+        "options": {
+          "YES": "Sí, quiero ver la comparación",
+          "NO": "No, prefiero ver solo mis resultados"
+        }
       }
     },
     "result": {
