@@ -24,7 +24,10 @@ export async function requestAdminMagicLink(
   // el primer ADM). No revelamos si el correo existe o no en la respuesta,
   // para no filtrar qué correos son admins.
   const admin = await prisma.adminUser.findUnique({ where: { email } });
-  if (!admin) {
+  // Un admin desactivado no debe poder pedir un link nuevo — mismo trato
+  // silencioso que un correo que no existe, para no filtrar cuáles son
+  // admins ni cuáles están desactivados.
+  if (!admin || !admin.active) {
     return { ok: true };
   }
 

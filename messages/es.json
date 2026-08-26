@@ -31,7 +31,8 @@
     },
     "licenseExpired": {
       "title": "Tu acceso venció",
-      "subtitle": "Tu empresa contrató tu licencia por un tiempo limitado y ya se cumplió. Contacta a tu equipo de RRHH si necesitas seguir usando Caudall."
+      "subtitle": "Tu empresa contrató tu licencia por un tiempo limitado y ya se cumplió. Contacta a tu equipo de RRHH si necesitas seguir usando Caudall.",
+      "subtitleSuspended": "Tu empresa pausó temporalmente su cuenta de Caudall. Contacta a tu equipo de RRHH si tienes preguntas."
     },
     "welcome": {
       "title": "Ya estás dentro, bienvenido a {tenantName}",
@@ -180,7 +181,14 @@
       "adminWelcomeEmailFailed": "creado, pero no pudimos enviarle el correo — avísale tú directamente",
       "adminDuplicate": "ya existe como administrador, no se agregó",
       "adminInvalidFormat": "correo no válido, no se agregó",
-      "continueCta": "Continuar a la empresa"
+      "continueCta": "Continuar a la empresa",
+      "saveCta": "Guardar",
+      "saving": "Guardando...",
+      "suspendCta": "Suspender empresa",
+      "reactivateCta": "Reactivar empresa",
+      "confirmSuspend": "¿Suspender esta empresa? Sus empleados y administradores perderán acceso de inmediato. No se borra ningún dato y puedes reactivarla cuando quieras.",
+      "suspendedNotice": "Esta empresa está suspendida — sus empleados y administradores no pueden entrar.",
+      "suspendedBadge": "Suspendida"
     },
     "administradores": {
       "title": "Administradores",
@@ -208,7 +216,15 @@
       "colEmail": "Correo",
       "colProfile": "Perfil",
       "colDetail": "Detalle",
-      "colCreated": "Creado"
+      "colCreated": "Creado",
+      "errorSelfDemote": "No puedes quitarte a ti mismo el perfil ADM.",
+      "errorSelfDeactivate": "No puedes desactivar tu propia cuenta.",
+      "editCta": "Editar",
+      "saveCta": "Guardar",
+      "cancelCta": "Cancelar",
+      "deactivateCta": "Desactivar",
+      "activateCta": "Activar",
+      "inactiveBadge": "Inactivo"
     },
     "empresa": {
       "title": "Salud financiera de {tenantName}",

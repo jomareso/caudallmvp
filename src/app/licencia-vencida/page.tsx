@@ -1,7 +1,12 @@
 import { getTranslations } from 'next-intl/server';
 
-export default async function LicenciaVencidaPage() {
+export default async function LicenciaVencidaPage({
+  searchParams
+}: {
+  searchParams: { motivo?: string };
+}) {
   const t = await getTranslations('employee.licenseExpired');
+  const suspended = searchParams.motivo === 'suspendida';
 
   return (
     <main className="min-h-screen flex items-center justify-center p-6">
@@ -10,7 +15,7 @@ export default async function LicenciaVencidaPage() {
           !
         </div>
         <h1 className="text-lg font-medium text-quartz mb-2">{t('title')}</h1>
-        <p className="text-sm text-nickel">{t('subtitle')}</p>
+        <p className="text-sm text-nickel">{t(suspended ? 'subtitleSuspended' : 'subtitle')}</p>
       </div>
     </main>
   );

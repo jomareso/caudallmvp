@@ -20,6 +20,7 @@ export default async function EmpresasPage() {
     include: { licenses: { select: { status: true } } },
     orderBy: { createdAt: 'desc' }
   });
+  const tSuspended = t('suspendedBadge');
 
   return (
     <main className="flex-1 p-6">
@@ -62,7 +63,14 @@ export default async function EmpresasPage() {
                 href={`/admin/empresas/${tenant.id}`}
                 className="block bg-white border border-silver/60 rounded-lg p-3 text-xs hover:border-cola"
               >
-                <p className="text-quartz font-medium">{tenant.name}</p>
+                <p className="text-quartz font-medium">
+                  {tenant.name}
+                  {tenant.status === 'SUSPENDED' ? (
+                    <span className="ml-2 text-[10px] bg-bad/10 text-bad rounded px-1.5 py-0.5 align-middle">
+                      {tSuspended}
+                    </span>
+                  ) : null}
+                </p>
                 <p className="text-nickel">
                   {t('licenseSummary', { active, unused, expired, total: tenant.licenses.length })}
                 </p>

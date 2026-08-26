@@ -173,6 +173,7 @@ model AdminUser {
   profileType    AdminProfileType
   functionalRole FunctionalRole?
   tenantId       String?
+  active         Boolean          @default(true)
   createdAt      DateTime         @default(now())
   lastActiveAt   DateTime?
 

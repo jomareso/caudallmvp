@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
@@ -14,12 +15,18 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
   const admin =
     sessionUser?.role === 'admin' && sessionUser.id
-      ? await prisma.adminUser.findUnique({ where: { id: sessionUser.id } })
+      ? await prisma.adminUser.findUnique({ where: { id: sessionUser.id }, include: { tenant: true } })
       : null;
 
   // Sin sesión de admin (ej. la pantalla de login) no hay nada que
   // envolver: se muestra la página tal cual, sin encabezado ni navegación.
   if (!admin) return <>{children}</>;
+
+  // Un admin desactivado (ej. desde /admin/administradores) o cuya empresa
+  // fue suspendida puede seguir teniendo un JWT válido — este chequeo corta
+  // el acceso en cada carga de página admin, igual que la licencia vencida
+  // corta al empleado.
+  if (!admin.active || admin.tenant?.status === 'SUSPENDED') redirect('/admin');
 
   const settings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } });
   const hasLogo = Boolean(settings?.logoData);

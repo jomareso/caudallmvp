@@ -11,7 +11,7 @@ import { generateUniqueLicenseCodes, isLicenseDurationMonths } from '@/lib/licen
 import { sendAdminWelcomeEmail } from '@/lib/email/send-magic-link';
 import { getRequestOrigin } from '@/lib/http/request-origin';
 
-async function requireAdm(): Promise<void> {
+async function requireAdm() {
   const session = await auth();
   // Ver src/lib/auth/auth.ts sobre por qué el cast local.
   const sessionUser = session?.user as { id?: string; role?: 'employee' | 'admin' } | undefined;
@@ -19,6 +19,7 @@ async function requireAdm(): Promise<void> {
 
   const admin = await prisma.adminUser.findUnique({ where: { id: sessionUser.id } });
   if (!admin || admin.profileType !== 'ADM') redirect('/admin');
+  return admin;
 }
 
 const createTenantSchema = z.object({
@@ -142,4 +143,87 @@ export async function generateLicenses(
 
   revalidatePath(`/admin/empresas/${tenantId}`);
   return { ok: true, codes };
+}
+
+const updateTenantSchema = z.object({
+  tenantId: z.string().trim().min(1),
+  name: z.string().trim().min(1)
+});
+
+export async function updateTenant(input: unknown): Promise<{ ok: true } | { ok: false; message: string }> {
+  const admin = await requireAdm();
+  const t = await getTranslations('admin.empresas');
+
+  const parsed = updateTenantSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, message: t('errorGeneric') };
+  }
+  const { tenantId, name } = parsed.data;
+
+  const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
+  if (!tenant) {
+    return { ok: false, message: t('errorGeneric') };
+  }
+  if (tenant.name === name) {
+    return { ok: true };
+  }
+
+  await prisma.tenant.update({ where: { id: tenantId }, data: { name } });
+
+  await prisma.auditLog.create({
+    data: {
+      whoId: admin.id,
+      whoData: { email: admin.email, profileType: admin.profileType },
+      what: 'UPDATE_TENANT',
+      entityType: 'Tenant',
+      entityId: tenantId,
+      previousValue: { name: tenant.name },
+      newValue: { name }
+    }
+  });
+
+  revalidatePath('/admin/empresas');
+  revalidatePath(`/admin/empresas/${tenantId}`);
+  return { ok: true };
+}
+
+export async function setTenantSuspended(
+  input: unknown
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  const admin = await requireAdm();
+  const t = await getTranslations('admin.empresas');
+
+  const parsed = z.object({ tenantId: z.string().trim().min(1), suspended: z.boolean() }).safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, message: t('errorGeneric') };
+  }
+  const { tenantId, suspended } = parsed.data;
+
+  const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
+  if (!tenant) {
+    return { ok: false, message: t('errorGeneric') };
+  }
+
+  // Nunca se borra un tenant (empleados, licencias y diagnósticos ya le
+  // apuntan — Decisión 1 exige que el historial del empleado nunca se
+  // pierda). Suspender es el equivalente a "eliminar": corta el acceso de
+  // empleados y admins de esa empresa sin tocar ni un dato.
+  const newStatus = suspended ? 'SUSPENDED' : 'ACTIVE';
+  await prisma.tenant.update({ where: { id: tenantId }, data: { status: newStatus } });
+
+  await prisma.auditLog.create({
+    data: {
+      whoId: admin.id,
+      whoData: { email: admin.email, profileType: admin.profileType },
+      what: suspended ? 'SUSPEND_TENANT' : 'REACTIVATE_TENANT',
+      entityType: 'Tenant',
+      entityId: tenantId,
+      previousValue: { status: tenant.status },
+      newValue: { status: newStatus }
+    }
+  });
+
+  revalidatePath('/admin/empresas');
+  revalidatePath(`/admin/empresas/${tenantId}`);
+  return { ok: true };
 }

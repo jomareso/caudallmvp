@@ -20,8 +20,14 @@ export default async function EmployeeLayout({ children }: { children: ReactNode
   if (sessionUser?.role === 'employee' && sessionUser.id) {
     const employee = await prisma.employee.findUnique({
       where: { id: sessionUser.id },
-      include: { license: true }
+      include: { license: true, tenant: true }
     });
+
+    // Una empresa suspendida corta el acceso de sus empleados igual que una
+    // licencia vencida — no se borra nada, solo deja de admitir entrada.
+    if (employee?.tenant.status === 'SUSPENDED') {
+      redirect('/licencia-vencida?motivo=suspendida');
+    }
 
     const license = employee?.license;
     const justExpired = license?.status === 'ACTIVE' && license.expiresAt && license.expiresAt < new Date();

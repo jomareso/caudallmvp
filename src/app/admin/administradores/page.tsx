@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
 import { CreateAdminForm } from './create-admin-form';
+import { AdminRow } from './admin-row';
 
 const PROFILE_LABEL_KEY: Record<string, string> = {
   ADM: 'profileTypeAdm',
@@ -63,14 +64,40 @@ export default async function AdministradoresPage() {
         <h2 className="text-sm font-medium text-quartz mt-6 mb-2">{t('existingTitle')}</h2>
         <div className="space-y-2">
           {admins.map((a) => (
-            <div key={a.id} className="bg-white border border-silver/60 rounded-lg p-3 text-xs">
-              <p className="text-quartz font-medium">{a.email}</p>
-              <p className="text-nickel">
-                {t(PROFILE_LABEL_KEY[a.profileType])}
-                {a.tenant ? ` · ${a.tenant.name}` : ''}
-                {a.functionalRole ? ` · ${t(FUNCTIONAL_ROLE_LABEL_KEY[a.functionalRole])}` : ''}
-              </p>
-            </div>
+            <AdminRow
+              key={a.id}
+              admin={{
+                id: a.id,
+                email: a.email,
+                profileType: a.profileType,
+                functionalRole: a.functionalRole,
+                tenantId: a.tenantId,
+                active: a.active,
+                tenantName: a.tenant?.name ?? null,
+                profileLabel:
+                  t(PROFILE_LABEL_KEY[a.profileType]) +
+                  (a.functionalRole ? ` · ${t(FUNCTIONAL_ROLE_LABEL_KEY[a.functionalRole])}` : '')
+              }}
+              tenants={tenants}
+              isSelf={a.id === admin.id}
+              labels={{
+                profileTypeAdm: t('profileTypeAdm'),
+                profileTypeEmpresa: t('profileTypeEmpresa'),
+                profileTypeFuncional: t('profileTypeFuncional'),
+                tenantPlaceholder: t('tenantPlaceholder'),
+                functionalRoleMethodologist: t('functionalRoleMethodologist'),
+                functionalRoleProductAdmin: t('functionalRoleProductAdmin'),
+                functionalRoleAnalyst: t('functionalRoleAnalyst'),
+                functionalRoleViewer: t('functionalRoleViewer'),
+                editCta: t('editCta'),
+                saveCta: t('saveCta'),
+                saving: t('creating'),
+                cancelCta: t('cancelCta'),
+                deactivateCta: t('deactivateCta'),
+                activateCta: t('activateCta'),
+                inactiveBadge: t('inactiveBadge')
+              }}
+            />
           ))}
         </div>
       </div>

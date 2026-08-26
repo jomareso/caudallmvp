@@ -3,6 +3,8 @@ import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
 import { GenerateLicensesForm } from './generate-licenses-form';
+import { TenantNameForm } from './tenant-name-form';
+import { SuspendTenantButton } from './suspend-tenant-button';
 
 const STATUS_LABEL_KEY: Record<string, string> = {
   UNUSED: 'statusUnused',
@@ -31,10 +33,37 @@ export default async function EmpresaDetallePage({ params }: { params: { id: str
   });
   if (!tenant) notFound();
 
+  const suspended = tenant.status === 'SUSPENDED';
+
   return (
     <main className="flex-1 p-6">
       <div className="w-full max-w-md">
-        <h1 className="text-lg font-medium text-quartz mb-6">{tenant.name}</h1>
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-lg font-medium text-quartz">{tenant.name}</h1>
+          <SuspendTenantButton
+            tenantId={tenant.id}
+            suspended={suspended}
+            labels={{
+              suspendCta: t('suspendCta'),
+              reactivateCta: t('reactivateCta'),
+              confirmSuspend: t('confirmSuspend')
+            }}
+          />
+        </div>
+        {suspended ? <p className="text-xs text-bad mb-4">{t('suspendedNotice')}</p> : null}
+
+        <div className="bg-white border border-silver/60 rounded-xl p-4 mb-6">
+          <TenantNameForm
+            tenantId={tenant.id}
+            initialName={tenant.name}
+            labels={{
+              nameLabel: t('nameLabel'),
+              cta: t('saveCta'),
+              saving: t('saving'),
+              errorGeneric: t('errorGeneric')
+            }}
+          />
+        </div>
 
         <GenerateLicensesForm
           tenantId={tenant.id}
