@@ -214,7 +214,11 @@
       "licensesActive": "En uso",
       "licensesExpired": "Vencidas",
       "licensesTotal": "{total} licencias contratadas en total",
-      "licensesExpiringSoon": "{count} licencias vencen en los próximos 30 días"
+      "licensesExpiringSoon": "{count} licencias vencen en los próximos 30 días",
+      "completionTitle": "Tasa de finalización del diagnóstico",
+      "completionDetail": "{completed} de {registered} empleados registrados lo completaron",
+      "actionCommitmentTitle": "Se comprometieron con una acción",
+      "actionCommitmentDetail": "% de empleados con diagnóstico completo que aceptaron al menos una recomendación"
     },
     "funcional": {
       "title": "Todavía no hay herramientas para tu rol",

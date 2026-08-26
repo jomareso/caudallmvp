@@ -52,6 +52,21 @@ export default async function AdminEmpresaPage() {
     }
   });
 
+  // La tasa de finalización es participación (cuántos se registraron,
+  // cuántos terminaron), no resultado del diagnóstico — se muestra igual
+  // que las licencias, sin esperar al umbral de anonimato.
+  const completionCard = (
+    <div className="bg-white border border-silver/60 rounded-xl p-4 mb-6">
+      <p className="text-xs text-nickel mb-1">{t('completionTitle')}</p>
+      <p className="text-2xl font-medium text-quartz leading-none mb-1">
+        {Math.round(aggregates.completionRate * 100)}%
+      </p>
+      <p className="text-[11px] text-nickel">
+        {t('completionDetail', { completed: aggregates.employeeCount, registered: aggregates.registeredCount })}
+      </p>
+    </div>
+  );
+
   // Las licencias son visibles aunque todavía no haya suficientes
   // empleados con diagnóstico completo para el umbral de anonimato — no
   // son datos de un empleado en particular (Decisión 1), y RRHH necesita
@@ -85,6 +100,7 @@ export default async function AdminEmpresaPage() {
       <main className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-sm text-center">
           <h1 className="text-lg font-medium text-quartz mb-6">{t('title', { tenantName: admin.tenant.name })}</h1>
+          {completionCard}
           {licenseCard}
           <h2 className="text-base font-medium text-quartz mb-2">{t('insufficientTitle')}</h2>
           <p className="text-sm text-nickel">
@@ -106,14 +122,34 @@ export default async function AdminEmpresaPage() {
         </h1>
         <p className="text-xs text-nickel mb-6 text-center">{t('employeeCount', { count: aggregates.employeeCount })}</p>
 
+        {completionCard}
         {licenseCard}
 
-        <div className="text-center mb-6">
+        <div className="text-center mb-4">
           <p className="text-xs text-nickel mb-1">{t('averageCfhiLabel')}</p>
           <p className="text-5xl font-medium text-yale leading-none mb-1">{cfhiRounded}</p>
           <span className={`inline-block text-[11px] px-2.5 py-1 rounded-lg ${BAND_CLASS[cfhiBand]}`}>
             {tBand(cfhiBand)}
           </span>
+        </div>
+
+        <div className="grid grid-cols-4 gap-1 text-center mb-6">
+          {(['CRITICAL', 'UNMET', 'PARTIAL', 'MET'] as const).map((band) => (
+            <div key={band} className="border border-silver/50 rounded-lg py-2 bg-white">
+              <p className="text-base font-medium text-quartz leading-none mb-1">
+                {aggregates.cfhiBandDistribution[band]}
+              </p>
+              <p className="text-[10px] text-nickel">{tBand(band)}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-white border border-silver/60 rounded-xl p-4 mb-6">
+          <p className="text-xs text-nickel mb-1">{t('actionCommitmentTitle')}</p>
+          <p className="text-2xl font-medium text-quartz leading-none mb-1">
+            {Math.round(aggregates.actionCommitmentRate * 100)}%
+          </p>
+          <p className="text-[11px] text-nickel">{t('actionCommitmentDetail')}</p>
         </div>
 
         <p className="text-xs text-nickel mb-2">{t('dimensionsTitle')}</p>
