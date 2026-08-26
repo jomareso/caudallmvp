@@ -1,18 +1,13 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { auth } from '@/lib/auth/auth';
-import { prisma } from '@/lib/db/prisma';
+import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
+import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 
 export default async function BienvenidaPage() {
-  const session = await auth();
-  if (!session?.user?.id) redirect('/');
-
-  const employee = await prisma.employee.findUnique({
-    where: { id: session.user.id },
-    include: { tenant: true }
-  });
-  if (!employee) redirect('/');
+  const baseEmployee = await requireEmployee();
+  const employee = await runWithTenantContext(employeeTenantContext(baseEmployee), () =>
+    prisma.employee.findUniqueOrThrow({ where: { id: baseEmployee.id }, include: { tenant: true } })
+  );
 
   const t = await getTranslations('employee.welcome');
 

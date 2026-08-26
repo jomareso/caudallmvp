@@ -1,25 +1,22 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { auth } from '@/lib/auth/auth';
-import { prisma } from '@/lib/db/prisma';
+import { prisma, runWithTenantContext } from '@/lib/db/prisma';
+import { requireAdm } from '@/lib/auth/admin-context';
 import { CreateTenantForm } from './create-tenant-form';
 
 export default async function EmpresasPage() {
-  const session = await auth();
-  // Ver src/lib/auth/auth.ts sobre por qué el cast local.
-  const sessionUser = session?.user as { id?: string; role?: 'employee' | 'admin' } | undefined;
-  if (sessionUser?.role !== 'admin' || !sessionUser.id) redirect('/admin');
-
-  const admin = await prisma.adminUser.findUnique({ where: { id: sessionUser.id } });
-  if (!admin || admin.profileType !== 'ADM') redirect('/admin');
+  await requireAdm();
 
   const t = await getTranslations('admin.empresas');
 
-  const tenants = await prisma.tenant.findMany({
-    include: { licenses: { select: { status: true } } },
-    orderBy: { createdAt: 'desc' }
-  });
+  // ADM ve licencias de TODOS los tenants a propósito (control total de la
+  // plataforma), de ahí platform-admin.
+  const tenants = await runWithTenantContext({ kind: 'platform-admin' }, () =>
+    prisma.tenant.findMany({
+      include: { licenses: { select: { status: true } } },
+      orderBy: { createdAt: 'desc' }
+    })
+  );
   const tSuspended = t('suspendedBadge');
 
   return (

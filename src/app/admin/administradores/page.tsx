@@ -1,7 +1,6 @@
-import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { auth } from '@/lib/auth/auth';
-import { prisma } from '@/lib/db/prisma';
+import { prisma, runWithTenantContext } from '@/lib/db/prisma';
+import { requireAdm } from '@/lib/auth/admin-context';
 import { CreateAdminForm } from './create-admin-form';
 import { AdminRow } from './admin-row';
 
@@ -19,18 +18,16 @@ const FUNCTIONAL_ROLE_LABEL_KEY: Record<string, string> = {
 };
 
 export default async function AdministradoresPage() {
-  const session = await auth();
-  // Ver src/lib/auth/auth.ts sobre por qué el cast local.
-  const sessionUser = session?.user as { id?: string; role?: 'employee' | 'admin' } | undefined;
-  if (sessionUser?.role !== 'admin' || !sessionUser.id) redirect('/admin');
+  const admin = await requireAdm();
 
-  const admin = await prisma.adminUser.findUnique({ where: { id: sessionUser.id } });
-  if (!admin || admin.profileType !== 'ADM') redirect('/admin');
-
-  const [admins, tenants] = await Promise.all([
-    prisma.adminUser.findMany({ include: { tenant: true }, orderBy: { createdAt: 'desc' } }),
-    prisma.tenant.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } })
-  ]);
+  // ADM ve administradores de TODOS los tenants a propósito — es su
+  // alcance (control total de la plataforma), de ahí platform-admin.
+  const [admins, tenants] = await runWithTenantContext({ kind: 'platform-admin' }, () =>
+    Promise.all([
+      prisma.adminUser.findMany({ include: { tenant: true }, orderBy: { createdAt: 'desc' } }),
+      prisma.tenant.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } })
+    ])
+  );
 
   const t = await getTranslations('admin.administradores');
 

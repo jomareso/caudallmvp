@@ -1,5 +1,14 @@
+import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth/auth';
+import { authConfig } from '@/lib/auth/auth.config';
+
+// Usa authConfig directamente (no @/lib/auth/auth) a propósito: ese
+// archivo importa Prisma para el provider de magic-link, y Prisma no
+// puede cargarse en Edge Runtime (donde corre este middleware por
+// defecto) — ver el comentario en auth.config.ts. Este middleware solo
+// necesita decodificar el JWT de la cookie de sesión, nunca llama a
+// authorize(), así que no necesita el provider en absoluto.
+const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;

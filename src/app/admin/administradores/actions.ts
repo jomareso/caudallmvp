@@ -1,21 +1,9 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { getTranslations } from 'next-intl/server';
-import { auth } from '@/lib/auth/auth';
-import { prisma } from '@/lib/db/prisma';
-
-async function requireAdm() {
-  const session = await auth();
-  // Ver src/lib/auth/auth.ts sobre por qué el cast local.
-  const sessionUser = session?.user as { id?: string; role?: 'employee' | 'admin' } | undefined;
-  if (sessionUser?.role !== 'admin' || !sessionUser.id) redirect('/admin');
-
-  const admin = await prisma.adminUser.findUnique({ where: { id: sessionUser.id } });
-  if (!admin || admin.profileType !== 'ADM') redirect('/admin');
-  return admin;
-}
+import { prisma, runWithTenantContext } from '@/lib/db/prisma';
+import { requireAdm } from '@/lib/auth/admin-context';
 
 const formSchema = z.object({
   email: z.string().trim().toLowerCase().email(),
@@ -46,21 +34,25 @@ export async function createAdminUser(
     return { ok: false, message: t('errorFunctionalRoleRequired') };
   }
 
-  const existing = await prisma.adminUser.findUnique({ where: { email } });
-  if (existing) {
-    return { ok: false, message: t('errorEmailExists') };
-  }
-
-  await prisma.adminUser.create({
-    data: {
-      email,
-      profileType,
-      tenantId: profileType === 'EMPRESA' ? tenantId : null,
-      functionalRole: profileType === 'FUNCIONAL' ? functionalRole : null
+  // ADM administra admins de CUALQUIER tenant a propósito — su alcance es
+  // toda la plataforma, de ahí platform-admin para todo este archivo.
+  return runWithTenantContext({ kind: 'platform-admin' }, async () => {
+    const existing = await prisma.adminUser.findUnique({ where: { email } });
+    if (existing) {
+      return { ok: false, message: t('errorEmailExists') };
     }
-  });
 
-  return { ok: true };
+    await prisma.adminUser.create({
+      data: {
+        email,
+        profileType,
+        tenantId: profileType === 'EMPRESA' ? tenantId : null,
+        functionalRole: profileType === 'FUNCIONAL' ? functionalRole : null
+      }
+    });
+
+    return { ok: true };
+  });
 }
 
 const updateFormSchema = z.object({
@@ -95,37 +87,39 @@ export async function updateAdminUser(
     return { ok: false, message: t('errorSelfDemote') };
   }
 
-  const target = await prisma.adminUser.findUnique({ where: { id: adminUserId } });
-  if (!target) {
-    return { ok: false, message: t('errorGeneric') };
-  }
-
-  await prisma.adminUser.update({
-    where: { id: adminUserId },
-    data: {
-      profileType,
-      tenantId: profileType === 'EMPRESA' ? tenantId : null,
-      functionalRole: profileType === 'FUNCIONAL' ? functionalRole : null
+  return runWithTenantContext({ kind: 'platform-admin' }, async () => {
+    const target = await prisma.adminUser.findUnique({ where: { id: adminUserId } });
+    if (!target) {
+      return { ok: false, message: t('errorGeneric') };
     }
-  });
 
-  await prisma.auditLog.create({
-    data: {
-      whoId: actor.id,
-      whoData: { email: actor.email, profileType: actor.profileType },
-      what: 'UPDATE_ADMIN_USER',
-      entityType: 'AdminUser',
-      entityId: adminUserId,
-      previousValue: { profileType: target.profileType, tenantId: target.tenantId, functionalRole: target.functionalRole },
-      newValue: {
+    await prisma.adminUser.update({
+      where: { id: adminUserId },
+      data: {
         profileType,
         tenantId: profileType === 'EMPRESA' ? tenantId : null,
         functionalRole: profileType === 'FUNCIONAL' ? functionalRole : null
       }
-    }
-  });
+    });
 
-  return { ok: true };
+    await prisma.auditLog.create({
+      data: {
+        whoId: actor.id,
+        whoData: { email: actor.email, profileType: actor.profileType },
+        what: 'UPDATE_ADMIN_USER',
+        entityType: 'AdminUser',
+        entityId: adminUserId,
+        previousValue: { profileType: target.profileType, tenantId: target.tenantId, functionalRole: target.functionalRole },
+        newValue: {
+          profileType,
+          tenantId: profileType === 'EMPRESA' ? tenantId : null,
+          functionalRole: profileType === 'FUNCIONAL' ? functionalRole : null
+        }
+      }
+    });
+
+    return { ok: true };
+  });
 }
 
 export async function setAdminUserActive(
@@ -146,24 +140,26 @@ export async function setAdminUserActive(
     return { ok: false, message: t('errorSelfDeactivate') };
   }
 
-  const target = await prisma.adminUser.findUnique({ where: { id: adminUserId } });
-  if (!target) {
-    return { ok: false, message: t('errorGeneric') };
-  }
-
-  await prisma.adminUser.update({ where: { id: adminUserId }, data: { active } });
-
-  await prisma.auditLog.create({
-    data: {
-      whoId: actor.id,
-      whoData: { email: actor.email, profileType: actor.profileType },
-      what: active ? 'REACTIVATE_ADMIN_USER' : 'DEACTIVATE_ADMIN_USER',
-      entityType: 'AdminUser',
-      entityId: adminUserId,
-      previousValue: { active: target.active },
-      newValue: { active }
+  return runWithTenantContext({ kind: 'platform-admin' }, async () => {
+    const target = await prisma.adminUser.findUnique({ where: { id: adminUserId } });
+    if (!target) {
+      return { ok: false, message: t('errorGeneric') };
     }
-  });
 
-  return { ok: true };
+    await prisma.adminUser.update({ where: { id: adminUserId }, data: { active } });
+
+    await prisma.auditLog.create({
+      data: {
+        whoId: actor.id,
+        whoData: { email: actor.email, profileType: actor.profileType },
+        what: active ? 'REACTIVATE_ADMIN_USER' : 'DEACTIVATE_ADMIN_USER',
+        entityType: 'AdminUser',
+        entityId: adminUserId,
+        previousValue: { active: target.active },
+        newValue: { active }
+      }
+    });
+
+    return { ok: true };
+  });
 }

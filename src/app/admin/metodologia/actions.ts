@@ -1,21 +1,9 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
+import { requireAdm } from '@/lib/auth/admin-context';
 import { syncBancoMaestro, type SyncBancoMaestroSummary } from '@/lib/seed/sync-banco-maestro';
-
-async function requireAdm() {
-  const session = await auth();
-  // Ver src/lib/auth/auth.ts sobre por qué el cast local.
-  const sessionUser = session?.user as { id?: string; role?: 'employee' | 'admin' } | undefined;
-  if (sessionUser?.role !== 'admin' || !sessionUser.id) redirect('/admin');
-
-  const admin = await prisma.adminUser.findUnique({ where: { id: sessionUser.id } });
-  if (!admin || admin.profileType !== 'ADM') redirect('/admin');
-  return admin;
-}
 
 // Reemplaza el flujo manual de "genera un SQL y pídele a Reynoso que lo
 // corra en Neon" para cada actualización del Excel del banco de preguntas:
@@ -32,7 +20,11 @@ export async function syncBancoMaestroContent(): Promise<
 
   let summary: SyncBancoMaestroSummary;
   try {
-    summary = await syncBancoMaestro(prisma);
+    // El sync opera sobre catálogo compartido (sin dueño de tenant), fuera de
+    // cualquier contexto de RLS — el cast es solo una limitante de tipos de
+    // las extensiones de Prisma (ver src/lib/db/prisma.ts), no cambia el
+    // comportamiento real en runtime.
+    summary = await syncBancoMaestro(prisma as unknown as import('@prisma/client').PrismaClient);
   } catch (error) {
     console.error('[syncBancoMaestroContent] fallo al sincronizar', error);
     return { ok: false, message: 'No pudimos sincronizar el banco de preguntas. Intenta de nuevo.' };
