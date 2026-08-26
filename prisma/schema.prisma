@@ -39,8 +39,40 @@ model Tenant {
   evidence              Evidence[]
   interventionOverrides TenantInterventionOverride[]
   learningEvents        LearningEvent[]
+  licenses              License[]
 
   @@map("tenants")
+}
+
+// Decisión 6 (actualizada): cada empleado se registra con su propio código
+// de licencia individual, no con un código compartido por toda la empresa.
+// La empresa contrata N licencias con una vigencia fija (3/6/12 meses); ADM
+// las genera en lote desde /admin/empresas. La vigencia empieza a contar
+// quien se registra con el código (activatedAt), no desde que se crea —
+// una licencia sin usar no vence. Tenant.enrollmentCode se conserva para no
+// romper el registro de tenants ya creados con el modelo anterior, pero
+// ningún tenant nuevo debería depender de él.
+model License {
+  id             String        @id @default(cuid())
+  tenantId       String
+  code           String        @unique
+  durationMonths Int
+  status         LicenseStatus @default(UNUSED)
+  activatedAt    DateTime?
+  expiresAt      DateTime?
+  createdAt      DateTime      @default(now())
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  employee Employee?
+
+  @@index([tenantId])
+  @@map("licenses")
+}
+
+enum LicenseStatus {
+  UNUSED
+  ACTIVE
+  EXPIRED
 }
 
 enum TenantStatus {
@@ -78,6 +110,9 @@ model Employee {
   tenantId           String
   personalEmail      String
   enrollmentCodeUsed String
+  // Nullable: empleados de tenants viejos, registrados antes del modelo de
+  // licencias individuales, con el código compartido de Tenant.enrollmentCode.
+  licenseId          String?        @unique
   authMethod         AuthMethod
   demographicData    Json?
   status             EmployeeStatus @default(REGISTERED)
@@ -85,6 +120,7 @@ model Employee {
   lastActiveAt       DateTime?
 
   tenant          Tenant                 @relation(fields: [tenantId], references: [id])
+  license         License?               @relation(fields: [licenseId], references: [id])
   segments        EmployeeSegment[]
   evidence        Evidence[]
   variableStates  VariableState[]

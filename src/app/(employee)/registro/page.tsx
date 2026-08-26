@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { prisma } from '@/lib/db/prisma';
+import { findTenantByCode } from '@/lib/licenses';
 import { EmailForm } from './email-form';
 
 export default async function RegistroPage({
@@ -10,8 +10,11 @@ export default async function RegistroPage({
   const code = searchParams.code?.trim().toUpperCase();
   if (!code) redirect('/');
 
-  const tenant = await prisma.tenant.findUnique({ where: { enrollmentCode: code } });
-  if (!tenant || tenant.status === 'SUSPENDED') redirect('/');
+  const found = await findTenantByCode(code);
+  if (!found || found.tenant.status === 'SUSPENDED') redirect('/');
+  if (found.license?.status === 'EXPIRED' || (found.license?.expiresAt && found.license.expiresAt < new Date())) {
+    redirect('/');
+  }
 
-  return <EmailForm enrollmentCode={tenant.enrollmentCode} tenantName={tenant.name} />;
+  return <EmailForm enrollmentCode={code} tenantName={found.tenant.name} />;
 }

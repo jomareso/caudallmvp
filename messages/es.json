@@ -7,8 +7,8 @@
     "landing": {
       "title": "Sabes dónde estás. Caudall te conecta.",
       "subtitle": "Un espacio privado para conocer tu salud financiera y mejorarla.",
-      "enrollmentCodeLabel": "Código de tu empresa",
-      "enrollmentCodePlaceholder": "Código de tu empresa",
+      "enrollmentCodeLabel": "Tu código de acceso",
+      "enrollmentCodePlaceholder": "Código que te dio tu empresa",
       "ctaContinue": "Continuar",
       "validating": "Verificando..."
     },
@@ -26,8 +26,12 @@
     },
     "invalidLink": {
       "title": "Este link ya no funciona",
-      "subtitle": "Puede que haya vencido o que ya lo hayas usado. Pide uno nuevo con tu código de empresa y tu correo.",
+      "subtitle": "Puede que haya vencido o que ya lo hayas usado. Pide uno nuevo con tu código de acceso y tu correo.",
       "ctaRetry": "Intentar de nuevo"
+    },
+    "licenseExpired": {
+      "title": "Tu acceso venció",
+      "subtitle": "Tu empresa contrató tu licencia por un tiempo limitado y ya se cumplió. Contacta a tu equipo de RRHH si necesitas seguir usando Caudall."
     },
     "welcome": {
       "title": "Ya estás dentro, bienvenido a {tenantName}",
@@ -53,6 +57,7 @@
       "settings": "Configuración",
       "admins": "Administradores",
       "methodology": "Metodología",
+      "companies": "Empresas",
       "logout": "Cerrar sesión"
     },
     "metodologia": {
@@ -143,6 +148,30 @@
       "uploadErrorType": "El archivo debe ser una imagen (PNG, JPG, WEBP o SVG).",
       "uploadErrorSize": "El archivo es muy grande — el máximo es 2 MB.",
       "uploadErrorGeneric": "No pudimos guardar el logo. Intenta de nuevo."
+    },
+    "empresas": {
+      "title": "Empresas",
+      "nameLabel": "Nombre de la empresa",
+      "namePlaceholder": "Ej. Empresa Acme",
+      "licenseCountLabel": "Cantidad de licencias",
+      "durationLabel": "Vigencia de cada licencia",
+      "duration3": "3 meses",
+      "duration6": "6 meses",
+      "duration12": "12 meses",
+      "createCta": "Crear empresa",
+      "creating": "Creando...",
+      "errorGeneric": "No pudimos completar la acción. Revisa los datos e intenta de nuevo.",
+      "existingTitle": "Empresas actuales",
+      "licenseSummary": "{active} activas · {unused} sin usar · {expired} vencidas de {total}",
+      "generateTitle": "Generar más licencias",
+      "generateCta": "Generar licencias",
+      "generateSuccess": "Licencias generadas correctamente.",
+      "licensesTitle": "Licencias ({count})",
+      "statusUnused": "Sin usar",
+      "statusActive": "Activa",
+      "statusExpired": "Vencida",
+      "durationValue": "{months} meses",
+      "expiresAt": "vence"
     },
     "administradores": {
       "title": "Administradores",
