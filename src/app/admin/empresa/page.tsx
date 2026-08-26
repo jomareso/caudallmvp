@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
 import { getTenantAggregates } from '@/lib/engines/tenant-aggregates';
-import { scoreToDimensionState } from '@/lib/engines/scoring';
+import { scoreToDimensionState, scoreToProgressTier } from '@/lib/engines/scoring';
 
 const BAND_CLASS: Record<string, string> = {
   CRITICAL: 'bg-bad/10 text-bad',
@@ -11,6 +11,15 @@ const BAND_CLASS: Record<string, string> = {
   PARTIAL: 'bg-warn/10 text-warn',
   MET: 'bg-ok/10 text-ok',
   NA: 'bg-silver/20 text-nickel'
+};
+
+// Metodología v1.5 §6: el dashboard de RRHH resume la condición general con
+// Vulnerables/Sobreviviendo/Saludables (3 niveles), distinto de las 4
+// bandas que usa el detalle por dimensión más abajo en esta misma página.
+const TIER_CLASS: Record<string, string> = {
+  LOW: 'bg-bad/10 text-bad',
+  MID: 'bg-warn/10 text-warn',
+  HIGH: 'bg-ok/10 text-ok'
 };
 
 export default async function AdminEmpresaPage() {
@@ -25,6 +34,7 @@ export default async function AdminEmpresaPage() {
   const t = await getTranslations('admin.empresa');
   const tDim = await getTranslations('diagnostic.dimensions');
   const tBand = await getTranslations('diagnostic.result.bands');
+  const tTier = await getTranslations('admin.empresa.tiers');
 
   const [aggregates, licenseCounts] = await Promise.all([
     getTenantAggregates(admin.tenant.id),
@@ -112,7 +122,7 @@ export default async function AdminEmpresaPage() {
   }
 
   const cfhiRounded = Math.round(aggregates.averageCfhi);
-  const cfhiBand = scoreToDimensionState(cfhiRounded);
+  const cfhiTier = scoreToProgressTier(cfhiRounded);
 
   return (
     <main className="flex-1 flex items-center justify-center p-6">
@@ -128,18 +138,18 @@ export default async function AdminEmpresaPage() {
         <div className="text-center mb-4">
           <p className="text-xs text-nickel mb-1">{t('averageCfhiLabel')}</p>
           <p className="text-5xl font-medium text-yale leading-none mb-1">{cfhiRounded}</p>
-          <span className={`inline-block text-[11px] px-2.5 py-1 rounded-lg ${BAND_CLASS[cfhiBand]}`}>
-            {tBand(cfhiBand)}
+          <span className={`inline-block text-[11px] px-2.5 py-1 rounded-lg ${TIER_CLASS[cfhiTier]}`}>
+            {tTier(cfhiTier)}
           </span>
         </div>
 
-        <div className="grid grid-cols-4 gap-1 text-center mb-6">
-          {(['CRITICAL', 'UNMET', 'PARTIAL', 'MET'] as const).map((band) => (
-            <div key={band} className="border border-silver/50 rounded-lg py-2 bg-white">
+        <div className="grid grid-cols-3 gap-1 text-center mb-6">
+          {(['LOW', 'MID', 'HIGH'] as const).map((tier) => (
+            <div key={tier} className="border border-silver/50 rounded-lg py-2 bg-white">
               <p className="text-base font-medium text-quartz leading-none mb-1">
-                {aggregates.cfhiBandDistribution[band]}
+                {aggregates.cfhiTierDistribution[tier]}
               </p>
-              <p className="text-[10px] text-nickel">{tBand(band)}</p>
+              <p className="text-[10px] text-nickel">{tTier(tier)}</p>
             </div>
           ))}
         </div>

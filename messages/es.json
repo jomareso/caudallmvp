@@ -230,6 +230,11 @@
       "title": "Salud financiera de {tenantName}",
       "employeeCount": "{count} empleados con diagnóstico completo",
       "averageCfhiLabel": "Índice de Salud Financiera promedio",
+      "tiers": {
+        "LOW": "Vulnerables",
+        "MID": "Sobreviviendo",
+        "HIGH": "Saludables"
+      },
       "dimensionsTitle": "Tus 5 dimensiones (promedio)",
       "insufficientTitle": "Todavía no hay suficientes datos",
       "insufficientBody": "Necesitas al menos {minRequired} empleados con el diagnóstico completo para ver agregados anónimos. Hoy tienes {count}. Esto protege la privacidad individual de tus empleados (nunca vemos datos de uno solo).",
@@ -1324,6 +1329,12 @@
         "PARTIAL": "En construcción",
         "MET": "Saludable",
         "NA": "No aplica"
+      },
+      "levels": {
+        "LOW": "Explorador",
+        "MID": "Navegante",
+        "HIGH": "Capitán",
+        "prefix": "Nivel"
       },
       "ctaNextStep": "Ver mi próximo paso"
     },

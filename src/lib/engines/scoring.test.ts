@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { scoreToDimensionState, weightedAverageExcludingNA } from './scoring';
+import { scoreToDimensionState, scoreToProgressTier, weightedAverageExcludingNA } from './scoring';
 
 describe('weightedAverageExcludingNA', () => {
   it('promedia ponderado cuando todo tiene score', () => {
@@ -66,5 +66,16 @@ describe('scoreToDimensionState', () => {
     expect(scoreToDimensionState(40)).toBe('UNMET');
     expect(scoreToDimensionState(31)).toBe('UNMET');
     expect(scoreToDimensionState(10)).toBe('CRITICAL');
+  });
+});
+
+describe('scoreToProgressTier', () => {
+  it('mapea los cortes provisionales de nivel (0-40/41-70/71-100)', () => {
+    expect(scoreToProgressTier(100)).toBe('HIGH');
+    expect(scoreToProgressTier(71)).toBe('HIGH');
+    expect(scoreToProgressTier(70)).toBe('MID');
+    expect(scoreToProgressTier(41)).toBe('MID');
+    expect(scoreToProgressTier(40)).toBe('LOW');
+    expect(scoreToProgressTier(0)).toBe('LOW');
   });
 });

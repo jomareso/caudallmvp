@@ -53,3 +53,20 @@ export function scoreToDimensionState(score: number): DimensionState {
   if (score >= 31) return 'UNMET';
   return 'CRITICAL';
 }
+
+export type ProgressTier = 'LOW' | 'MID' | 'HIGH';
+
+// Metodología v1.5 §6: Explorador/Navegante/Capitán (empleado) y
+// Vulnerables/Sobreviviendo/Saludables (RRHH) son "una capa de
+// gamificación y progreso" — comparten la misma medición de fondo (CFHI y
+// puntuaciones por dimensión) pero NO son la misma banda de 4 estados que
+// devuelve scoreToDimensionState (esa es la "interpretación de la
+// condición"; el nivel es un elemento aparte que se muestra junto a ella,
+// no en su lugar). Cortes provisionales confirmados por Reynoso — el
+// propio documento los marca como provisionales hasta calibrarlos con
+// evidencia real.
+export function scoreToProgressTier(score: number): ProgressTier {
+  if (score >= 71) return 'HIGH';
+  if (score >= 41) return 'MID';
+  return 'LOW';
+}
