@@ -33,7 +33,7 @@ Están detalladas en `docs/decisions.md`. Nunca las violes sin discutirlo primer
 3. **Co-branding pleno por tenant:** logo + color primario configurables. NO white-label completo (sin dominios propios, sin tipografías personalizables).
 4. **Catálogo común de intervenciones con overrides (activar/desactivar por tenant).** Contenido propio de tenant es fase posterior.
 5. **Solo español en MVP, con i18n desde el inicio.** Todo texto de UI viene de archivos de traducción, nunca hardcodeado.
-6. **Autoregistro con código de empresa + email personal.** Sin integración HRIS, sin SSO corporativo. El email debe ser personal (no corporativo) — refuerza la barrera de confianza.
+6. **Autoregistro con licencia individual + email personal.** Cada empleado se registra con su propia licencia (no un código compartido de toda la empresa) — la empresa contrata N licencias con vigencia de 3/6/12 meses, controlando cuántos empleados usan Caudall y por cuánto tiempo. Al vencer, el empleado pierde acceso (sus datos no se borran). Sin integración HRIS, sin SSO corporativo. El email debe ser personal (no corporativo) — refuerza la barrera de confianza.
 7. **Prioridad de dispositivo:** empleado mobile-first, RRHH desktop-first, admin desktop-only.
 8. **Autenticación del empleado:** magic link como principal, OAuth con Google (cuenta personal) opcional. **Sin contraseñas.**
 9. **PWA desde el MVP.** Service worker, manifest, prompt de instalación, notificaciones push cuando sea posible.

@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db/prisma';
+import { scoreToDimensionState } from './scoring';
 
 // spec (docs/data-model.md, Bloque 7) + Decisión 1: la empresa nunca ve
 // datos individuales de empleados, solo agregados anonimizados con un
@@ -8,6 +9,11 @@ import { prisma } from '@/lib/db/prisma';
 // de que quien llame a este motor obtenga un score individual: solo
 // promedios y conteos por estado, nunca una fila de VariableState/
 // DimensionScore/FinancialState por empleado.
+//
+// registeredCount/completionRate son la excepción: son conteos de
+// participación (cuántos se registraron, cuántos terminaron), no
+// resultado de diagnóstico — igual que el conteo de licencias, se
+// muestran aunque no se alcance el umbral de anonimato.
 
 export type DimensionAggregate = {
   code: string;
@@ -15,25 +21,68 @@ export type DimensionAggregate = {
   stateDistribution: Record<'CRITICAL' | 'UNMET' | 'PARTIAL' | 'MET' | 'NA', number>;
 };
 
+export type CfhiBandDistribution = Record<'CRITICAL' | 'UNMET' | 'PARTIAL' | 'MET', number>;
+
 export type TenantAggregatesResult =
-  | { status: 'INSUFFICIENT_ANONYMITY'; employeeCount: number; minRequired: number }
-  | { status: 'OK'; employeeCount: number; averageCfhi: number; dimensions: DimensionAggregate[] };
+  | {
+      status: 'INSUFFICIENT_ANONYMITY';
+      employeeCount: number;
+      minRequired: number;
+      registeredCount: number;
+      completionRate: number;
+    }
+  | {
+      status: 'OK';
+      employeeCount: number;
+      registeredCount: number;
+      completionRate: number;
+      averageCfhi: number;
+      cfhiBandDistribution: CfhiBandDistribution;
+      actionCommitmentRate: number;
+      dimensions: DimensionAggregate[];
+    };
 
 export async function getTenantAggregates(tenantId: string): Promise<TenantAggregatesResult> {
   const tenant = await prisma.tenant.findUniqueOrThrow({ where: { id: tenantId } });
 
-  const financialStates = await prisma.financialState.findMany({
-    where: { employee: { tenantId } },
-    select: { cfhiScore: true, employeeId: true }
-  });
+  const [registeredCount, financialStates] = await Promise.all([
+    prisma.employee.count({ where: { tenantId } }),
+    prisma.financialState.findMany({
+      where: { employee: { tenantId } },
+      select: { cfhiScore: true, employeeId: true }
+    })
+  ]);
 
   const employeeCount = financialStates.length;
+  const completionRate = registeredCount > 0 ? employeeCount / registeredCount : 0;
+
   if (employeeCount < tenant.aggregationMinSegmentSize) {
-    return { status: 'INSUFFICIENT_ANONYMITY', employeeCount, minRequired: tenant.aggregationMinSegmentSize };
+    return {
+      status: 'INSUFFICIENT_ANONYMITY',
+      employeeCount,
+      minRequired: tenant.aggregationMinSegmentSize,
+      registeredCount,
+      completionRate
+    };
   }
 
   const averageCfhi = financialStates.reduce((sum, fs) => sum + fs.cfhiScore, 0) / employeeCount;
   const qualifyingEmployeeIds = financialStates.map((fs) => fs.employeeId);
+
+  const cfhiBandDistribution: CfhiBandDistribution = { CRITICAL: 0, UNMET: 0, PARTIAL: 0, MET: 0 };
+  for (const fs of financialStates) {
+    cfhiBandDistribution[scoreToDimensionState(fs.cfhiScore)] += 1;
+  }
+
+  const committedEmployeeIds = await prisma.employeeIntervention.findMany({
+    where: {
+      employeeId: { in: qualifyingEmployeeIds },
+      status: { in: ['COMMITTED', 'IN_PROGRESS', 'COMPLETED'] }
+    },
+    select: { employeeId: true },
+    distinct: ['employeeId']
+  });
+  const actionCommitmentRate = committedEmployeeIds.length / employeeCount;
 
   const methodology = await prisma.methodology.findFirst({
     where: { status: 'ACTIVE' },
@@ -75,5 +124,14 @@ export async function getTenantAggregates(tenantId: string): Promise<TenantAggre
     return { code: dimension.code, averageScore, stateDistribution: distribution };
   });
 
-  return { status: 'OK', employeeCount, averageCfhi, dimensions };
+  return {
+    status: 'OK',
+    employeeCount,
+    registeredCount,
+    completionRate,
+    averageCfhi,
+    cfhiBandDistribution,
+    actionCommitmentRate,
+    dimensions
+  };
 }

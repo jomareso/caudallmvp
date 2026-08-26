@@ -7,8 +7,8 @@
     "landing": {
       "title": "Sabes dónde estás. Caudall te conecta.",
       "subtitle": "Un espacio privado para conocer tu salud financiera y mejorarla.",
-      "enrollmentCodeLabel": "Código de tu empresa",
-      "enrollmentCodePlaceholder": "Código de tu empresa",
+      "enrollmentCodeLabel": "Tu código de acceso",
+      "enrollmentCodePlaceholder": "Código que te dio tu empresa",
       "ctaContinue": "Continuar",
       "validating": "Verificando..."
     },
@@ -26,8 +26,13 @@
     },
     "invalidLink": {
       "title": "Este link ya no funciona",
-      "subtitle": "Puede que haya vencido o que ya lo hayas usado. Pide uno nuevo con tu código de empresa y tu correo.",
+      "subtitle": "Puede que haya vencido o que ya lo hayas usado. Pide uno nuevo con tu código de acceso y tu correo.",
       "ctaRetry": "Intentar de nuevo"
+    },
+    "licenseExpired": {
+      "title": "Tu acceso venció",
+      "subtitle": "Tu empresa contrató tu licencia por un tiempo limitado y ya se cumplió. Contacta a tu equipo de RRHH si necesitas seguir usando Caudall.",
+      "subtitleSuspended": "Tu empresa pausó temporalmente su cuenta de Caudall. Contacta a tu equipo de RRHH si tienes preguntas."
     },
     "welcome": {
       "title": "Ya estás dentro, bienvenido a {tenantName}",
@@ -53,6 +58,7 @@
       "settings": "Configuración",
       "admins": "Administradores",
       "methodology": "Metodología",
+      "companies": "Empresas",
       "logout": "Cerrar sesión"
     },
     "metodologia": {
@@ -144,6 +150,46 @@
       "uploadErrorSize": "El archivo es muy grande — el máximo es 2 MB.",
       "uploadErrorGeneric": "No pudimos guardar el logo. Intenta de nuevo."
     },
+    "empresas": {
+      "title": "Empresas",
+      "nameLabel": "Nombre de la empresa",
+      "namePlaceholder": "Ej. Empresa Acme",
+      "licenseCountLabel": "Cantidad de licencias",
+      "durationLabel": "Vigencia de cada licencia",
+      "duration3": "3 meses",
+      "duration6": "6 meses",
+      "duration12": "12 meses",
+      "createCta": "Crear empresa",
+      "creating": "Creando...",
+      "errorGeneric": "No pudimos completar la acción. Revisa los datos e intenta de nuevo.",
+      "existingTitle": "Empresas actuales",
+      "licenseSummary": "{active} activas · {unused} sin usar · {expired} vencidas de {total}",
+      "generateTitle": "Generar más licencias",
+      "generateCta": "Generar licencias",
+      "generateSuccess": "Licencias generadas correctamente.",
+      "licensesTitle": "Licencias ({count})",
+      "statusUnused": "Sin usar",
+      "statusActive": "Activa",
+      "statusExpired": "Vencida",
+      "durationValue": "{months} meses",
+      "expiresAt": "vence",
+      "adminEmailsLabel": "Administradores de esta empresa (opcional)",
+      "adminEmailsPlaceholder": "Un correo por línea, ej.\nrrhh@acme.com\ngerente@acme.com",
+      "adminEmailsHelp": "Cada uno recibirá un correo para entrar al panel de esta empresa. Puedes agregar más después desde Administradores.",
+      "adminResultsTitle": "Resultado de los administradores",
+      "adminCreated": "creado, correo de bienvenida enviado",
+      "adminWelcomeEmailFailed": "creado, pero no pudimos enviarle el correo — avísale tú directamente",
+      "adminDuplicate": "ya existe como administrador, no se agregó",
+      "adminInvalidFormat": "correo no válido, no se agregó",
+      "continueCta": "Continuar a la empresa",
+      "saveCta": "Guardar",
+      "saving": "Guardando...",
+      "suspendCta": "Suspender empresa",
+      "reactivateCta": "Reactivar empresa",
+      "confirmSuspend": "¿Suspender esta empresa? Sus empleados y administradores perderán acceso de inmediato. No se borra ningún dato y puedes reactivarla cuando quieras.",
+      "suspendedNotice": "Esta empresa está suspendida — sus empleados y administradores no pueden entrar.",
+      "suspendedBadge": "Suspendida"
+    },
     "administradores": {
       "title": "Administradores",
       "existingTitle": "Administradores actuales",
@@ -170,7 +216,15 @@
       "colEmail": "Correo",
       "colProfile": "Perfil",
       "colDetail": "Detalle",
-      "colCreated": "Creado"
+      "colCreated": "Creado",
+      "errorSelfDemote": "No puedes quitarte a ti mismo el perfil ADM.",
+      "errorSelfDeactivate": "No puedes desactivar tu propia cuenta.",
+      "editCta": "Editar",
+      "saveCta": "Guardar",
+      "cancelCta": "Cancelar",
+      "deactivateCta": "Desactivar",
+      "activateCta": "Activar",
+      "inactiveBadge": "Inactivo"
     },
     "empresa": {
       "title": "Salud financiera de {tenantName}",
@@ -179,7 +233,17 @@
       "dimensionsTitle": "Tus 5 dimensiones (promedio)",
       "insufficientTitle": "Todavía no hay suficientes datos",
       "insufficientBody": "Necesitas al menos {minRequired} empleados con el diagnóstico completo para ver agregados anónimos. Hoy tienes {count}. Esto protege la privacidad individual de tus empleados (nunca vemos datos de uno solo).",
-      "privacyNote": "Estos son promedios y conteos de tu empresa — nunca vemos las respuestas de un empleado en particular."
+      "privacyNote": "Estos son promedios y conteos de tu empresa — nunca vemos las respuestas de un empleado en particular.",
+      "licensesTitle": "Licencias",
+      "licensesUnused": "Disponibles",
+      "licensesActive": "En uso",
+      "licensesExpired": "Vencidas",
+      "licensesTotal": "{total} licencias contratadas en total",
+      "licensesExpiringSoon": "{count} licencias vencen en los próximos 30 días",
+      "completionTitle": "Tasa de finalización del diagnóstico",
+      "completionDetail": "{completed} de {registered} empleados registrados lo completaron",
+      "actionCommitmentTitle": "Se comprometieron con una acción",
+      "actionCommitmentDetail": "% de empleados con diagnóstico completo que aceptaron al menos una recomendación"
     },
     "funcional": {
       "title": "Todavía no hay herramientas para tu rol",
@@ -1163,6 +1227,88 @@
           "NOT_COMPLETED_FORGOT": "No lo hice porque se me olvidó",
           "NOT_COMPLETED_OTHER": "No lo hice por otra razón",
           "SKIPPED": "Decidí no hacerlo"
+        }
+      },
+      "CTX-01": {
+        "text": "¿En qué rango de edad estás?",
+        "whyAsk": "Aporta contexto de etapa de vida para análisis y comparación, sin afectar el CFHI. No debe usarse como criterio único de prueba social ni para decisiones laborales.",
+        "options": {
+          "AGE_18_24": "18 a 24 años",
+          "AGE_25_34": "25 a 34 años",
+          "AGE_35_44": "35 a 44 años",
+          "AGE_45_54": "45 a 54 años",
+          "AGE_55_64": "55 a 64 años",
+          "AGE_65_PLUS": "65 años o más",
+          "DECLINED": "Prefiero no responder"
+        }
+      },
+      "CTX-02": {
+        "text": "Además de ti, ¿cuántas personas dependen total o parcialmente de tus ingresos?",
+        "whyAsk": "Aproxima la carga económica del hogar y mejora la comparabilidad entre personas con responsabilidades financieras similares. No afecta el CFHI.",
+        "options": {
+          "DEP_0": "Ninguna",
+          "DEP_1": "1 persona",
+          "DEP_2": "2 personas",
+          "DEP_3": "3 personas",
+          "DEP_4_PLUS": "4 o más personas",
+          "DECLINED": "Prefiero no responder"
+        }
+      },
+      "CTX-03": {
+        "text": "¿Qué parte de los gastos de tu hogar depende de tus ingresos?",
+        "whyAsk": "Contextualiza la responsabilidad económica real de la persona dentro del hogar y evita comparar situaciones con cargas muy distintas. No afecta el CFHI.",
+        "options": {
+          "RESP_ALMOST_ALL": "Prácticamente todos",
+          "RESP_MOST": "Más de la mitad",
+          "RESP_HALF": "Aproximadamente la mitad",
+          "RESP_LESS": "Menos de la mitad",
+          "RESP_NONE": "Ninguno o casi ninguno",
+          "DECLINED": "Prefiero no responder"
+        }
+      },
+      "CTX-04": {
+        "text": "Aproximadamente, ¿en qué rango está tu ingreso mensual neto personal?",
+        "whyAsk": "Permite contextualizar capacidad financiera y construir comparaciones más pertinentes. El ingreso es contexto, no puntuación de salud financiera.",
+        "options": {
+          "INC_LT_25K": "Menos de RD$25,000",
+          "INC_25_49K": "RD$25,000 a RD$49,999",
+          "INC_50_74K": "RD$50,000 a RD$74,999",
+          "INC_75_99K": "RD$75,000 a RD$99,999",
+          "INC_100_149K": "RD$100,000 a RD$149,999",
+          "INC_150_199K": "RD$150,000 a RD$199,999",
+          "INC_200K_PLUS": "RD$200,000 o más",
+          "DECLINED": "Prefiero no responder"
+        }
+      },
+      "CTX-05": {
+        "text": "Pensando en los últimos meses, ¿cómo describirías tus ingresos de un mes a otro?",
+        "whyAsk": "Distingue estabilidad y variabilidad del ingreso para comparar contextos financieros semejantes. La variabilidad por sí sola no implica mala salud financiera.",
+        "options": {
+          "INC_STABLE": "Son bastante estables de un mes a otro",
+          "INC_MOSTLY_STABLE": "Son mayormente estables, con algunas variaciones",
+          "INC_VARIABLE_PREDICTABLE": "Varían, pero normalmente puedo anticipar cuánto recibiré",
+          "INC_VARIABLE_UNPREDICTABLE": "Varían bastante y es difícil anticipar cuánto recibiré",
+          "DECLINED": "Prefiero no responder"
+        }
+      },
+      "CTX-06": {
+        "text": "¿Cuál es el nivel educativo más alto que has alcanzado?",
+        "whyAsk": "Aporta contexto adicional para segmentación y análisis, sin asumir que un mayor nivel educativo implica mejor salud financiera. No afecta el CFHI.",
+        "options": {
+          "EDU_PRIMARY_OR_LESS": "Primaria o menos",
+          "EDU_SECONDARY": "Secundaria",
+          "EDU_TECHNICAL": "Técnico / vocacional",
+          "EDU_UNIVERSITY": "Universitario",
+          "EDU_POSTGRAD": "Posgrado",
+          "DECLINED": "Prefiero no responder"
+        }
+      },
+      "CTX-07": {
+        "text": "¿Quieres comparar tus resultados con personas que tienen un contexto financiero similar al tuyo?",
+        "whyAsk": "Registra la decisión explícita del participante de ver o no una comparación contextual. La respuesta no modifica su puntuación ni sus recomendaciones.",
+        "options": {
+          "YES": "Sí, quiero ver la comparación",
+          "NO": "No, prefiero ver solo mis resultados"
         }
       }
     },

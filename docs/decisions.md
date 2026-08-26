@@ -100,22 +100,23 @@ Este documento captura las decisiones estructurales del MVP en formato ADR (Arch
 
 ---
 
-## ADR-006 — Registro del empleado: autoregistro con código de empresa + email personal
+## ADR-006 — Registro del empleado: autoregistro con licencia individual + email personal
 
-**Estado:** Accepted
+**Estado:** Accepted (actualizado 24 ago 2026 — ver adenda abajo)
 **Contexto:** El empleado necesita autenticarse. Opciones: autoregistro con código, carga manual de correos por RRHH, integración con HRIS/nómina, SSO corporativo.
 
-**Decisión:** Autoregistro con código de empresa + email **personal** (no corporativo). Opcionalmente RRHH puede subir lista de correos autorizados (feature simple, no bloqueante). Sin integración HRIS ni SSO en MVP.
+**Decisión:** Autoregistro con código de acceso + email **personal** (no corporativo). Opcionalmente RRHH puede subir lista de correos autorizados (feature simple, no bloqueante). Sin integración HRIS ni SSO en MVP.
 
 **Alternativas consideradas:**
 - Integración HRIS desde MVP. Rechazado: cada integración es un proyecto, mata foco.
 - SSO corporativo desde MVP. Rechazado: el empleado entrando con credenciales corporativas rompe la percepción de privacidad (viola espíritu de ADR-001).
 
 **Consecuencias:**
-- Entidad `Tenant` tiene `enrollmentCode` (código único de empresa).
 - Entidad `Employee` tiene `personalEmail` (no corporativo).
 - El flujo de registro valida que el email no coincida con el dominio corporativo del tenant, y advierte.
 - No hay código de integración con Workday, BambooHR, etc., ni SAML/OIDC corporativo.
+
+**Adenda (24 ago 2026) — control de licencias por empleado:** el código de acceso dejó de ser un código único compartido por toda la empresa (`Tenant.enrollmentCode`, que se conserva solo por compatibilidad con tenants creados antes de este cambio). Ahora cada empleado se registra con su propia **licencia individual** (`License.code`), y la empresa contrata N licencias con una vigencia de 3, 6 o 12 meses. Esto le da a la empresa control real sobre cuántos empleados pueden usar Caudall a la vez y por cuánto tiempo — antes el código compartido no tenía ningún límite. Al vencer la vigencia de una licencia (contada desde que el empleado se registra con ella, no desde que se crea), el empleado pierde acceso a la app; sus datos de diagnóstico no se borran. ADM crea empresas y genera licencias desde `/admin/empresas`.
 
 ---
 

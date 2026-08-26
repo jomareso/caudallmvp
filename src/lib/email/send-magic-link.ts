@@ -52,6 +52,43 @@ export async function sendMagicLinkEmail(params: {
   }
 }
 
+// A diferencia del magic link (vence en 15 min), este correo no lleva token
+// — solo avisa que ya tiene acceso. El admin pide su propio link de entrada
+// cuando lo vaya a usar, consistente con la Decisión 8 (sin contraseñas, sin
+// links de larga duración flotando en un correo).
+export async function sendAdminWelcomeEmail(params: { to: string; tenantName: string; panelUrl: string }): Promise<void> {
+  const { to, tenantName, panelUrl } = params;
+  const from = process.env.EMAIL_FROM ?? 'Caudall <no-reply@caudall.com>';
+
+  const { error } = await getResendClient().emails.send({
+    from,
+    to,
+    subject: 'Ya tienes acceso al panel de Caudall',
+    html: `
+      <div style="font-family:Helvetica,Arial,sans-serif;max-width:420px;margin:0 auto;color:#4B4C4C">
+        <h1 style="color:#0F5499;font-size:20px;font-weight:500">caudall</h1>
+        <p style="font-size:14px;line-height:1.5">
+          Ya tienes acceso al panel administrativo de Caudall para <b>${tenantName}</b>.
+        </p>
+        <p style="margin:24px 0">
+          <a href="${panelUrl}"
+             style="background:#0F5499;color:#fff;padding:12px 20px;border-radius:8px;
+                    text-decoration:none;font-size:14px;display:inline-block">
+            Entrar al panel
+          </a>
+        </p>
+        <p style="font-size:12px;color:#737373;line-height:1.5">
+          Entra con este correo (${to}) y te enviaremos un link de acceso válido por 15 minutos.
+        </p>
+      </div>
+    `
+  });
+
+  if (error) {
+    throw new Error(`No se pudo enviar el correo: ${error.message}`);
+  }
+}
+
 export async function sendAdminMagicLinkEmail(params: { to: string; verifyUrl: string }): Promise<void> {
   const { to, verifyUrl } = params;
   const from = process.env.EMAIL_FROM ?? 'Caudall <no-reply@caudall.com>';

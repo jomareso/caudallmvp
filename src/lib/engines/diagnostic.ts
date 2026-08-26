@@ -40,8 +40,20 @@ function isApplicable(question: Question, facts: Facts, debtDimensionId: string 
     return false;
   }
 
-  const askIf = question.askIfRule as { raw?: string } | null;
-  if (askIf?.raw && !evaluateRule(askIf.raw, facts)) return false;
+  // Las preguntas de contexto (banco v4.1, bloque "antes de ver tu
+  // resultado" de la spec de metodología) traen su ASK_IF en inglés llano
+  // ("user has not skipped optional context block") en vez de la gramática
+  // que evaluateRule() entiende — como cualquier fragmento no reconocido,
+  // evaluaría siempre a false y esas 7 preguntas nunca se preguntarían
+  // (verificado con una simulación completa). El orden ya las coloca
+  // después de ANCHOR/ADAPTIVE (ver ROLE_ORDER), que es exactamente lo que
+  // pide la spec ("después del diagnóstico financiero"), así que basta con
+  // no evaluar su ASK_IF de texto libre — el dedup de "ya respondida" en
+  // getNextQuestion() sigue aplicando igual.
+  if (question.role !== 'CONTEXT') {
+    const askIf = question.askIfRule as { raw?: string } | null;
+    if (askIf?.raw && !evaluateRule(askIf.raw, facts)) return false;
+  }
 
   const skipIf = question.skipIfRule as { raw?: string } | null;
   if (skipIf?.raw && evaluateRule(skipIf.raw, facts)) return false;
