@@ -171,7 +171,16 @@
       "statusActive": "Activa",
       "statusExpired": "Vencida",
       "durationValue": "{months} meses",
-      "expiresAt": "vence"
+      "expiresAt": "vence",
+      "adminEmailsLabel": "Administradores de esta empresa (opcional)",
+      "adminEmailsPlaceholder": "Un correo por línea, ej.\nrrhh@acme.com\ngerente@acme.com",
+      "adminEmailsHelp": "Cada uno recibirá un correo para entrar al panel de esta empresa. Puedes agregar más después desde Administradores.",
+      "adminResultsTitle": "Resultado de los administradores",
+      "adminCreated": "creado, correo de bienvenida enviado",
+      "adminWelcomeEmailFailed": "creado, pero no pudimos enviarle el correo — avísale tú directamente",
+      "adminDuplicate": "ya existe como administrador, no se agregó",
+      "adminInvalidFormat": "correo no válido, no se agregó",
+      "continueCta": "Continuar a la empresa"
     },
     "administradores": {
       "title": "Administradores",

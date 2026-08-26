@@ -37,7 +37,16 @@ export default async function EmpresasPage() {
             duration12: t('duration12'),
             cta: t('createCta'),
             creating: t('creating'),
-            errorGeneric: t('errorGeneric')
+            errorGeneric: t('errorGeneric'),
+            adminEmailsLabel: t('adminEmailsLabel'),
+            adminEmailsPlaceholder: t('adminEmailsPlaceholder'),
+            adminEmailsHelp: t('adminEmailsHelp'),
+            adminResultsTitle: t('adminResultsTitle'),
+            adminCreated: t('adminCreated'),
+            adminWelcomeEmailFailed: t('adminWelcomeEmailFailed'),
+            adminDuplicate: t('adminDuplicate'),
+            adminInvalidFormat: t('adminInvalidFormat'),
+            continueCta: t('continueCta')
           }}
         />
 

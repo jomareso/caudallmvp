@@ -2,14 +2,17 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { createTenant } from './actions';
+import { createTenant, type AdminEmailOutcome } from './actions';
 
 export function CreateTenantForm({ labels }: { labels: Record<string, string> }) {
   const router = useRouter();
   const [name, setName] = useState('');
   const [licenseCount, setLicenseCount] = useState('20');
   const [durationMonths, setDurationMonths] = useState('12');
+  const [adminEmails, setAdminEmails] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [adminResults, setAdminResults] = useState<AdminEmailOutcome[] | null>(null);
+  const [tenantId, setTenantId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(event: React.FormEvent) {
@@ -17,13 +20,48 @@ export function CreateTenantForm({ labels }: { labels: Record<string, string> })
     setError(null);
 
     startTransition(async () => {
-      const result = await createTenant({ name, licenseCount, durationMonths });
+      const result = await createTenant({ name, licenseCount, durationMonths, adminEmails });
       if (!result.ok) {
         setError(result.message);
         return;
       }
-      router.push(`/admin/empresas/${result.tenantId}`);
+      // Si no se ingresaron correos, no hay nada que mostrar — seguimos
+      // directo al detalle de la empresa como antes.
+      if (result.adminResults.length === 0) {
+        router.push(`/admin/empresas/${result.tenantId}`);
+        return;
+      }
+      setAdminResults(result.adminResults);
+      setTenantId(result.tenantId);
     });
+  }
+
+  if (adminResults && tenantId) {
+    const statusLabel: Record<AdminEmailOutcome['status'], string> = {
+      created: labels.adminCreated,
+      welcomeEmailFailed: labels.adminWelcomeEmailFailed,
+      duplicate: labels.adminDuplicate,
+      invalidFormat: labels.adminInvalidFormat
+    };
+    return (
+      <div className="bg-white border border-silver/60 rounded-xl p-6 text-left">
+        <p className="text-sm font-medium text-quartz mb-3">{labels.adminResultsTitle}</p>
+        <ul className="space-y-1.5 mb-4">
+          {adminResults.map((r) => (
+            <li key={r.email} className="text-xs text-nickel">
+              <span className="text-quartz">{r.email}</span> — {statusLabel[r.status]}
+            </li>
+          ))}
+        </ul>
+        <button
+          type="button"
+          onClick={() => router.push(`/admin/empresas/${tenantId}`)}
+          className="w-full bg-yale text-white rounded-lg py-2.5 text-sm"
+        >
+          {labels.continueCta}
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -66,6 +104,19 @@ export function CreateTenantForm({ labels }: { labels: Record<string, string> })
         <option value="6">{labels.duration6}</option>
         <option value="12">{labels.duration12}</option>
       </select>
+
+      <label htmlFor="adminEmails" className="block text-xs text-nickel mb-1">
+        {labels.adminEmailsLabel}
+      </label>
+      <textarea
+        id="adminEmails"
+        value={adminEmails}
+        onChange={(event) => setAdminEmails(event.target.value)}
+        placeholder={labels.adminEmailsPlaceholder}
+        rows={3}
+        className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-1 focus:outline-none focus:border-cola"
+      />
+      <p className="text-[11px] text-nickel mb-3">{labels.adminEmailsHelp}</p>
 
       {error ? <p className="text-xs text-bad mb-3">{error}</p> : null}
 
