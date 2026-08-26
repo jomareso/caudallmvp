@@ -26,13 +26,67 @@ export default async function AdminEmpresaPage() {
   const tDim = await getTranslations('diagnostic.dimensions');
   const tBand = await getTranslations('diagnostic.result.bands');
 
-  const aggregates = await getTenantAggregates(admin.tenant.id);
+  const [aggregates, licenseCounts] = await Promise.all([
+    getTenantAggregates(admin.tenant.id),
+    prisma.license.groupBy({ by: ['status'], where: { tenantId: admin.tenant.id }, _count: true })
+  ]);
+
+  const countByStatus = Object.fromEntries(licenseCounts.map((c) => [c.status, c._count])) as Record<
+    'UNUSED' | 'ACTIVE' | 'EXPIRED',
+    number
+  >;
+  const licenseSummary = {
+    total: licenseCounts.reduce((sum, c) => sum + c._count, 0),
+    unused: countByStatus.UNUSED ?? 0,
+    active: countByStatus.ACTIVE ?? 0,
+    expired: countByStatus.EXPIRED ?? 0
+  };
+
+  const thirtyDaysFromNow = new Date();
+  thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+  const expiringSoon = await prisma.license.count({
+    where: {
+      tenantId: admin.tenant.id,
+      status: 'ACTIVE',
+      expiresAt: { gte: new Date(), lte: thirtyDaysFromNow }
+    }
+  });
+
+  // Las licencias son visibles aunque todavía no haya suficientes
+  // empleados con diagnóstico completo para el umbral de anonimato — no
+  // son datos de un empleado en particular (Decisión 1), y RRHH necesita
+  // saber cuántas le quedan disponibles desde el primer día.
+  const licenseCard = (
+    <div className="bg-white border border-silver/60 rounded-xl p-4 mb-6">
+      <p className="text-xs text-nickel mb-2">{t('licensesTitle')}</p>
+      <div className="grid grid-cols-3 gap-2 text-center mb-2">
+        <div>
+          <p className="text-xl font-medium text-quartz">{licenseSummary.unused}</p>
+          <p className="text-[11px] text-nickel">{t('licensesUnused')}</p>
+        </div>
+        <div>
+          <p className="text-xl font-medium text-quartz">{licenseSummary.active}</p>
+          <p className="text-[11px] text-nickel">{t('licensesActive')}</p>
+        </div>
+        <div>
+          <p className="text-xl font-medium text-quartz">{licenseSummary.expired}</p>
+          <p className="text-[11px] text-nickel">{t('licensesExpired')}</p>
+        </div>
+      </div>
+      <p className="text-[11px] text-nickel text-center">{t('licensesTotal', { total: licenseSummary.total })}</p>
+      {expiringSoon > 0 ? (
+        <p className="text-[11px] text-warn text-center mt-1">{t('licensesExpiringSoon', { count: expiringSoon })}</p>
+      ) : null}
+    </div>
+  );
 
   if (aggregates.status === 'INSUFFICIENT_ANONYMITY') {
     return (
       <main className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-sm text-center">
-          <h1 className="text-lg font-medium text-quartz mb-2">{t('insufficientTitle')}</h1>
+          <h1 className="text-lg font-medium text-quartz mb-6">{t('title', { tenantName: admin.tenant.name })}</h1>
+          {licenseCard}
+          <h2 className="text-base font-medium text-quartz mb-2">{t('insufficientTitle')}</h2>
           <p className="text-sm text-nickel">
             {t('insufficientBody', { minRequired: aggregates.minRequired, count: aggregates.employeeCount })}
           </p>
@@ -51,6 +105,8 @@ export default async function AdminEmpresaPage() {
           {t('title', { tenantName: admin.tenant.name })}
         </h1>
         <p className="text-xs text-nickel mb-6 text-center">{t('employeeCount', { count: aggregates.employeeCount })}</p>
+
+        {licenseCard}
 
         <div className="text-center mb-6">
           <p className="text-xs text-nickel mb-1">{t('averageCfhiLabel')}</p>

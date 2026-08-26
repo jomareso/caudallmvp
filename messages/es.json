@@ -208,7 +208,13 @@
       "dimensionsTitle": "Tus 5 dimensiones (promedio)",
       "insufficientTitle": "Todavía no hay suficientes datos",
       "insufficientBody": "Necesitas al menos {minRequired} empleados con el diagnóstico completo para ver agregados anónimos. Hoy tienes {count}. Esto protege la privacidad individual de tus empleados (nunca vemos datos de uno solo).",
-      "privacyNote": "Estos son promedios y conteos de tu empresa — nunca vemos las respuestas de un empleado en particular."
+      "privacyNote": "Estos son promedios y conteos de tu empresa — nunca vemos las respuestas de un empleado en particular.",
+      "licensesTitle": "Licencias",
+      "licensesUnused": "Disponibles",
+      "licensesActive": "En uso",
+      "licensesExpired": "Vencidas",
+      "licensesTotal": "{total} licencias contratadas en total",
+      "licensesExpiringSoon": "{count} licencias vencen en los próximos 30 días"
     },
     "funcional": {
       "title": "Todavía no hay herramientas para tu rol",
