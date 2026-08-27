@@ -32,7 +32,9 @@ export default async function AccionPage() {
               achieved: tAction('achieved'),
               partial: tAction('partial'),
               notAchieved: tAction('notAchieved'),
-              watchVideo: tAction('watchVideo')
+              watchVideo: tAction('watchVideo'),
+              pushEnable: tAction('pushEnable'),
+              pushEnabled: tAction('pushEnabled')
             }}
           />
         ) : (

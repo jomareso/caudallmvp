@@ -60,7 +60,8 @@
       "admins": "Administradores",
       "methodology": "Metodología",
       "companies": "Empresas",
-      "logout": "Cerrar sesión"
+      "logout": "Cerrar sesión",
+      "notifications": "Notificaciones"
     },
     "metodologia": {
       "title": "Metodología",
@@ -254,6 +255,16 @@
     "funcional": {
       "title": "Todavía no hay herramientas para tu rol",
       "body": "El editor del banco de preguntas y las demás herramientas del equipo de Caudall son una fase posterior del panel administrativo. Por ahora tu cuenta existe, pero no hay nada que gestionar aquí."
+    },
+    "notifications": {
+      "title": "Notificaciones push",
+      "description": "Herramienta de verificación: envía una notificación de prueba a un empleado que ya activó notificaciones, para confirmar que la infraestructura funciona.",
+      "emailLabel": "Correo personal del empleado",
+      "titleLabel": "Título",
+      "bodyLabel": "Mensaje",
+      "send": "Enviar notificación de prueba",
+      "sending": "Enviando...",
+      "success": "Notificación enviada."
     }
   },
   "diagnostic": {
@@ -1426,7 +1437,9 @@
       "notAchieved": "No todavía",
       "none": "Vas bien — no hay ninguna acción pendiente que necesites atender ahora.",
       "pending": "Todavía no tenemos suficiente información para sugerirte un próximo paso. Vuelve a revisar tu diagnóstico más adelante — algunas respuestas nuevas pueden desbloquear una recomendación.",
-      "watchVideo": "Ver video corto"
+      "watchVideo": "Ver video corto",
+      "pushEnable": "Avísame cuando sea el momento",
+      "pushEnabled": "Te vamos a avisar por notificación."
     }
   },
   "interventions": {
