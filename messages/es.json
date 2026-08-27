@@ -230,6 +230,11 @@
       "title": "Salud financiera de {tenantName}",
       "employeeCount": "{count} empleados con diagnóstico completo",
       "averageCfhiLabel": "Índice de Salud Financiera promedio",
+      "tiers": {
+        "LOW": "Vulnerables",
+        "MID": "Sobreviviendo",
+        "HIGH": "Saludables"
+      },
       "dimensionsTitle": "Tus 5 dimensiones (promedio)",
       "insufficientTitle": "Todavía no hay suficientes datos",
       "insufficientBody": "Necesitas al menos {minRequired} empleados con el diagnóstico completo para ver agregados anónimos. Hoy tienes {count}. Esto protege la privacidad individual de tus empleados (nunca vemos datos de uno solo).",
@@ -261,6 +266,7 @@
       "SAVING": "Ahorro",
       "PLANNING": "Planificación",
       "BEHAVIORAL": "Conductual",
+      "CONTEXTO": "Contexto",
       "descriptions": {
         "CONTROL": "¿Manejo sosteniblemente mis finanzas cotidianas?",
         "RESILIENCE": "¿Puedo absorber un shock financiero?",
@@ -1324,6 +1330,12 @@
         "MET": "Saludable",
         "NA": "No aplica"
       },
+      "levels": {
+        "LOW": "Explorador",
+        "MID": "Navegante",
+        "HIGH": "Capitán",
+        "prefix": "Nivel"
+      },
       "ctaNextStep": "Ver mi próximo paso"
     },
     "action": {
@@ -1337,6 +1349,7 @@
       "partial": "En parte",
       "notAchieved": "No todavía",
       "none": "Vas bien — no hay ninguna acción pendiente que necesites atender ahora.",
+    "pending": "Todavía no tenemos suficiente información para sugerirte un próximo paso. Vuelve a revisar tu diagnóstico más adelante — algunas respuestas nuevas pueden desbloquear una recomendación.",
       "watchVideo": "Ver video corto"
     }
   },

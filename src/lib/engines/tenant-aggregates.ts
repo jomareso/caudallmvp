@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db/prisma';
-import { scoreToDimensionState } from './scoring';
+import { scoreToProgressTier } from './scoring';
 
 // spec (docs/data-model.md, Bloque 7) + Decisión 1: la empresa nunca ve
 // datos individuales de empleados, solo agregados anonimizados con un
@@ -21,7 +21,12 @@ export type DimensionAggregate = {
   stateDistribution: Record<'CRITICAL' | 'UNMET' | 'PARTIAL' | 'MET' | 'NA', number>;
 };
 
-export type CfhiBandDistribution = Record<'CRITICAL' | 'UNMET' | 'PARTIAL' | 'MET', number>;
+// Metodología v1.5 §6: en el dashboard de RRHH, la condición general se
+// resume con Vulnerables/Sobreviviendo/Saludables (3 niveles) — distinto
+// de las 4 bandas CRITICAL/UNMET/PARTIAL/MET que usa el detalle por
+// dimensión, mismos cortes que el nivel de progreso del empleado
+// (scoreToProgressTier).
+export type CfhiTierDistribution = Record<'LOW' | 'MID' | 'HIGH', number>;
 
 export type TenantAggregatesResult =
   | {
@@ -37,7 +42,7 @@ export type TenantAggregatesResult =
       registeredCount: number;
       completionRate: number;
       averageCfhi: number;
-      cfhiBandDistribution: CfhiBandDistribution;
+      cfhiTierDistribution: CfhiTierDistribution;
       actionCommitmentRate: number;
       dimensions: DimensionAggregate[];
     };
@@ -69,9 +74,9 @@ export async function getTenantAggregates(tenantId: string): Promise<TenantAggre
   const averageCfhi = financialStates.reduce((sum, fs) => sum + fs.cfhiScore, 0) / employeeCount;
   const qualifyingEmployeeIds = financialStates.map((fs) => fs.employeeId);
 
-  const cfhiBandDistribution: CfhiBandDistribution = { CRITICAL: 0, UNMET: 0, PARTIAL: 0, MET: 0 };
+  const cfhiTierDistribution: CfhiTierDistribution = { LOW: 0, MID: 0, HIGH: 0 };
   for (const fs of financialStates) {
-    cfhiBandDistribution[scoreToDimensionState(fs.cfhiScore)] += 1;
+    cfhiTierDistribution[scoreToProgressTier(fs.cfhiScore)] += 1;
   }
 
   const committedEmployeeIds = await prisma.employeeIntervention.findMany({
@@ -130,7 +135,7 @@ export async function getTenantAggregates(tenantId: string): Promise<TenantAggre
     registeredCount,
     completionRate,
     averageCfhi,
-    cfhiBandDistribution,
+    cfhiTierDistribution,
     actionCommitmentRate,
     dimensions
   };

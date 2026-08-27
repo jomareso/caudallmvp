@@ -60,7 +60,7 @@ export default async function DiagnosticoPage() {
     <main className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-sm">
         <div className="flex justify-end text-[11px] text-nickel mb-1">
-          <span>{dimension ? tDim(dimension.code) : tDim('BEHAVIORAL')}</span>
+          <span>{dimension ? tDim(dimension.code) : tDim(question.role === 'CONTEXT' ? 'CONTEXTO' : 'BEHAVIORAL')}</span>
         </div>
         <div className="h-1 bg-silver/40 rounded-full overflow-hidden mb-5">
           <div

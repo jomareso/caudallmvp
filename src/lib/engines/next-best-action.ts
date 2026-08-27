@@ -71,7 +71,7 @@ export function meetsReadinessGate(
   return true;
 }
 
-async function hasNoRealGap(employeeId: string): Promise<boolean> {
+export async function hasNoRealGap(employeeId: string): Promise<boolean> {
   const scores = await prisma.dimensionScore.findMany({ where: { employeeId, state: { not: 'NA' } } });
   return scores.length > 0 && scores.every((s) => !GAP_STATES.includes(s.state));
 }
