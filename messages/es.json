@@ -1372,7 +1372,47 @@
         "body": "Completa unas preguntas cortas para compararte con personas en una situación similar a la tuya.",
         "cta": "Responder ahora"
       },
-      "ctaNextStep": "Ver mi próximo paso"
+      "ctaNextStep": "Ver mi próximo paso",
+      "interpretation": {
+        "cfhi": {
+          "MET": "Tu salud financiera general es saludable: tus finanzas están mayormente bajo control y tienes bases sólidas en la mayoría de las áreas.",
+          "PARTIAL": "Tu salud financiera está en construcción: hay áreas sólidas y otras que todavía necesitan atención.",
+          "UNMET": "Tu salud financiera está en riesgo: varias áreas necesitan atención antes de que se conviertan en un problema mayor.",
+          "CRITICAL": "Tu salud financiera necesita atención prioritaria: hay señales que conviene atender cuanto antes."
+        },
+        "dimensions": {
+          "CONTROL": {
+            "MET": "Manejas tus finanzas cotidianas con margen: tus ingresos cubren tus gastos y compromisos sin necesidad de recurrir a deuda o ahorros para llegar a fin de mes.",
+            "PARTIAL": "Tus finanzas del día a día están mayormente bajo control, pero el margen es ajustado: un imprevisto podría complicarte.",
+            "UNMET": "Tus gastos y compromisos están presionando tus ingresos. Es común que dependas de deuda o ahorros para cerrar el mes.",
+            "CRITICAL": "Tus gastos superan tus ingresos de forma sostenida. Esto suele requerir atención prioritaria antes que cualquier otro objetivo financiero."
+          },
+          "RESILIENCE": {
+            "MET": "Si surge un imprevisto (una emergencia médica, una pérdida temporal de ingreso), tienes con qué cubrirlo sin poner en riesgo tus necesidades básicas.",
+            "PARTIAL": "Tienes algo de colchón, pero no alcanzaría para cubrir un imprevisto grande sin hacer ajustes importantes.",
+            "UNMET": "Un imprevisto te obligaría a recurrir a deuda, ayuda de terceros o vender algo: hoy no tienes una reserva que te proteja.",
+            "CRITICAL": "Cualquier imprevisto, por pequeño que sea, pondría en riesgo tus necesidades esenciales. No hay colchón que te proteja hoy."
+          },
+          "DEBT": {
+            "MET": "Tus deudas actuales son manejables: las pagas a tiempo y no comprometen tu día a día.",
+            "PARTIAL": "Puedes cumplir con tus deudas, pero te exigen ajustes o dejan poco margen para otras cosas.",
+            "UNMET": "Tus deudas están presionando tu situación: pagarlas cuesta trabajo y puede haber atrasos o renovaciones.",
+            "CRITICAL": "Tus deudas están en un punto que compromete seriamente tu estabilidad: atrasos recurrentes o una carga que hoy no puedes sostener con tus ingresos."
+          },
+          "SAVING": {
+            "MET": "Tienes un hábito de ahorro activo y constante: apartas recursos de forma regular.",
+            "PARTIAL": "Ahorras, pero de forma irregular o en montos que no siempre puedes sostener.",
+            "UNMET": "Casi no logras apartar dinero de forma recurrente: el ahorro todavía no es un hábito.",
+            "CRITICAL": "Hoy no tienes ninguna práctica de ahorro: todo tu ingreso se destina a cubrir lo inmediato."
+          },
+          "PLANNING": {
+            "MET": "Tienes objetivos claros, un plan de acción para alcanzarlos y le das seguimiento.",
+            "PARTIAL": "Tienes algunas metas definidas, pero falta un plan concreto o seguimiento constante.",
+            "UNMET": "Tienes ideas de lo que quieres lograr, pero todavía no se han convertido en un plan con pasos concretos.",
+            "CRITICAL": "No tienes objetivos financieros definidos todavía: es el punto de partida para empezar a planificar."
+          }
+        }
+      }
     },
     "action": {
       "eyebrow": "Tu próximo paso",
