@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
+import { RegisterServiceWorker } from './register-service-worker';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default async function RootLayout({
   return (
     <html lang="es">
       <body>
+        <RegisterServiceWorker />
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>

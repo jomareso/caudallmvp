@@ -83,6 +83,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                 <Link href="/admin/administradores" className="hover:text-yale">
                   {t('admins')}
                 </Link>
+                <Link href="/admin/notificaciones" className="hover:text-yale">
+                  {t('notifications')}
+                </Link>
               </>
             ) : null}
             <LogoutButton label={t('logout')} />

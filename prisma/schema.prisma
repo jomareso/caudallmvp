@@ -129,10 +129,29 @@ model Employee {
   financialState  FinancialState?
   safetyFlags     SafetyFlag[]
   interventions   EmployeeIntervention[]
+  pushSubscriptions PushSubscription[]
 
   @@unique([tenantId, personalEmail])
   @@index([tenantId])
   @@map("employees")
+}
+
+// Decisión 9: PWA con notificaciones push desde el MVP. Una fila por
+// dispositivo/navegador suscrito (un empleado puede tener varios). No lleva
+// tenantId propio — se resuelve por employeeId, igual que VariableState y
+// el resto de tablas "ligadas por employeeId" (ver migración de RLS).
+model PushSubscription {
+  id         String   @id @default(cuid())
+  employeeId String
+  endpoint   String   @unique
+  p256dh     String
+  auth       String
+  createdAt  DateTime @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+  @@map("push_subscriptions")
 }
 
 enum AuthMethod {
@@ -777,4 +796,45 @@ enum LearningEventType {
   INTERVENTION_COMMITTED
   INTERVENTION_COMPLETED
   OUTCOME_REPORTED
+}
+
+// Comparación con pares (benchmark nacional, CLAUDE.md: "diferenciador
+// clave frente a ChatGPT"). Cada fila es UN encuestado anonimizado de los
+// Estudios de Salud Financiera de Reynoso (2021-2024) — no es dato de un
+// empleado de Caudall, es contenido de referencia de la plataforma, igual
+// que Question/Variable/Intervention: sin tenantId propio, sin RLS (mismo
+// criterio que esas tablas, ver 20260826225832_enable_rls, que
+// deliberadamente no las incluye).
+//
+// NO incluye Resiliencia: el estudio de origen no la mide por separado
+// (esa pregunta quedó mezclada dentro de "Ahorro" en el instrumento
+// viejo, justo la confusión que prohíbe la Regla CORE #5) — decisión
+// explícita de Reynoso: comparar solo el score general y Control/Ahorro/
+// Deuda/Planificación hasta que exista un estudio que mida Resiliencia
+// aparte. Ver prisma/seed-data/scripts/convert-national-benchmark.py
+// para el mapeo completo desde los datos originales.
+model NationalBenchmarkRecord {
+  id                String  @id @default(cuid())
+  version           String
+  studyYear         Int?
+  sourceLabel       String
+  sex               String?
+  ageBand           String?
+  educationLevel    String?
+  employmentStatus  String?
+  dependents        String?
+  incomeRangeRaw    String?
+  controlScore      Float
+  savingScore       Float
+  debtScore         Float
+  planningScore     Float
+  overallScore      Float
+  condition         String?
+  createdAt         DateTime @default(now())
+
+  @@index([version])
+  @@index([ageBand])
+  @@index([employmentStatus])
+  @@index([educationLevel])
+  @@map("national_benchmark_records")
 }
