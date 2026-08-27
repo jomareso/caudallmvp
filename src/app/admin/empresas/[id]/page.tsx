@@ -1,7 +1,7 @@
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { auth } from '@/lib/auth/auth';
-import { prisma } from '@/lib/db/prisma';
+import { prisma, runWithTenantContext } from '@/lib/db/prisma';
+import { requireAdm } from '@/lib/auth/admin-context';
 import { GenerateLicensesForm } from './generate-licenses-form';
 import { TenantNameForm } from './tenant-name-form';
 import { SuspendTenantButton } from './suspend-tenant-button';
@@ -13,13 +13,7 @@ const STATUS_LABEL_KEY: Record<string, string> = {
 };
 
 export default async function EmpresaDetallePage({ params }: { params: { id: string } }) {
-  const session = await auth();
-  // Ver src/lib/auth/auth.ts sobre por qué el cast local.
-  const sessionUser = session?.user as { id?: string; role?: 'employee' | 'admin' } | undefined;
-  if (sessionUser?.role !== 'admin' || !sessionUser.id) redirect('/admin');
-
-  const admin = await prisma.adminUser.findUnique({ where: { id: sessionUser.id } });
-  if (!admin || admin.profileType !== 'ADM') redirect('/admin');
+  await requireAdm();
 
   const t = await getTranslations('admin.empresas');
   const dateFormat = new Intl.DateTimeFormat('es-DO', {
@@ -27,10 +21,13 @@ export default async function EmpresaDetallePage({ params }: { params: { id: str
     timeZone: 'America/Santo_Domingo'
   });
 
-  const tenant = await prisma.tenant.findUnique({
-    where: { id: params.id },
-    include: { licenses: { orderBy: { createdAt: 'desc' }, include: { employee: true } } }
-  });
+  // ADM ve el detalle de CUALQUIER tenant a propósito, de ahí platform-admin.
+  const tenant = await runWithTenantContext({ kind: 'platform-admin' }, () =>
+    prisma.tenant.findUnique({
+      where: { id: params.id },
+      include: { licenses: { orderBy: { createdAt: 'desc' }, include: { employee: true } } }
+    })
+  );
   if (!tenant) notFound();
 
   const suspended = tenant.status === 'SUSPENDED';

@@ -1,22 +1,18 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
+import { requireAdm } from '@/lib/auth/admin-context';
 import { SyncBancoMaestroButton } from './sync-banco-maestro-button';
 
 export default async function AdminMetodologiaPage() {
-  const session = await auth();
-  // Ver src/lib/auth/auth.ts sobre por qué el cast local.
-  const sessionUser = session?.user as { id?: string; role?: 'employee' | 'admin' } | undefined;
-  if (sessionUser?.role !== 'admin' || !sessionUser.id) redirect('/admin');
-
-  const admin = await prisma.adminUser.findUnique({ where: { id: sessionUser.id } });
   // Solo ADM administra el Banco Maestro — tocar constructos/variables/
   // preguntas afecta al motor de todos los tenants a la vez.
-  if (!admin || admin.profileType !== 'ADM') redirect('/admin');
+  await requireAdm();
 
   const t = await getTranslations('admin.metodologia');
+
+  // methodology/questionBank/audit_logs son catálogo global sin tenantId,
+  // no llevan RLS.
 
   const [methodology, questionBank, lastSync] = await Promise.all([
     prisma.methodology.findFirst({ where: { status: 'ACTIVE' } }),

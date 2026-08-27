@@ -1,5 +1,5 @@
 import { Prisma, VersionStatus } from '@prisma/client';
-import type { PrismaClient, DimensionCode, QuestionRole, InferenceType } from '@prisma/client';
+import type { DimensionCode, QuestionRole, InferenceType, PrismaClient } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import bancoMaestro from '../../../prisma/seed-data/banco-maestro-v3.json';
 

@@ -1,20 +1,14 @@
-import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
+import { requireAdm } from '@/lib/auth/admin-context';
 import { LogoUploadForm } from './upload-form';
 
 export default async function AdminConfiguracionPage() {
-  const session = await auth();
-  // Ver src/lib/auth/auth.ts sobre por qué el cast local.
-  const sessionUser = session?.user as { id?: string; role?: 'employee' | 'admin' } | undefined;
-  if (sessionUser?.role !== 'admin' || !sessionUser.id) redirect('/admin');
-
-  const admin = await prisma.adminUser.findUnique({ where: { id: sessionUser.id } });
   // Solo ADM (control total de la plataforma) administra el logo de
   // Caudall — EMPRESA y FUNCIONAL no tienen ese alcance.
-  if (!admin || admin.profileType !== 'ADM') redirect('/admin');
+  await requireAdm();
 
+  // platform_settings es un singleton global sin tenantId, no lleva RLS.
   const settings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } });
   const hasLogo = Boolean(settings?.logoData);
 

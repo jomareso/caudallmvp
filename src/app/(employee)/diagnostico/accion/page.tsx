@@ -1,13 +1,10 @@
-import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { auth } from '@/lib/auth/auth';
 import { getActionSuggestion } from './actions';
 import { ActionCard } from './action-card';
 
 export default async function AccionPage() {
-  const session = await auth();
-  if (!session?.user?.id) redirect('/');
-
+  // getActionSuggestion() (en ./actions, un Server Action) ya resuelve su
+  // propia sesión/contexto de RLS — no hace falta duplicarlo acá.
   const result = await getActionSuggestion();
   const t = await getTranslations();
   const tAction = await getTranslations('diagnostic.action');

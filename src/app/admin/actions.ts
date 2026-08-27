@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { prisma } from '@/lib/db/prisma';
+import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { signOut } from '@/lib/auth/auth';
 import { createMagicLinkToken } from '@/lib/auth/magic-link';
 import { sendAdminMagicLinkEmail } from '@/lib/email/send-magic-link';
@@ -23,7 +23,16 @@ export async function requestAdminMagicLink(
   // si alguien con acceso ya lo creó (ej. sembrado directo en el seed para
   // el primer ADM). No revelamos si el correo existe o no en la respuesta,
   // para no filtrar qué correos son admins.
-  const admin = await prisma.adminUser.findUnique({ where: { email } });
+  //
+  // Este lookup pasa por email, ANTES de que exista cualquier sesión — no
+  // hay id de session-subject todavía, así que no aplica ese contexto. Es
+  // una operación de infraestructura de auth (no expone datos de tenant
+  // al llamador: solo decide si se envía o no un correo, y la respuesta
+  // es siempre {ok:true} para no filtrar nada), así que corre bajo
+  // contexto platform-admin.
+  const admin = await runWithTenantContext({ kind: 'platform-admin' }, () =>
+    prisma.adminUser.findUnique({ where: { email } })
+  );
   // Un admin desactivado no debe poder pedir un link nuevo — mismo trato
   // silencioso que un correo que no existe, para no filtrar cuáles son
   // admins ni cuáles están desactivados.

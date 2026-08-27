@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth';
-import { prisma } from '@/lib/db/prisma';
+import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { LandingForm } from './landing-form';
 
 export default async function LandingPage() {
@@ -14,8 +14,15 @@ export default async function LandingPage() {
   // cookie, /bienvenida no lo encuentra y redirige de vuelta acá — sin
   // esta verificación eso es un bucle infinito entre / y /bienvenida.
   const session = await auth();
-  if (session?.user?.id) {
-    const employee = await prisma.employee.findUnique({ where: { id: session.user.id } });
+  // Ver src/lib/auth/auth.ts sobre por qué el cast local.
+  const sessionUser = session?.user as
+    | { id?: string; tenantId?: string; role?: 'employee' | 'admin' }
+    | undefined;
+  if (sessionUser?.role === 'employee' && sessionUser.id && sessionUser.tenantId) {
+    const employee = await runWithTenantContext(
+      { kind: 'tenant', tenantId: sessionUser.tenantId },
+      () => prisma.employee.findUnique({ where: { id: sessionUser.id! } })
+    );
     if (employee) redirect('/bienvenida');
   }
 

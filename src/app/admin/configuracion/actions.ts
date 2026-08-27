@@ -1,24 +1,12 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getTranslations } from 'next-intl/server';
-import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
+import { requireAdm } from '@/lib/auth/admin-context';
 
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']);
 const MAX_SIZE_BYTES = 2 * 1024 * 1024;
-
-async function requireAdm() {
-  const session = await auth();
-  // Ver src/lib/auth/auth.ts sobre por qué el cast local.
-  const sessionUser = session?.user as { id?: string; role?: 'employee' | 'admin' } | undefined;
-  if (sessionUser?.role !== 'admin' || !sessionUser.id) redirect('/admin');
-
-  const admin = await prisma.adminUser.findUnique({ where: { id: sessionUser.id } });
-  if (!admin || admin.profileType !== 'ADM') redirect('/admin');
-  return admin;
-}
 
 export async function uploadLogo(formData: FormData): Promise<{ ok: true } | { ok: false; message: string }> {
   await requireAdm();
@@ -37,6 +25,7 @@ export async function uploadLogo(formData: FormData): Promise<{ ok: true } | { o
 
   const bytes = Buffer.from(await file.arrayBuffer());
 
+  // platform_settings es un singleton global sin tenantId, no lleva RLS.
   await prisma.platformSettings.upsert({
     where: { id: 'singleton' },
     update: { logoData: bytes, logoMimeType: file.type },
