@@ -10,7 +10,7 @@ export default async function AccionPage() {
   const tAction = await getTranslations('diagnostic.action');
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
+    <main className="min-h-screen flex flex-col items-center p-6 pt-16">
       <div className="w-full max-w-sm">
         <p className="text-xs text-nickel mb-2 text-center">{tAction('eyebrow')}</p>
 

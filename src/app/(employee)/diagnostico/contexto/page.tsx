@@ -36,7 +36,7 @@ export default async function DiagnosticoContextoPage() {
       });
 
     return (
-      <main className="min-h-screen flex items-center justify-center p-6">
+      <main className="min-h-screen flex flex-col items-center p-6 pt-16">
         <div className="w-full max-w-sm">
           <ContextFlow
             // La pantalla de transición (explicando por qué se pregunta

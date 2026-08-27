@@ -48,7 +48,7 @@ export default async function ResultadoPage() {
     const cfhiLevel = scoreToProgressTier(cfhiRounded);
 
     return (
-      <main className="min-h-screen flex items-center justify-center p-6">
+      <main className="min-h-screen flex flex-col items-center p-6 pt-16">
         <div className="w-full max-w-sm text-center">
           <p className="text-xs text-nickel mb-1">{t('title')}</p>
           <p className="text-5xl font-medium text-yale leading-none mb-1">{cfhiRounded}</p>

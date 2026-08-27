@@ -60,7 +60,7 @@ export default async function DiagnosticoPage() {
       });
 
     return (
-      <main className="min-h-screen flex items-center justify-center p-6">
+      <main className="min-h-screen flex flex-col items-center p-6 pt-16">
         <div className="w-full max-w-sm">
           <div className="flex justify-end text-[11px] text-nickel mb-1">
             <span>{dimension ? tDim(dimension.code) : tDim('BEHAVIORAL')}</span>

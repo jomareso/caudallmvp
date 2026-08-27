@@ -28,7 +28,7 @@ export function LandingForm({ hasLogo }: { hasLogo: boolean }) {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
+    <main className="min-h-screen flex flex-col items-center p-6 pt-16">
       <div className="w-full max-w-sm text-center">
         {hasLogo ? (
           // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable

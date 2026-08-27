@@ -34,7 +34,7 @@ export function EmailForm({
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
+    <main className="min-h-screen flex flex-col items-center p-6 pt-16">
       <div className="w-full max-w-sm">
         <p className="text-xs text-nickel text-center mb-1">{tenantName} &middot; caudall</p>
         <h1 className="text-lg font-medium text-quartz text-center mb-1">{t('title')}</h1>

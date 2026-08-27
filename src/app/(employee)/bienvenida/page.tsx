@@ -16,7 +16,7 @@ export default async function BienvenidaPage() {
   const t = await getTranslations('employee.welcome');
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
+    <main className="min-h-screen flex flex-col items-center p-6 pt-16">
       <div className="w-full max-w-sm text-center">
         <div className="w-14 h-14 rounded-full bg-ok/10 text-ok flex items-center justify-center text-2xl mx-auto mb-4">
           ✓
