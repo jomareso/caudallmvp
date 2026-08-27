@@ -129,10 +129,29 @@ model Employee {
   financialState  FinancialState?
   safetyFlags     SafetyFlag[]
   interventions   EmployeeIntervention[]
+  pushSubscriptions PushSubscription[]
 
   @@unique([tenantId, personalEmail])
   @@index([tenantId])
   @@map("employees")
+}
+
+// Decisión 9: PWA con notificaciones push desde el MVP. Una fila por
+// dispositivo/navegador suscrito (un empleado puede tener varios). No lleva
+// tenantId propio — se resuelve por employeeId, igual que VariableState y
+// el resto de tablas "ligadas por employeeId" (ver migración de RLS).
+model PushSubscription {
+  id         String   @id @default(cuid())
+  employeeId String
+  endpoint   String   @unique
+  p256dh     String
+  auth       String
+  createdAt  DateTime @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+  @@map("push_subscriptions")
 }
 
 enum AuthMethod {

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { commitToAction, dismissAction, reportOutcome } from './actions';
+import { PushOptIn } from './push-opt-in';
 
 type Status = 'SUGGESTED' | 'COMMITTED' | 'IN_PROGRESS' | 'COMPLETED' | 'DISMISSED';
 
@@ -59,6 +60,8 @@ export function ActionCard({
     partial: string;
     notAchieved: string;
     watchVideo: string;
+    pushEnable: string;
+    pushEnabled: string;
   };
 }) {
   const router = useRouter();
@@ -151,7 +154,10 @@ export function ActionCard({
 
       {status === 'COMMITTED' || status === 'IN_PROGRESS' ? (
         <div>
-          <p className="text-xs text-ok mb-3">{labels.committedNotice}</p>
+          <p className="text-xs text-ok mb-1">{labels.committedNotice}</p>
+          <div className="mb-3">
+            <PushOptIn labels={{ enable: labels.pushEnable, enabled: labels.pushEnabled }} />
+          </div>
           <p className="text-sm text-quartz mb-2">{labels.didYouDoIt}</p>
           <div className="flex gap-2">
             <button
