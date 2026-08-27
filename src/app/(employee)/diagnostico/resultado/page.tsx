@@ -6,14 +6,6 @@ import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-cont
 import { scoreToDimensionState, scoreToProgressTier } from '@/lib/engines/scoring';
 import { countContextAnsweredAndTotal } from '@/lib/engines/diagnostic';
 
-const BAND_CLASS: Record<string, string> = {
-  CRITICAL: 'bg-bad/10 text-bad',
-  UNMET: 'bg-warn/10 text-warn',
-  PARTIAL: 'bg-warn/10 text-warn',
-  MET: 'bg-ok/10 text-ok',
-  NA: 'bg-silver/20 text-nickel'
-};
-
 export default async function ResultadoPage() {
   const employee = await requireEmployee();
   const employeeId = employee.id;
@@ -39,7 +31,6 @@ export default async function ResultadoPage() {
 
     const t = await getTranslations('diagnostic.result');
     const tDim = await getTranslations('diagnostic.dimensions');
-    const tBand = await getTranslations('diagnostic.result.bands');
     const tLevel = await getTranslations('diagnostic.result.levels');
     const tInterpretation = await getTranslations('diagnostic.result.interpretation');
 
@@ -54,9 +45,6 @@ export default async function ResultadoPage() {
             <p className="text-xs text-nickel mb-1">{t('title')}</p>
             <p className="text-5xl font-medium text-yale leading-none mb-1">{cfhiRounded}</p>
             <p className="text-[11px] text-nickel mb-2">{t('outOf100')}</p>
-            <span className={`inline-block text-[11px] px-2.5 py-1 rounded-lg mr-1.5 ${BAND_CLASS[cfhiBand]}`}>
-              {tBand(cfhiBand)}
-            </span>
             <span className="inline-block text-[11px] px-2.5 py-1 rounded-lg bg-picton/10 text-yale">
               {tLevel('prefix')}: {tLevel(cfhiLevel)}
             </span>
@@ -85,9 +73,9 @@ export default async function ResultadoPage() {
                           {tLevel(level)}
                         </span>
                       ) : null}
-                      {band ? (
-                        <span className={`text-[10px] px-2 py-0.5 rounded-lg ${BAND_CLASS[band]}`}>
-                          {isNA ? t('debtNotApplicable') : `${score} · ${tBand(band)}`}
+                      {isNA || score !== null ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-lg bg-silver/20 text-nickel">
+                          {isNA ? t('debtNotApplicable') : score}
                         </span>
                       ) : null}
                     </div>
