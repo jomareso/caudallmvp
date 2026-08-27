@@ -24,6 +24,21 @@ export async function submitDiagnosticAnswer(input: {
       return { ok: false, message: 'Esa opción ya no está disponible. Recarga la página.' };
     }
 
+    // diagnosticStartedAt se fija una sola vez, en la primerísima
+    // respuesta (financiera o de contexto, lo que llegue primero — en la
+    // práctica siempre financiera, ya que el bloque de contexto solo se
+    // ofrece después) — mide cuánto toma la parte financiera del
+    // diagnóstico (ver diagnostic-completion.ts y diagnostic-stats.ts).
+    const financialStateExists = await prisma.financialState.findUnique({
+      where: { employeeId },
+      select: { employeeId: true }
+    });
+    if (!financialStateExists) {
+      await prisma.financialState.create({
+        data: { employeeId, cfhiScore: 0, cfhiConfidence: 0, diagnosticStartedAt: new Date() }
+      });
+    }
+
     const evidenceValue = answerOption.evidenceProduced as EvidencePayload;
 
     const [variable, employee, activeMethodology] = await Promise.all([

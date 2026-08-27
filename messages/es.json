@@ -40,7 +40,8 @@
       "ctaStart": "Empezar mi diagnóstico",
       "beforeStart": {
         "title": "Antes de empezar",
-        "body": "Te tomará unos 5–8 minutos. Busca un momento donde puedas concentrarte — entre más honestas sean tus respuestas, más útil va a ser tu diagnóstico."
+        "body": "Te tomará unos 5–8 minutos. Busca un momento donde puedas concentrarte — entre más honestas sean tus respuestas, más útil va a ser tu diagnóstico.",
+        "bodyWithStats": "Te tomará cerca de {minutes} minutos y unas {questions} preguntas — así les tomó en promedio a quienes ya lo hicieron. Busca un momento donde puedas concentrarte — entre más honestas sean tus respuestas, más útil va a ser tu diagnóstico."
       }
     },
     "trust": {
@@ -259,6 +260,13 @@
     "ctaContinue": "Continuar",
     "ctaFinish": "Ver mi resultado",
     "errorSelectOption": "Selecciona una opción antes de continuar.",
+    "context": {
+      "eyebrow": "Ya terminaste lo esencial",
+      "title": "Unas últimas preguntas, opcionales",
+      "body": "Con esto podemos compararte con personas en una situación similar a la tuya — mismo rango de edad, de ingresos, de responsabilidades — en vez de con el promedio general. Toma menos de un minuto, y puedes responderlas después si prefieres.",
+      "ctaContinue": "Continuar",
+      "ctaSkip": "Ahora no"
+    },
     "dimensions": {
       "CONTROL": "Control",
       "RESILIENCE": "Resiliencia",
@@ -1335,6 +1343,10 @@
         "MID": "Navegante",
         "HIGH": "Capitán",
         "prefix": "Nivel"
+      },
+      "contextBanner": {
+        "body": "Completa unas preguntas cortas para compararte con personas en una situación similar a la tuya.",
+        "cta": "Responder ahora"
       },
       "ctaNextStep": "Ver mi próximo paso"
     },
