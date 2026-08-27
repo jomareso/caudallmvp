@@ -1426,7 +1426,8 @@
       "notAchieved": "No todavía",
       "none": "Vas bien — no hay ninguna acción pendiente que necesites atender ahora.",
       "pending": "Todavía no tenemos suficiente información para sugerirte un próximo paso. Vuelve a revisar tu diagnóstico más adelante — algunas respuestas nuevas pueden desbloquear una recomendación.",
-      "watchVideo": "Ver video corto"
+      "watchVideo": "Ver video corto",
+      "backToResult": "Ver mi resultado"
     }
   },
   "interventions": {

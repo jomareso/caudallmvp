@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { getActionSuggestion } from './actions';
 import { ActionCard } from './action-card';
@@ -37,7 +38,13 @@ export default async function AccionPage() {
           />
         ) : (
           <div className="bg-white border border-silver/60 rounded-xl p-6 text-center">
-            <p className="text-sm text-nickel">{tAction(result.reason === 'HEALTHY' ? 'none' : 'pending')}</p>
+            <p className="text-sm text-nickel mb-4">{tAction(result.reason === 'HEALTHY' ? 'none' : 'pending')}</p>
+            <Link
+              href="/diagnostico/resultado"
+              className="inline-block bg-yale text-white rounded-lg py-2.5 px-6 text-sm"
+            >
+              {tAction('backToResult')}
+            </Link>
           </div>
         )}
       </div>
