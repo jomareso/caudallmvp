@@ -1383,6 +1383,13 @@
         "body": "Completa unas preguntas cortas para compararte con personas en una situación similar a la tuya.",
         "cta": "Responder ahora"
       },
+      "comparison": {
+        "title": "Cómo te comparás",
+        "subtitleCohort": "Comparado con personas en una situación similar a la tuya ({n} personas)",
+        "subtitleNational": "Comparado con el promedio nacional ({n} personas · Estudio de Salud Financiera 2021-2024)",
+        "you": "Tú",
+        "average": "Promedio"
+      },
       "ctaNextStep": "Ver mi próximo paso",
       "interpretation": {
         "cfhi": {
