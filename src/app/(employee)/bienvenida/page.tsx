@@ -2,12 +2,16 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
+import { getPlatformDiagnosticStats } from '@/lib/engines/diagnostic-stats';
 
 export default async function BienvenidaPage() {
   const baseEmployee = await requireEmployee();
-  const employee = await runWithTenantContext(employeeTenantContext(baseEmployee), () =>
-    prisma.employee.findUniqueOrThrow({ where: { id: baseEmployee.id }, include: { tenant: true } })
-  );
+  const [employee, stats] = await Promise.all([
+    runWithTenantContext(employeeTenantContext(baseEmployee), () =>
+      prisma.employee.findUniqueOrThrow({ where: { id: baseEmployee.id }, include: { tenant: true } })
+    ),
+    getPlatformDiagnosticStats()
+  ]);
 
   const t = await getTranslations('employee.welcome');
 
@@ -24,7 +28,11 @@ export default async function BienvenidaPage() {
 
         <div className="bg-picton/10 border border-cola/30 rounded-lg p-4 text-left mb-6">
           <p className="text-xs font-medium text-quartz mb-1">{t('beforeStart.title')}</p>
-          <p className="text-xs text-nickel">{t('beforeStart.body')}</p>
+          <p className="text-xs text-nickel">
+            {stats
+              ? t('beforeStart.bodyWithStats', { minutes: stats.averageMinutes, questions: stats.averageQuestions })
+              : t('beforeStart.body')}
+          </p>
         </div>
 
         <Link

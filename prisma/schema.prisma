@@ -604,6 +604,15 @@ model FinancialState {
   finReadiness              String?
   behReadiness              String?
   lastDiagnosticCompletedAt DateTime?
+  // Los tres campos de abajo miden SOLO la parte financiera (GATE/ANCHOR/
+  // ADAPTIVE/FOLLOWUP/BEHAVIORAL) — el bloque de contexto es aparte,
+  // opcional y no cuenta para "cuánto toma el diagnóstico" (ver
+  // src/lib/engines/diagnostic-stats.ts). diagnosticStartedAt se fija una
+  // sola vez, en la primera respuesta; los otros dos se fijan al terminar
+  // (finalizeDiagnostic), como snapshot — no se recalculan después.
+  diagnosticStartedAt        DateTime?
+  diagnosticDurationSeconds  Int?
+  questionsAnsweredCount     Int?
   updatedAt                 DateTime  @updatedAt
 
   employee Employee @relation(fields: [employeeId], references: [id])

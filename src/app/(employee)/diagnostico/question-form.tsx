@@ -9,13 +9,23 @@ export function QuestionForm({
   questionText,
   options,
   continueLabel,
-  errorLabel
+  errorLabel,
+  mode = 'financial'
 }: {
   questionId: string;
   questionText: string;
   options: { id: string; label: string }[];
   continueLabel: string;
   errorLabel: string;
+  // 'financial' (default): al terminar la parte financiera del
+  // diagnóstico, sigue a /diagnostico/contexto (que decide si hay bloque
+  // de contexto pendiente u ofrece ir directo a resultado) — antes iba
+  // directo a resultado. 'context': cada respuesta del bloque de
+  // contexto vuelve a /diagnostico/contexto, que sirve la siguiente
+  // pregunta o redirige a resultado cuando ya no queda ninguna — el
+  // campo `done` de submitDiagnosticAnswer refleja la parte financiera
+  // (ya terminada en este punto), así que no sirve para decidir acá.
+  mode?: 'financial' | 'context';
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
@@ -35,7 +45,11 @@ export function QuestionForm({
         setError(result.message);
         return;
       }
-      router.push(result.done ? '/diagnostico/resultado' : '/diagnostico');
+      if (mode === 'context') {
+        router.push('/diagnostico/contexto');
+      } else {
+        router.push(result.done ? '/diagnostico/contexto' : '/diagnostico');
+      }
       router.refresh();
     });
   }

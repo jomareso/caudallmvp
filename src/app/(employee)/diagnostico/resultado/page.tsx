@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { scoreToDimensionState, scoreToProgressTier } from '@/lib/engines/scoring';
+import { countContextAnsweredAndTotal } from '@/lib/engines/diagnostic';
 
 const BAND_CLASS: Record<string, string> = {
   CRITICAL: 'bg-bad/10 text-bad',
@@ -32,6 +33,9 @@ export default async function ResultadoPage() {
       where: { employeeId }
     });
     const scoreByDimensionId = new Map(dimensionScores.map((ds) => [ds.dimensionId, ds]));
+
+    const { answered: ctxAnswered, total: ctxTotal } = await countContextAnsweredAndTotal(employeeId);
+    const showContextBanner = ctxTotal > 0 && ctxAnswered < ctxTotal;
 
     const t = await getTranslations('diagnostic.result');
     const tDim = await getTranslations('diagnostic.dimensions');
@@ -90,6 +94,15 @@ export default async function ResultadoPage() {
               );
             })}
           </div>
+
+          {showContextBanner ? (
+            <div className="mt-6 bg-picton/10 border border-cola/30 rounded-lg p-4 text-left">
+              <p className="text-xs text-nickel mb-2">{t('contextBanner.body')}</p>
+              <Link href="/diagnostico/contexto" className="text-xs text-yale underline">
+                {t('contextBanner.cta')}
+              </Link>
+            </div>
+          ) : null}
 
           <Link
             href="/diagnostico/accion"

@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db/prisma';
 import { computeRootCause } from './root-cause';
 import { computePriority } from './priority';
 import { computeEligibility } from './eligibility';
+import { countAnsweredAndTotal } from './diagnostic';
 import { logLearningEvent } from './learning';
 
 // Causa raíz (§25), Prioridad (§26) y Eligibility/Readiness (§18, §27)
@@ -25,19 +26,43 @@ export async function finalizeDiagnostic(employeeId: string): Promise<void> {
   const behReadiness = eligibilityResult.behavioralReadiness.state;
   const eligibility = eligibilityResult;
 
+  // "Cuánto toma el diagnóstico" (usado en la pantalla de bienvenida, ver
+  // diagnostic-stats.ts) mide SOLO la parte financiera — diagnosticStartedAt
+  // se fija en la primera respuesta (submitDiagnosticAnswer). Si por algún
+  // motivo no está (ej. una cuenta vieja que ya tenía evidence antes de que
+  // este campo existiera), no se inventa una duración: queda null y esa
+  // fila simplemente no entra al promedio.
+  const existing = await prisma.financialState.findUnique({ where: { employeeId } });
+  const completedAt = new Date();
+  const diagnosticDurationSeconds = existing?.diagnosticStartedAt
+    ? Math.max(0, Math.round((completedAt.getTime() - existing.diagnosticStartedAt.getTime()) / 1000))
+    : null;
+  const { answered: questionsAnsweredCount } = await countAnsweredAndTotal(employeeId);
+
   await prisma.financialState.upsert({
     where: { employeeId },
-    update: { lastDiagnosticCompletedAt: new Date(), rootCause, systemPriority, finReadiness, behReadiness, eligibility },
-    create: {
-      employeeId,
-      cfhiScore: 0,
-      cfhiConfidence: 0,
-      lastDiagnosticCompletedAt: new Date(),
+    update: {
+      lastDiagnosticCompletedAt: completedAt,
       rootCause,
       systemPriority,
       finReadiness,
       behReadiness,
-      eligibility
+      eligibility,
+      diagnosticDurationSeconds,
+      questionsAnsweredCount
+    },
+    create: {
+      employeeId,
+      cfhiScore: 0,
+      cfhiConfidence: 0,
+      lastDiagnosticCompletedAt: completedAt,
+      rootCause,
+      systemPriority,
+      finReadiness,
+      behReadiness,
+      eligibility,
+      diagnosticDurationSeconds,
+      questionsAnsweredCount
     }
   });
 

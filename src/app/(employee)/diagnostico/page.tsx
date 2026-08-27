@@ -23,7 +23,10 @@ export default async function DiagnosticoPage() {
       if (!financialState?.systemPriority) {
         await finalizeDiagnostic(employeeId);
       }
-      redirect('/diagnostico/resultado');
+      // El bloque de contexto (opcional) se ofrece después de terminar la
+      // parte financiera — /diagnostico/contexto decide si hay algo
+      // pendiente ahí o si va directo a resultado.
+      redirect('/diagnostico/contexto');
     }
 
     const dimension = question.dimensionId
@@ -60,7 +63,7 @@ export default async function DiagnosticoPage() {
       <main className="min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
           <div className="flex justify-end text-[11px] text-nickel mb-1">
-            <span>{dimension ? tDim(dimension.code) : tDim(question.role === 'CONTEXT' ? 'CONTEXTO' : 'BEHAVIORAL')}</span>
+            <span>{dimension ? tDim(dimension.code) : tDim('BEHAVIORAL')}</span>
           </div>
           <div className="h-1 bg-silver/40 rounded-full overflow-hidden mb-5">
             <div
