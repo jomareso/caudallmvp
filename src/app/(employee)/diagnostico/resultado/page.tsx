@@ -41,6 +41,7 @@ export default async function ResultadoPage() {
     const tDim = await getTranslations('diagnostic.dimensions');
     const tBand = await getTranslations('diagnostic.result.bands');
     const tLevel = await getTranslations('diagnostic.result.levels');
+    const tInterpretation = await getTranslations('diagnostic.result.interpretation');
 
     const cfhiRounded = Math.round(financialState.cfhiScore);
     const cfhiBand = scoreToDimensionState(cfhiRounded);
@@ -58,6 +59,10 @@ export default async function ResultadoPage() {
           <span className="inline-block text-[11px] px-2.5 py-1 rounded-lg bg-picton/10 text-yale">
             {tLevel('prefix')}: {tLevel(cfhiLevel)}
           </span>
+
+          <p className="text-xs text-nickel text-left mt-3 leading-relaxed">
+            {tInterpretation(`cfhi.${cfhiBand}`)}
+          </p>
 
           <p className="text-xs text-nickel text-left mt-8 mb-2">{t('dimensionsTitle')}</p>
           <div className="space-y-2 text-left">
@@ -89,6 +94,11 @@ export default async function ResultadoPage() {
                     <div className="h-1.5 bg-silver/30 rounded-full overflow-hidden">
                       <div className="h-full bg-cola" style={{ width: `${score}%` }} />
                     </div>
+                  ) : null}
+                  {!isNA && band ? (
+                    <p className="text-[11px] text-nickel mt-1.5 leading-relaxed">
+                      {tInterpretation(`dimensions.${dimension.code}.${band}`)}
+                    </p>
                   ) : null}
                 </div>
               );
