@@ -40,16 +40,13 @@ function isApplicable(question: Question, facts: Facts, debtDimensionId: string 
     return false;
   }
 
-  // Las preguntas de contexto (banco v4.1, bloque "antes de ver tu
-  // resultado" de la spec de metodología) traen su ASK_IF en inglés llano
+  // Las preguntas de contexto (banco v4.1) traen su ASK_IF en inglés llano
   // ("user has not skipped optional context block") en vez de la gramática
   // que evaluateRule() entiende — como cualquier fragmento no reconocido,
   // evaluaría siempre a false y esas 7 preguntas nunca se preguntarían
-  // (verificado con una simulación completa). El orden ya las coloca
-  // después de ANCHOR/ADAPTIVE (ver ROLE_ORDER), que es exactamente lo que
-  // pide la spec ("después del diagnóstico financiero"), así que basta con
-  // no evaluar su ASK_IF de texto libre — el dedup de "ya respondida" en
-  // getNextQuestion() sigue aplicando igual.
+  // (verificado con una simulación completa). Por eso no se evalúa su
+  // ASK_IF de texto libre — su aplicabilidad la decide enteramente el rol
+  // (ver getNextContextQuestion) y no esta función.
   if (question.role !== 'CONTEXT') {
     const askIf = question.askIfRule as { raw?: string } | null;
     if (askIf?.raw && !evaluateRule(askIf.raw, facts)) return false;
@@ -65,13 +62,20 @@ function isApplicable(question: Question, facts: Facts, debtDimensionId: string 
 // ADAPTIVE que dependan de esa respuesta, aunque compartan basePriority —
 // vimos en pruebas reales que si no se fuerza este orden, una pregunta de
 // deuda podía dispararse antes de saber si la deuda aplica.
+//
+// CONTEXT queda FUERA de este orden a propósito: ya no es parte de la
+// secuencia principal del diagnóstico financiero (ver getNextQuestion),
+// sino un bloque aparte, opcional, que se ofrece después — con su propia
+// pantalla de transición explicando por qué se pregunta (comparación con
+// personas similares) y su propio botón de "ahora no" (ver
+// (employee)/diagnostico/contexto/). Antes vivía mezclado en medio de
+// FOLLOWUP/BEHAVIORAL sin ninguna explicación ni forma de saltarlo.
 const ROLE_ORDER: Record<string, number> = {
   GATE: 0,
   ANCHOR: 1,
   ADAPTIVE: 2,
-  CONTEXT: 3,
-  FOLLOWUP: 4,
-  BEHAVIORAL: 5
+  FOLLOWUP: 3,
+  BEHAVIORAL: 4
 };
 
 async function loadBankAndState(employeeId: string) {
@@ -90,14 +94,6 @@ async function loadBankAndState(employeeId: string) {
     prisma.dimension.findFirst({ where: { code: 'DEBT' } })
   ]);
 
-  if (bank) {
-    bank.questions.sort((a, b) => {
-      const roleDiff = (ROLE_ORDER[a.role] ?? 9) - (ROLE_ORDER[b.role] ?? 9);
-      if (roleDiff !== 0) return roleDiff;
-      return b.basePriority - a.basePriority;
-    });
-  }
-
   return {
     bank,
     facts,
@@ -106,11 +102,24 @@ async function loadBankAndState(employeeId: string) {
   };
 }
 
+function sortByRoleThenPriority<T extends Question>(questions: T[]): T[] {
+  return [...questions].sort((a, b) => {
+    const roleDiff = (ROLE_ORDER[a.role] ?? 9) - (ROLE_ORDER[b.role] ?? 9);
+    if (roleDiff !== 0) return roleDiff;
+    return b.basePriority - a.basePriority;
+  });
+}
+
+// Diagnóstico FINANCIERO (GATE/ANCHOR/ADAPTIVE/FOLLOWUP/BEHAVIORAL) — el
+// bloque de contexto (CONTEXT) no es parte de esta secuencia, ver
+// getNextContextQuestion() más abajo.
 export async function getNextQuestion(employeeId: string): Promise<QuestionWithOptions | null> {
   const { bank, facts, answeredSet, debtDimensionId } = await loadBankAndState(employeeId);
   if (!bank) return null;
 
-  for (const question of bank.questions) {
+  const financialQuestions = sortByRoleThenPriority(bank.questions.filter((q) => q.role !== 'CONTEXT'));
+
+  for (const question of financialQuestions) {
     if (answeredSet.has(question.variableTargetId)) continue;
     if (!isApplicable(question, facts, debtDimensionId)) continue;
     return question;
@@ -129,6 +138,7 @@ export async function countAnsweredAndTotal(
   let total = 0;
 
   for (const question of bank.questions) {
+    if (question.role === 'CONTEXT') continue;
     const wasAnswered = answeredSet.has(question.variableTargetId);
     // Una pregunta ya respondida cuenta siempre, aunque una respuesta
     // posterior haya cambiado su ASK_IF/SKIP_IF — fue alcanzable cuando se
@@ -136,6 +146,41 @@ export async function countAnsweredAndTotal(
     if (!wasAnswered && !isApplicable(question, facts, debtDimensionId)) continue;
     total += 1;
     if (wasAnswered) answered += 1;
+  }
+
+  return { answered, total };
+}
+
+// Bloque de CONTEXTO — opcional, se ofrece después de terminar el
+// diagnóstico financiero (ver (employee)/diagnostico/contexto/). Todas las
+// preguntas CONTEXT activas del banco se consideran aplicables (su ASK_IF
+// de texto libre no se evalúa, ver isApplicable) — el único filtro real es
+// "no respondida todavía".
+export async function getNextContextQuestion(employeeId: string): Promise<QuestionWithOptions | null> {
+  const { bank, answeredSet } = await loadBankAndState(employeeId);
+  if (!bank) return null;
+
+  const contextQuestions = sortByRoleThenPriority(bank.questions.filter((q) => q.role === 'CONTEXT'));
+  for (const question of contextQuestions) {
+    if (answeredSet.has(question.variableTargetId)) continue;
+    return question;
+  }
+
+  return null;
+}
+
+export async function countContextAnsweredAndTotal(
+  employeeId: string
+): Promise<{ answered: number; total: number }> {
+  const { bank, answeredSet } = await loadBankAndState(employeeId);
+  if (!bank) return { answered: 0, total: 0 };
+
+  let answered = 0;
+  let total = 0;
+  for (const question of bank.questions) {
+    if (question.role !== 'CONTEXT') continue;
+    total += 1;
+    if (answeredSet.has(question.variableTargetId)) answered += 1;
   }
 
   return { answered, total };
