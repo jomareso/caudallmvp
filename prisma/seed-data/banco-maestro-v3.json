@@ -3504,6 +3504,38 @@
       ],
       "affectsCfhiNote": "NO_CFHI",
       "description": "Completada automáticamente desde las opciones de CTX-07 (ver comentario en el script)."
+    },
+    {
+      "code": "CTX_SEX",
+      "dimension": "CONTEXTO",
+      "construct": "CTX_SEGMENTATION",
+      "rawType": "CONTEXT",
+      "states": [
+        "FEMALE",
+        "MALE",
+        "DECLINED"
+      ],
+      "affectsCfhiNote": "NO_CFHI",
+      "description": "Completada automáticamente desde las opciones de CTX-08."
+    },
+    {
+      "code": "CTX_EMPLOYMENT_STATUS",
+      "dimension": "CONTEXTO",
+      "construct": "CTX_SEGMENTATION",
+      "rawType": "CONTEXT",
+      "states": [
+        "PRIVATE_EMPLOYEE",
+        "PUBLIC_EMPLOYEE",
+        "SELF_EMPLOYED",
+        "EMPLOYER",
+        "UNEMPLOYED",
+        "STUDENT",
+        "RETIRED",
+        "HOMEMAKER",
+        "DECLINED"
+      ],
+      "affectsCfhiNote": "NO_CFHI",
+      "description": "Completada automáticamente desde las opciones de CTX-09."
     }
   ],
   "questions": [
@@ -28097,7 +28129,7 @@
           "score": null,
           "secondaryUpdates": "CTX_AGE_BAND=AGE_18_24",
           "friction": null,
-          "nextCandidates": "CTX-02",
+          "nextCandidates": "CTX-08",
           "notes": "Uso secundario. No mostrar cohortes por edad si el grupo es pequeño o si la comparación puede revelar identidad."
         },
         {
@@ -28107,7 +28139,7 @@
           "score": null,
           "secondaryUpdates": "CTX_AGE_BAND=AGE_25_34",
           "friction": null,
-          "nextCandidates": "CTX-02",
+          "nextCandidates": "CTX-08",
           "notes": "Uso secundario. No mostrar cohortes por edad si el grupo es pequeño o si la comparación puede revelar identidad."
         },
         {
@@ -28117,7 +28149,7 @@
           "score": null,
           "secondaryUpdates": "CTX_AGE_BAND=AGE_35_44",
           "friction": null,
-          "nextCandidates": "CTX-02",
+          "nextCandidates": "CTX-08",
           "notes": "Uso secundario. No mostrar cohortes por edad si el grupo es pequeño o si la comparación puede revelar identidad."
         },
         {
@@ -28127,7 +28159,7 @@
           "score": null,
           "secondaryUpdates": "CTX_AGE_BAND=AGE_45_54",
           "friction": null,
-          "nextCandidates": "CTX-02",
+          "nextCandidates": "CTX-08",
           "notes": "Uso secundario. No mostrar cohortes por edad si el grupo es pequeño o si la comparación puede revelar identidad."
         },
         {
@@ -28137,7 +28169,7 @@
           "score": null,
           "secondaryUpdates": "CTX_AGE_BAND=AGE_55_64",
           "friction": null,
-          "nextCandidates": "CTX-02",
+          "nextCandidates": "CTX-08",
           "notes": "Uso secundario. No mostrar cohortes por edad si el grupo es pequeño o si la comparación puede revelar identidad."
         },
         {
@@ -28147,7 +28179,7 @@
           "score": null,
           "secondaryUpdates": "CTX_AGE_BAND=AGE_65_PLUS",
           "friction": null,
-          "nextCandidates": "CTX-02",
+          "nextCandidates": "CTX-08",
           "notes": "Uso secundario. No mostrar cohortes por edad si el grupo es pequeño o si la comparación puede revelar identidad."
         },
         {
@@ -28157,7 +28189,7 @@
           "score": null,
           "secondaryUpdates": null,
           "friction": null,
-          "nextCandidates": "CTX-02",
+          "nextCandidates": "CTX-08",
           "notes": "Uso secundario. No mostrar cohortes por edad si el grupo es pequeño o si la comparación puede revelar identidad."
         }
       ]
@@ -28200,7 +28232,7 @@
           "score": null,
           "secondaryUpdates": "CTX_DEPENDENTS=DEP_0",
           "friction": null,
-          "nextCandidates": "CTX-03",
+          "nextCandidates": "CTX-04",
           "notes": "Variable primaria para cohortes contextuales; usar bandas amplias."
         },
         {
@@ -28210,7 +28242,7 @@
           "score": null,
           "secondaryUpdates": "CTX_DEPENDENTS=DEP_1",
           "friction": null,
-          "nextCandidates": "CTX-03",
+          "nextCandidates": "CTX-04",
           "notes": "Variable primaria para cohortes contextuales; usar bandas amplias."
         },
         {
@@ -28220,7 +28252,7 @@
           "score": null,
           "secondaryUpdates": "CTX_DEPENDENTS=DEP_2",
           "friction": null,
-          "nextCandidates": "CTX-03",
+          "nextCandidates": "CTX-04",
           "notes": "Variable primaria para cohortes contextuales; usar bandas amplias."
         },
         {
@@ -28230,7 +28262,7 @@
           "score": null,
           "secondaryUpdates": "CTX_DEPENDENTS=DEP_3",
           "friction": null,
-          "nextCandidates": "CTX-03",
+          "nextCandidates": "CTX-04",
           "notes": "Variable primaria para cohortes contextuales; usar bandas amplias."
         },
         {
@@ -28240,7 +28272,7 @@
           "score": null,
           "secondaryUpdates": "CTX_DEPENDENTS=DEP_4_PLUS",
           "friction": null,
-          "nextCandidates": "CTX-03",
+          "nextCandidates": "CTX-04",
           "notes": "Variable primaria para cohortes contextuales; usar bandas amplias."
         },
         {
@@ -28250,7 +28282,7 @@
           "score": null,
           "secondaryUpdates": null,
           "friction": null,
-          "nextCandidates": "CTX-03",
+          "nextCandidates": "CTX-04",
           "notes": "Variable primaria para cohortes contextuales; usar bandas amplias."
         }
       ]
@@ -28280,7 +28312,7 @@
       "frictionTarget": null,
       "aiRegenerationAllowed": false,
       "coreLogicEditable": true,
-      "status": "ACTIVA",
+      "status": "RESERVA",
       "version": "4.0",
       "benchmarkSource": "Caudall · segmentación contextual / prueba social",
       "methodologicalFunction": "CONTEXT_SEGMENTATION",
@@ -28386,7 +28418,7 @@
           "score": null,
           "secondaryUpdates": "CTX_INCOME_BAND=INC_LT_25K",
           "friction": null,
-          "nextCandidates": "CTX-05",
+          "nextCandidates": "CTX-09",
           "notes": "Bandas RD parametrizables por inflación/mercado. Nunca sumar al CFHI. Puede sustituirse por banda salarial del empleador solo con gobierno y consentimiento adecuados."
         },
         {
@@ -28396,7 +28428,7 @@
           "score": null,
           "secondaryUpdates": "CTX_INCOME_BAND=INC_25_49K",
           "friction": null,
-          "nextCandidates": "CTX-05",
+          "nextCandidates": "CTX-09",
           "notes": "Bandas RD parametrizables por inflación/mercado. Nunca sumar al CFHI. Puede sustituirse por banda salarial del empleador solo con gobierno y consentimiento adecuados."
         },
         {
@@ -28406,7 +28438,7 @@
           "score": null,
           "secondaryUpdates": "CTX_INCOME_BAND=INC_50_74K",
           "friction": null,
-          "nextCandidates": "CTX-05",
+          "nextCandidates": "CTX-09",
           "notes": "Bandas RD parametrizables por inflación/mercado. Nunca sumar al CFHI. Puede sustituirse por banda salarial del empleador solo con gobierno y consentimiento adecuados."
         },
         {
@@ -28416,7 +28448,7 @@
           "score": null,
           "secondaryUpdates": "CTX_INCOME_BAND=INC_75_99K",
           "friction": null,
-          "nextCandidates": "CTX-05",
+          "nextCandidates": "CTX-09",
           "notes": "Bandas RD parametrizables por inflación/mercado. Nunca sumar al CFHI. Puede sustituirse por banda salarial del empleador solo con gobierno y consentimiento adecuados."
         },
         {
@@ -28426,7 +28458,7 @@
           "score": null,
           "secondaryUpdates": "CTX_INCOME_BAND=INC_100_149K",
           "friction": null,
-          "nextCandidates": "CTX-05",
+          "nextCandidates": "CTX-09",
           "notes": "Bandas RD parametrizables por inflación/mercado. Nunca sumar al CFHI. Puede sustituirse por banda salarial del empleador solo con gobierno y consentimiento adecuados."
         },
         {
@@ -28436,7 +28468,7 @@
           "score": null,
           "secondaryUpdates": "CTX_INCOME_BAND=INC_150_199K",
           "friction": null,
-          "nextCandidates": "CTX-05",
+          "nextCandidates": "CTX-09",
           "notes": "Bandas RD parametrizables por inflación/mercado. Nunca sumar al CFHI. Puede sustituirse por banda salarial del empleador solo con gobierno y consentimiento adecuados."
         },
         {
@@ -28446,7 +28478,7 @@
           "score": null,
           "secondaryUpdates": "CTX_INCOME_BAND=INC_200K_PLUS",
           "friction": null,
-          "nextCandidates": "CTX-05",
+          "nextCandidates": "CTX-09",
           "notes": "Bandas RD parametrizables por inflación/mercado. Nunca sumar al CFHI. Puede sustituirse por banda salarial del empleador solo con gobierno y consentimiento adecuados."
         },
         {
@@ -28456,7 +28488,7 @@
           "score": null,
           "secondaryUpdates": null,
           "friction": null,
-          "nextCandidates": "CTX-05",
+          "nextCandidates": "CTX-09",
           "notes": "Bandas RD parametrizables por inflación/mercado. Nunca sumar al CFHI. Puede sustituirse por banda salarial del empleador solo con gobierno y consentimiento adecuados."
         }
       ]
@@ -28486,7 +28518,7 @@
       "frictionTarget": null,
       "aiRegenerationAllowed": false,
       "coreLogicEditable": true,
-      "status": "ACTIVA",
+      "status": "RESERVA",
       "version": "4.0",
       "benchmarkSource": "Caudall · segmentación contextual / prueba social",
       "methodologicalFunction": "CONTEXT_SEGMENTATION",
@@ -28687,6 +28719,192 @@
           "friction": null,
           "nextCandidates": null,
           "notes": "Si NO, mostrar resultado sin benchmark. Si SÍ, solo comparar si existe cohorte segura y N suficiente."
+        }
+      ]
+    },
+    {
+      "id": "CTX-08",
+      "dimension": "CONTEXTO",
+      "construct": "CTX_SEGMENTATION",
+      "variable": "CTX_SEX",
+      "primaryOwnerConstruct": "CTX_SEGMENTATION",
+      "textUX": "¿Cuál es tu sexo?",
+      "whyAsk": "Aporta contexto de segmentación para análisis y comparación, sin afectar el CFHI.",
+      "role": "CONTEXT",
+      "anchor": false,
+      "askIfRaw": "FINANCIAL_DIAGNOSTIC_COMPLETE AND RESULT_NOT_SHOWN AND user has not skipped optional context block",
+      "skipIfRaw": "CTX_SEX known OR user declines context questions",
+      "basePriority": 50,
+      "informationValue": 0.4,
+      "scoringValue": 0.0,
+      "routingValue": 0.1,
+      "safetyValue": 0.0,
+      "rootCauseValue": 0.1,
+      "uncertaintyReduction": 0.2,
+      "burden": 1,
+      "inferenceSubstitutionAllowed": true,
+      "minConfidenceToSkip": 100,
+      "frictionTarget": null,
+      "aiRegenerationAllowed": false,
+      "coreLogicEditable": true,
+      "status": "ACTIVA",
+      "version": "4.2",
+      "benchmarkSource": "Caudall · segmentación contextual",
+      "methodologicalFunction": "CONTEXT_SEGMENTATION",
+      "behavioralConstruct": null,
+      "options": [
+        {
+          "order": 1,
+          "text": "Femenino",
+          "state": "FEMALE",
+          "score": null,
+          "secondaryUpdates": "CTX_SEX=FEMALE",
+          "friction": null,
+          "nextCandidates": "CTX-02",
+          "notes": "Uso secundario, no afecta el CFHI."
+        },
+        {
+          "order": 2,
+          "text": "Masculino",
+          "state": "MALE",
+          "score": null,
+          "secondaryUpdates": "CTX_SEX=MALE",
+          "friction": null,
+          "nextCandidates": "CTX-02",
+          "notes": "Uso secundario, no afecta el CFHI."
+        },
+        {
+          "order": 3,
+          "text": "Prefiero no responder",
+          "state": "DECLINED",
+          "score": null,
+          "secondaryUpdates": null,
+          "friction": null,
+          "nextCandidates": "CTX-02",
+          "notes": "Uso secundario, no afecta el CFHI."
+        }
+      ]
+    },
+    {
+      "id": "CTX-09",
+      "dimension": "CONTEXTO",
+      "construct": "CTX_SEGMENTATION",
+      "variable": "CTX_EMPLOYMENT_STATUS",
+      "primaryOwnerConstruct": "CTX_SEGMENTATION",
+      "textUX": "¿Cuál es tu situación laboral actual?",
+      "whyAsk": "Aporta contexto de segmentación para análisis y comparación, sin afectar el CFHI.",
+      "role": "CONTEXT",
+      "anchor": false,
+      "askIfRaw": "FINANCIAL_DIAGNOSTIC_COMPLETE AND RESULT_NOT_SHOWN AND user has not skipped optional context block",
+      "skipIfRaw": "CTX_EMPLOYMENT_STATUS known OR user declines context questions",
+      "basePriority": 50,
+      "informationValue": 0.5,
+      "scoringValue": 0.0,
+      "routingValue": 0.2,
+      "safetyValue": 0.0,
+      "rootCauseValue": 0.2,
+      "uncertaintyReduction": 0.25,
+      "burden": 1,
+      "inferenceSubstitutionAllowed": true,
+      "minConfidenceToSkip": 100,
+      "frictionTarget": null,
+      "aiRegenerationAllowed": false,
+      "coreLogicEditable": true,
+      "status": "ACTIVA",
+      "version": "4.2",
+      "benchmarkSource": "Caudall · segmentación contextual (categorías tipo Banco Central / ENCFT)",
+      "methodologicalFunction": "CONTEXT_SEGMENTATION",
+      "behavioralConstruct": null,
+      "options": [
+        {
+          "order": 1,
+          "text": "Empleado(a) sector privado",
+          "state": "PRIVATE_EMPLOYEE",
+          "score": null,
+          "secondaryUpdates": "CTX_EMPLOYMENT_STATUS=PRIVATE_EMPLOYEE",
+          "friction": null,
+          "nextCandidates": "CTX-06",
+          "notes": "Uso secundario, no afecta el CFHI."
+        },
+        {
+          "order": 2,
+          "text": "Empleado(a) sector público",
+          "state": "PUBLIC_EMPLOYEE",
+          "score": null,
+          "secondaryUpdates": "CTX_EMPLOYMENT_STATUS=PUBLIC_EMPLOYEE",
+          "friction": null,
+          "nextCandidates": "CTX-06",
+          "notes": "Uso secundario, no afecta el CFHI."
+        },
+        {
+          "order": 3,
+          "text": "Trabajador(a) independiente / por cuenta propia",
+          "state": "SELF_EMPLOYED",
+          "score": null,
+          "secondaryUpdates": "CTX_EMPLOYMENT_STATUS=SELF_EMPLOYED",
+          "friction": null,
+          "nextCandidates": "CTX-06",
+          "notes": "Uso secundario, no afecta el CFHI."
+        },
+        {
+          "order": 4,
+          "text": "Empleador(a) / dueño de negocio",
+          "state": "EMPLOYER",
+          "score": null,
+          "secondaryUpdates": "CTX_EMPLOYMENT_STATUS=EMPLOYER",
+          "friction": null,
+          "nextCandidates": "CTX-06",
+          "notes": "Uso secundario, no afecta el CFHI."
+        },
+        {
+          "order": 5,
+          "text": "Desempleado(a)",
+          "state": "UNEMPLOYED",
+          "score": null,
+          "secondaryUpdates": "CTX_EMPLOYMENT_STATUS=UNEMPLOYED",
+          "friction": null,
+          "nextCandidates": "CTX-06",
+          "notes": "Uso secundario, no afecta el CFHI."
+        },
+        {
+          "order": 6,
+          "text": "Estudiante",
+          "state": "STUDENT",
+          "score": null,
+          "secondaryUpdates": "CTX_EMPLOYMENT_STATUS=STUDENT",
+          "friction": null,
+          "nextCandidates": "CTX-06",
+          "notes": "Uso secundario, no afecta el CFHI."
+        },
+        {
+          "order": 7,
+          "text": "Jubilado(a) / pensionado(a)",
+          "state": "RETIRED",
+          "score": null,
+          "secondaryUpdates": "CTX_EMPLOYMENT_STATUS=RETIRED",
+          "friction": null,
+          "nextCandidates": "CTX-06",
+          "notes": "Uso secundario, no afecta el CFHI."
+        },
+        {
+          "order": 8,
+          "text": "Labores del hogar (no remunerado)",
+          "state": "HOMEMAKER",
+          "score": null,
+          "secondaryUpdates": "CTX_EMPLOYMENT_STATUS=HOMEMAKER",
+          "friction": null,
+          "nextCandidates": "CTX-06",
+          "notes": "Uso secundario, no afecta el CFHI."
+        },
+        {
+          "order": 9,
+          "text": "Prefiero no responder",
+          "state": "DECLINED",
+          "score": null,
+          "secondaryUpdates": null,
+          "friction": null,
+          "nextCandidates": "CTX-06",
+          "notes": "Uso secundario, no afecta el CFHI."
         }
       ]
     }
