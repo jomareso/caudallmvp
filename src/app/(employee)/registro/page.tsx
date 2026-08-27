@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { findTenantByCode } from '@/lib/licenses';
 import { runWithTenantContext } from '@/lib/db/prisma';
 import { EmailForm } from './email-form';
+import { BrandPanel } from '../brand-panel';
 
 export default async function RegistroPage({
   searchParams
@@ -21,5 +22,10 @@ export default async function RegistroPage({
     redirect('/');
   }
 
-  return <EmailForm enrollmentCode={code} tenantName={found.tenant.name} />;
+  return (
+    <main className="min-h-screen lg:grid lg:grid-cols-2">
+      <BrandPanel />
+      <EmailForm enrollmentCode={code} tenantName={found.tenant.name} />
+    </main>
+  );
 }

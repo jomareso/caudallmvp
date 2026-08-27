@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { getActionSuggestion } from './actions';
 import { ActionCard } from './action-card';
@@ -10,8 +11,8 @@ export default async function AccionPage() {
   const tAction = await getTranslations('diagnostic.action');
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-sm">
+    <main className="min-h-screen flex flex-col items-center p-6 pt-16 lg:justify-center lg:pt-6">
+      <div className="w-full max-w-sm lg:max-w-md">
         <p className="text-xs text-nickel mb-2 text-center">{tAction('eyebrow')}</p>
 
         {result.kind === 'suggestion' ? (
@@ -39,7 +40,13 @@ export default async function AccionPage() {
           />
         ) : (
           <div className="bg-white border border-silver/60 rounded-xl p-6 text-center">
-            <p className="text-sm text-nickel">{tAction(result.reason === 'HEALTHY' ? 'none' : 'pending')}</p>
+            <p className="text-sm text-nickel mb-4">{tAction(result.reason === 'HEALTHY' ? 'none' : 'pending')}</p>
+            <Link
+              href="/diagnostico/resultado"
+              className="inline-block bg-yale text-white rounded-lg py-2.5 px-6 text-sm"
+            >
+              {tAction('backToResult')}
+            </Link>
           </div>
         )}
       </div>

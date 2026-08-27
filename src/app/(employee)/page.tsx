@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { LandingForm } from './landing-form';
+import { BrandPanel } from './brand-panel';
 
 export default async function LandingPage() {
   // Si ya hay una sesión activa (magic link vigente), no tiene sentido
@@ -29,5 +30,10 @@ export default async function LandingPage() {
   const settings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } });
   const hasLogo = Boolean(settings?.logoData);
 
-  return <LandingForm hasLogo={hasLogo} />;
+  return (
+    <main className="min-h-screen lg:grid lg:grid-cols-2">
+      <BrandPanel />
+      <LandingForm hasLogo={hasLogo} />
+    </main>
+  );
 }
