@@ -36,8 +36,8 @@ export default async function DiagnosticoContextoPage() {
       });
 
     return (
-      <main className="min-h-screen flex flex-col items-center p-6 pt-16">
-        <div className="w-full max-w-sm">
+      <main className="min-h-screen flex flex-col items-center p-6 pt-16 lg:justify-center lg:pt-6">
+        <div className="w-full max-w-sm lg:max-w-md">
           <ContextFlow
             // La pantalla de transición (explicando por qué se pregunta
             // esto) solo se muestra la primera vez — si ya respondió

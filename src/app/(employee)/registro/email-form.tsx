@@ -34,7 +34,7 @@ export function EmailForm({
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center p-6 pt-16">
+    <div className="flex flex-col items-center p-6 pt-16 lg:justify-center">
       <div className="w-full max-w-sm">
         <p className="text-xs text-nickel text-center mb-1">{tenantName} &middot; caudall</p>
         <h1 className="text-lg font-medium text-quartz text-center mb-1">{t('title')}</h1>
@@ -63,12 +63,13 @@ export function EmailForm({
             {isPending ? t('sending') : t('ctaSendLink')}
           </button>
 
-          <div className="bg-picton/10 rounded-lg px-3 py-2.5 mt-4 flex gap-2 items-start">
+          {/* En lg+ el panel de marca (brand-panel.tsx) ya muestra esta misma garantía — repetirla acá se vería duplicado */}
+          <div className="bg-picton/10 rounded-lg px-3 py-2.5 mt-4 flex gap-2 items-start lg:hidden">
             <span aria-hidden className="text-sm">🔒</span>
             <p className="text-[11px] text-yale/90">{tTrust('privacyGuarantee')}</p>
           </div>
         </form>
       </div>
-    </main>
+    </div>
   );
 }

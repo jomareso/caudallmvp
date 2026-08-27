@@ -28,7 +28,7 @@ export function LandingForm({ hasLogo }: { hasLogo: boolean }) {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center p-6 pt-16">
+    <div className="flex flex-col items-center p-6 pt-16 lg:justify-center">
       <div className="w-full max-w-sm text-center">
         {hasLogo ? (
           // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
@@ -67,8 +67,9 @@ export function LandingForm({ hasLogo }: { hasLogo: boolean }) {
           </button>
         </form>
 
-        <p className="text-[11px] text-nickel mt-4">{tTrust('privacyGuarantee')}</p>
+        {/* En lg+ el panel de marca (brand-panel.tsx) ya muestra esta misma garantía — repetirla acá se vería duplicado */}
+        <p className="text-[11px] text-nickel mt-4 lg:hidden">{tTrust('privacyGuarantee')}</p>
       </div>
-    </main>
+    </div>
   );
 }

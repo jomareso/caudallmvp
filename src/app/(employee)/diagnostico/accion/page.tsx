@@ -10,8 +10,8 @@ export default async function AccionPage() {
   const tAction = await getTranslations('diagnostic.action');
 
   return (
-    <main className="min-h-screen flex flex-col items-center p-6 pt-16">
-      <div className="w-full max-w-sm">
+    <main className="min-h-screen flex flex-col items-center p-6 pt-16 lg:justify-center lg:pt-6">
+      <div className="w-full max-w-sm lg:max-w-md">
         <p className="text-xs text-nickel mb-2 text-center">{tAction('eyebrow')}</p>
 
         {result.kind === 'suggestion' ? (

@@ -49,23 +49,25 @@ export default async function ResultadoPage() {
 
     return (
       <main className="min-h-screen flex flex-col items-center p-6 pt-16">
-        <div className="w-full max-w-sm text-center">
-          <p className="text-xs text-nickel mb-1">{t('title')}</p>
-          <p className="text-5xl font-medium text-yale leading-none mb-1">{cfhiRounded}</p>
-          <p className="text-[11px] text-nickel mb-2">{t('outOf100')}</p>
-          <span className={`inline-block text-[11px] px-2.5 py-1 rounded-lg mr-1.5 ${BAND_CLASS[cfhiBand]}`}>
-            {tBand(cfhiBand)}
-          </span>
-          <span className="inline-block text-[11px] px-2.5 py-1 rounded-lg bg-picton/10 text-yale">
-            {tLevel('prefix')}: {tLevel(cfhiLevel)}
-          </span>
+        <div className="w-full max-w-sm lg:max-w-2xl text-center">
+          <div className="lg:max-w-md lg:mx-auto">
+            <p className="text-xs text-nickel mb-1">{t('title')}</p>
+            <p className="text-5xl font-medium text-yale leading-none mb-1">{cfhiRounded}</p>
+            <p className="text-[11px] text-nickel mb-2">{t('outOf100')}</p>
+            <span className={`inline-block text-[11px] px-2.5 py-1 rounded-lg mr-1.5 ${BAND_CLASS[cfhiBand]}`}>
+              {tBand(cfhiBand)}
+            </span>
+            <span className="inline-block text-[11px] px-2.5 py-1 rounded-lg bg-picton/10 text-yale">
+              {tLevel('prefix')}: {tLevel(cfhiLevel)}
+            </span>
 
-          <p className="text-xs text-nickel text-left mt-3 leading-relaxed">
-            {tInterpretation(`cfhi.${cfhiBand}`)}
-          </p>
+            <p className="text-xs text-nickel text-left mt-3 leading-relaxed">
+              {tInterpretation(`cfhi.${cfhiBand}`)}
+            </p>
+          </div>
 
           <p className="text-xs text-nickel text-left mt-8 mb-2">{t('dimensionsTitle')}</p>
-          <div className="space-y-2 text-left">
+          <div className="space-y-2 text-left lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-3">
             {methodology?.dimensions.map((dimension) => {
               const ds = scoreByDimensionId.get(dimension.id);
               const isNA = ds?.state === 'NA';
@@ -105,21 +107,23 @@ export default async function ResultadoPage() {
             })}
           </div>
 
-          {showContextBanner ? (
-            <div className="mt-6 bg-picton/10 border border-cola/30 rounded-lg p-4 text-left">
-              <p className="text-xs text-nickel mb-2">{t('contextBanner.body')}</p>
-              <Link href="/diagnostico/contexto" className="text-xs text-yale underline">
-                {t('contextBanner.cta')}
-              </Link>
-            </div>
-          ) : null}
+          <div className="lg:max-w-md lg:mx-auto">
+            {showContextBanner ? (
+              <div className="mt-6 bg-picton/10 border border-cola/30 rounded-lg p-4 text-left">
+                <p className="text-xs text-nickel mb-2">{t('contextBanner.body')}</p>
+                <Link href="/diagnostico/contexto" className="text-xs text-yale underline">
+                  {t('contextBanner.cta')}
+                </Link>
+              </div>
+            ) : null}
 
-          <Link
-            href="/diagnostico/accion"
-            className="block mt-6 text-center bg-yale text-white rounded-lg py-2.5 px-6 text-sm"
-          >
-            {t('ctaNextStep')}
-          </Link>
+            <Link
+              href="/diagnostico/accion"
+              className="block mt-6 text-center bg-yale text-white rounded-lg py-2.5 px-6 text-sm"
+            >
+              {t('ctaNextStep')}
+            </Link>
+          </div>
         </div>
       </main>
     );
