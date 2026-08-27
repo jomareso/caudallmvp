@@ -1324,6 +1324,30 @@
           "YES": "Sí, quiero ver la comparación",
           "NO": "No, prefiero ver solo mis resultados"
         }
+      },
+      "CTX-08": {
+        "text": "¿Cuál es tu sexo?",
+        "whyAsk": "Aporta contexto de segmentación para análisis y comparación, sin afectar el CFHI.",
+        "options": {
+          "FEMALE": "Femenino",
+          "MALE": "Masculino",
+          "DECLINED": "Prefiero no responder"
+        }
+      },
+      "CTX-09": {
+        "text": "¿Cuál es tu situación laboral actual?",
+        "whyAsk": "Aporta contexto de segmentación para análisis y comparación, sin afectar el CFHI.",
+        "options": {
+          "PRIVATE_EMPLOYEE": "Empleado(a) sector privado",
+          "PUBLIC_EMPLOYEE": "Empleado(a) sector público",
+          "SELF_EMPLOYED": "Trabajador(a) independiente / por cuenta propia",
+          "EMPLOYER": "Empleador(a) / dueño de negocio",
+          "UNEMPLOYED": "Desempleado(a)",
+          "STUDENT": "Estudiante",
+          "RETIRED": "Jubilado(a) / pensionado(a)",
+          "HOMEMAKER": "Labores del hogar (no remunerado)",
+          "DECLINED": "Prefiero no responder"
+        }
       }
     },
     "result": {
@@ -1361,7 +1385,7 @@
       "partial": "En parte",
       "notAchieved": "No todavía",
       "none": "Vas bien — no hay ninguna acción pendiente que necesites atender ahora.",
-    "pending": "Todavía no tenemos suficiente información para sugerirte un próximo paso. Vuelve a revisar tu diagnóstico más adelante — algunas respuestas nuevas pueden desbloquear una recomendación.",
+      "pending": "Todavía no tenemos suficiente información para sugerirte un próximo paso. Vuelve a revisar tu diagnóstico más adelante — algunas respuestas nuevas pueden desbloquear una recomendación.",
       "watchVideo": "Ver video corto"
     }
   },
