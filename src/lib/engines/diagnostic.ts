@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db/prisma';
 import type { Question, AnswerOption } from '@prisma/client';
 import { evaluateRule, type Facts } from './rules';
+import { applyConsistencyFlags } from './consistency';
 
 // NOTA: la spec (docs/spec-v2.md §22) dice que el banco adaptativo "ya
 // existe y ya fue auditado" y que no debe rehacerse desde cero — y ahora sí
@@ -26,6 +27,20 @@ export async function buildFacts(employeeId: string): Promise<Facts> {
     }
   }
   return facts;
+}
+
+// Evidence.questionId (a diferencia de VariableState, que vive por
+// variable) permite distinguir "esta pregunta puntual ya se respondió"
+// aunque otra pregunta distinta haya puesto un valor más reciente en la
+// misma variable — necesario para la aclaración de consistencia, que
+// reutiliza a propósito el VARIABLE_TARGET de la pregunta original (ver
+// getNextQuestion).
+async function wasQuestionAnswered(employeeId: string, questionId: string): Promise<boolean> {
+  const evidence = await prisma.evidence.findFirst({
+    where: { employeeId, questionId },
+    select: { id: true }
+  });
+  return evidence !== null;
 }
 
 function isApplicable(question: Question, facts: Facts, debtDimensionId: string | null): boolean {
@@ -93,6 +108,13 @@ async function loadBankAndState(employeeId: string) {
     prisma.dimension.findFirst({ where: { code: 'DEBT' } })
   ]);
 
+  // Consistency Resolution Engine (spec §20) — antes de decidir qué
+  // preguntar, se marca CONSISTENCY_FLAG si los hechos ya conocidos son
+  // contradictorios o anómalos entre sí (ver consistency.ts). Esto activa
+  // las preguntas de aclaración que el propio banco ya tenía previstas
+  // para este caso (CTRL-13/RES-08/DEBT-09).
+  applyConsistencyFlags(facts);
+
   return {
     bank,
     facts,
@@ -149,10 +171,15 @@ function sortByRoleThenPriority<T extends Question>(questions: T[]): T[] {
 // - Una condición de Safety sin resolver es, en la práctica, una pregunta
 //   con safetyValue alto sin responder — está en la MISMA lista que se
 //   revisa acá (ver isHighValue), no en una lista aparte.
-// La cuarta ("inconsistencia crítica pendiente") queda pendiente: el
-// Consistency Resolution Engine (spec §20) no existe todavía en el
-// código — no se puede consultar algo que no está construido. Cuando
-// exista, se agrega como una condición más para no parar.
+// La cuarta ("inconsistencia crítica pendiente") SÍ necesita un corte
+// aparte, a diferencia de las dos anteriores: applyConsistencyFlags() (ver
+// consistency.ts), llamado en loadBankAndState() antes de este punto, deja
+// marcado CONSISTENCY_FLAG si hay una inconsistencia real, y eso vuelve
+// aplicable la pregunta de aclaración correspondiente del banco — pero esa
+// pregunta no siempre alcanza el umbral de "alto valor" por su cuenta (ej.
+// CTRL-13 es 0.88/0.70, por debajo de HIGH_VALUE_THRESHOLD=0.9), así que
+// getNextQuestion() la prioriza de forma explícita mientras
+// CONSISTENCY_FLAG siga activo, antes de aplicar ese umbral.
 //
 // Los tres límites numéricos (target 8-12, soft max 15, hard max 18) son
 // la red de seguridad de la spec: nunca menos de STOP_FLOOR (aunque todo
@@ -189,15 +216,58 @@ export async function getNextQuestion(employeeId: string): Promise<QuestionWithO
     (q) => !answeredSet.has(q.variableTargetId) && isApplicable(q, facts, debtDimensionId)
   );
 
+  // Tope duro: para acá, sin excepción, aunque quede algo de alto valor o
+  // una inconsistencia sin aclarar. Se revisa antes que nada porque, a
+  // diferencia del resto, también debe cortar la ruta de aclaración de
+  // abajo.
+  if (answeredCount >= STOP_HARD_MAX) return null;
+
+  // Consistency Resolution Engine (spec §20): una inconsistencia detectada
+  // (ver consistency.ts) se resuelve SIEMPRE antes de parar, sin pasar por
+  // el umbral de "alto valor" — no es una pregunta más de alto valor, es
+  // su propia condición de STOP, al mismo nivel que el piso mínimo.
+  //
+  // Esta pregunta de aclaración NO pasa por applicableRemaining a
+  // propósito, por dos motivos:
+  // 1. Su VARIABLE_TARGET es la MISMA que la pregunta original que generó
+  //    la inconsistencia (ej. CTRL-13 vuelve a apuntar a CTRL_CASHFLOW,
+  //    igual que CTRL-01) — ya está en answeredSet en cuanto la
+  //    inconsistencia es detectable (hacen falta ambos hechos conocidos),
+  //    así que el filtro normal de "no respondida" siempre la excluiría.
+  // 2. Su propio SKIP_IF ("confidence >= 0.80") también la bloquearía: el
+  //    modelo de confianza hoy es binario (0 o 100, ver
+  //    diagnostico/actions.ts) y una respuesta directa ya deja
+  //    confidence=100 apenas se contesta — justo cuando la inconsistencia
+  //    recién se vuelve detectable.
+  // Por eso se busca directamente en financialQuestions (sin esos dos
+  // filtros) — pero SOLO se ofrece una vez por empleado (ver
+  // wasQuestionAnswered): sus propias opciones de respuesta incluyen los
+  // mismos valores "ambiguos" que la generaron (ej. DEBT-09 permite
+  // responder COMFORTABLE otra vez), así que sin este límite se le
+  // volvería a preguntar en cada vuelta si la persona confirma su
+  // respuesta original — Regla CORE #13: no exigir más certeza de la
+  // necesaria. Una aclaración es suficiente; lo que responda ahí se
+  // respeta, aunque la combinación le siga pareciendo atípica al motor.
+  const activeConsistencyFlag = facts.get('CONSISTENCY_FLAG')?.state;
+  if (activeConsistencyFlag) {
+    const clarifying = financialQuestions.find((q) => {
+      if (debtDimensionId && q.dimensionId === debtDimensionId && facts.get('DEBT_APPLICABILITY')?.state === 'NONE') {
+        return false;
+      }
+      const raw = (q.askIfRule as { raw?: string } | null)?.raw ?? '';
+      return raw.includes(`CONSISTENCY_FLAG = ${activeConsistencyFlag}`);
+    });
+    if (clarifying && !(await wasQuestionAnswered(employeeId, clarifying.id))) {
+      return clarifying;
+    }
+  }
+
   if (applicableRemaining.length === 0) return null;
 
   // Antes del mínimo objetivo, seguimos preguntando lo mejor disponible
   // sin importar si su valor ya bajó del umbral — el piso de la spec
   // manda sobre el criterio de "alto valor".
   if (answeredCount < STOP_FLOOR) return applicableRemaining[0];
-
-  // Tope duro: para acá, sin excepción, aunque quede algo de alto valor.
-  if (answeredCount >= STOP_HARD_MAX) return null;
 
   const threshold = answeredCount >= STOP_SOFT_MAX ? HIGH_VALUE_THRESHOLD_SOFT : HIGH_VALUE_THRESHOLD;
   const nextHighValue = applicableRemaining.find((q) => isHighValue(q, threshold));
