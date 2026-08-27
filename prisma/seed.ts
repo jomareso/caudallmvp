@@ -10,11 +10,19 @@
 import { PrismaClient, InterventionType } from '@prisma/client';
 import interventionCatalogDraft from './seed-data/intervention-catalog-draft.json';
 import { syncBancoMaestro } from '../src/lib/seed/sync-banco-maestro';
+import { syncNationalBenchmark } from '../src/lib/seed/sync-national-benchmark';
 
 const prisma = new PrismaClient();
 
 async function main() {
   const bancoSummary = await syncBancoMaestro(prisma);
+
+  const benchmarkSummary = await syncNationalBenchmark(prisma);
+  console.log(
+    benchmarkSummary.skipped
+      ? `Benchmark nacional (${benchmarkSummary.version}): ya cargado, sin cambios.`
+      : `Benchmark nacional (${benchmarkSummary.version}): ${benchmarkSummary.inserted} registros cargados.`
+  );
 
   const methodology = await prisma.methodology.findUniqueOrThrow({ where: { version: bancoSummary.methodologyVersion } });
   const questionBank = await prisma.questionBank.findUniqueOrThrow({ where: { version: bancoSummary.questionBankVersion } });
