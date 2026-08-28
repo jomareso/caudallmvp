@@ -11,6 +11,7 @@ import {
   DEFAULT_DIMENSION_ICON,
   type CommitmentTrigger
 } from '@/lib/engines/commitment-triggers';
+import { OUTCOME_REASONS, type OutcomeReason } from '@/lib/engines/outcome-reasons';
 
 type Status = 'SUGGESTED' | 'COMMITTED' | 'IN_PROGRESS' | 'COMPLETED' | 'DISMISSED';
 
@@ -89,6 +90,9 @@ export function ActionCard({
     achieved: string;
     partial: string;
     notAchieved: string;
+    outcomeReasonPrompt: string;
+    outcomeReasonBack: string;
+    outcomeReasons: Record<OutcomeReason, string>;
     watchVideo: string;
     pushEnable: string;
     pushEnabled: string;
@@ -106,6 +110,10 @@ export function ActionCard({
   const [selectedTrigger, setSelectedTrigger] = useState<CommitmentTrigger | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [commitError, setCommitError] = useState<string | null>(null);
+  // "En parte" / "Todavía no" son las dos fricciones reales que vale la
+  // pena entender (regla CORE 19: FRICTION → TECHNIQUE) — "Sí, lo hice" no
+  // tiene nada que explicar, así que dispara directo sin pasar por acá.
+  const [pendingOutcome, setPendingOutcome] = useState<'PARTIAL' | 'NOT_ACHIEVED' | null>(null);
   const embedUrl = videoUrl ? getYouTubeEmbedUrl(videoUrl) : null;
   const dimensionIcon = DIMENSION_ICON[dimensionCode] ?? DEFAULT_DIMENSION_ICON;
 
@@ -129,11 +137,19 @@ export function ActionCard({
     });
   }
 
-  function handleOutcome(outcome: 'ACHIEVED' | 'PARTIAL' | 'NOT_ACHIEVED') {
+  function handleOutcome(outcome: 'ACHIEVED' | 'PARTIAL' | 'NOT_ACHIEVED', reason?: OutcomeReason) {
     startTransition(async () => {
-      await reportOutcome(employeeInterventionId, outcome);
+      await reportOutcome(employeeInterventionId, outcome, reason);
       router.refresh();
     });
+  }
+
+  function handleOutcomeClick(outcome: 'ACHIEVED' | 'PARTIAL' | 'NOT_ACHIEVED') {
+    if (outcome === 'ACHIEVED') {
+      handleOutcome(outcome);
+      return;
+    }
+    setPendingOutcome(outcome);
   }
 
   return (
@@ -274,33 +290,62 @@ export function ActionCard({
           <div className="mb-3">
             <PushOptIn labels={{ enable: labels.pushEnable, enabled: labels.pushEnabled }} />
           </div>
-          <p className="text-sm text-quartz mb-2">{labels.didYouDoIt}</p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => handleOutcome('ACHIEVED')}
-              disabled={isPending}
-              className="flex-1 bg-yale text-white rounded-lg py-2 text-xs disabled:opacity-60"
-            >
-              {labels.achieved}
-            </button>
-            <button
-              type="button"
-              onClick={() => handleOutcome('PARTIAL')}
-              disabled={isPending}
-              className="flex-1 border border-yale text-yale rounded-lg py-2 text-xs disabled:opacity-60"
-            >
-              {labels.partial}
-            </button>
-            <button
-              type="button"
-              onClick={() => handleOutcome('NOT_ACHIEVED')}
-              disabled={isPending}
-              className="flex-1 border border-silver text-nickel rounded-lg py-2 text-xs disabled:opacity-60"
-            >
-              {labels.notAchieved}
-            </button>
-          </div>
+          {pendingOutcome ? (
+            <div>
+              <p className="text-sm text-quartz mb-2">{labels.outcomeReasonPrompt}</p>
+              <div className="flex flex-col gap-1.5 mb-2">
+                {OUTCOME_REASONS.map((reason) => (
+                  <button
+                    key={reason}
+                    type="button"
+                    onClick={() => handleOutcome(pendingOutcome, reason)}
+                    disabled={isPending}
+                    className="text-left text-xs rounded-lg border border-silver/60 text-quartz px-3 py-2 disabled:opacity-60"
+                  >
+                    {labels.outcomeReasons[reason]}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setPendingOutcome(null)}
+                disabled={isPending}
+                className="text-xs text-nickel underline disabled:opacity-60"
+              >
+                {labels.outcomeReasonBack}
+              </button>
+            </div>
+          ) : (
+            <div>
+              <p className="text-sm text-quartz mb-2">{labels.didYouDoIt}</p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleOutcomeClick('ACHIEVED')}
+                  disabled={isPending}
+                  className="flex-1 bg-yale text-white rounded-lg py-2 text-xs disabled:opacity-60"
+                >
+                  {labels.achieved}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOutcomeClick('PARTIAL')}
+                  disabled={isPending}
+                  className="flex-1 border border-yale text-yale rounded-lg py-2 text-xs disabled:opacity-60"
+                >
+                  {labels.partial}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOutcomeClick('NOT_ACHIEVED')}
+                  disabled={isPending}
+                  className="flex-1 border border-silver text-nickel rounded-lg py-2 text-xs disabled:opacity-60"
+                >
+                  {labels.notAchieved}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       ) : null}
     </div>

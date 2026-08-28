@@ -6,6 +6,7 @@ import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-cont
 import { computeNextBestAction, hasNoRealGap } from '@/lib/engines/next-best-action';
 import { logLearningEvent, reportInterventionOutcome } from '@/lib/engines/learning';
 import { isCommitmentTrigger, type CommitmentTrigger } from '@/lib/engines/commitment-triggers';
+import { isOutcomeReason } from '@/lib/engines/outcome-reasons';
 
 export type CommitmentData = { triggerCode: CommitmentTrigger; targetDate: string };
 
@@ -163,10 +164,20 @@ export async function dismissAction(employeeInterventionId: string): Promise<{ o
   });
 }
 
+// reason es opcional (ACHIEVED no lo pide — no hay fricción que explicar
+// cuando sí se logró) pero cuando viene, ya fue validado contra
+// OUTCOME_REASONS por el picker de chips en action-card.tsx; se re-valida
+// acá porque un Server Action es un endpoint público, no solo lo que
+// permite la UI.
 export async function reportOutcome(
   employeeInterventionId: string,
-  outcome: InterventionOutcome
+  outcome: InterventionOutcome,
+  reason?: string
 ): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (reason !== undefined && !isOutcomeReason(reason)) {
+    return { ok: false, message: 'Motivo inválido.' };
+  }
+
   const found = await requireOwnEmployeeIntervention(employeeInterventionId);
   if (!found) return { ok: false, message: 'No encontramos esa recomendación.' };
 
@@ -176,18 +187,26 @@ export async function reportOutcome(
     // o "en parte", quedaría excluida para siempre de futuras sugerencias
     // (ver alreadyResolved en getActionSuggestion) y el empleado se quedaría
     // sin nada que ver la próxima vez, en vez de que se le siga preguntando.
+    // El motivo sí se guarda en feedback aunque el ciclo no cierre — es la
+    // señal que necesita el Learning Engine (regla CORE 20).
     if (outcome === 'NOT_ACHIEVED') {
       const employee = await prisma.employee.findUniqueOrThrow({ where: { id: found.employeeId } });
+      if (reason) {
+        await prisma.employeeIntervention.update({
+          where: { id: employeeInterventionId },
+          data: { feedback: { reason } }
+        });
+      }
       await logLearningEvent({
         eventType: 'OUTCOME_REPORTED',
         tenantId: employee.tenantId,
         employeeId: found.employeeId,
-        context: { employeeInterventionId, outcome }
+        context: { employeeInterventionId, outcome, reason }
       });
       return { ok: true };
     }
 
-    await reportInterventionOutcome(employeeInterventionId, outcome);
+    await reportInterventionOutcome(employeeInterventionId, outcome, reason ? { reason } : undefined);
     return { ok: true };
   });
 }

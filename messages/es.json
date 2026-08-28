@@ -1605,6 +1605,15 @@
       "achieved": "Sí, lo hice",
       "partial": "En parte",
       "notAchieved": "No todavía",
+      "outcomeReason": {
+        "prompt": "¿Qué pasó?",
+        "back": "Atrás",
+        "reasons": {
+          "NO_TIME": "No tuve tiempo",
+          "TOO_HARD": "Fue más difícil de lo que pensé",
+          "CHANGED_MIND": "Cambié de opinión"
+        }
+      },
       "none": "Vas bien — no hay ninguna acción pendiente que necesites atender ahora.",
       "pending": "Todavía no tenemos suficiente información para sugerirte un próximo paso. Vuelve a revisar tu diagnóstico más adelante — algunas respuestas nuevas pueden desbloquear una recomendación.",
       "watchVideo": "Ver video corto",

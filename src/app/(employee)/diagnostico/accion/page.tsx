@@ -60,6 +60,13 @@ export default async function AccionPage() {
                 achieved: tAction('achieved'),
                 partial: tAction('partial'),
                 notAchieved: tAction('notAchieved'),
+                outcomeReasonPrompt: tAction('outcomeReason.prompt'),
+                outcomeReasonBack: tAction('outcomeReason.back'),
+                outcomeReasons: {
+                  NO_TIME: tAction('outcomeReason.reasons.NO_TIME'),
+                  TOO_HARD: tAction('outcomeReason.reasons.TOO_HARD'),
+                  CHANGED_MIND: tAction('outcomeReason.reasons.CHANGED_MIND')
+                },
                 watchVideo: tAction('watchVideo'),
                 pushEnable: tAction('pushEnable'),
                 pushEnabled: tAction('pushEnabled')
