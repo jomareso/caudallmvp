@@ -4,6 +4,7 @@ import { runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { countContextAnsweredAndTotal, getNextContextQuestion } from '@/lib/engines/diagnostic';
 import { ContextFlow } from './context-flow';
+import { EmployeeTopBar } from '../../employee-topbar';
 
 export default async function DiagnosticoContextoPage() {
   const employee = await requireEmployee();
@@ -36,26 +37,29 @@ export default async function DiagnosticoContextoPage() {
       });
 
     return (
-      <main className="min-h-screen flex flex-col items-center p-6 pt-16 lg:justify-center lg:pt-6">
-        <div className="w-full max-w-sm lg:max-w-md">
-          <ContextFlow
-            // La pantalla de transición (explicando por qué se pregunta
-            // esto) solo se muestra la primera vez — si ya respondió
-            // alguna, va directo a la siguiente pregunta sin repetirla.
-            showIntro={answered === 0}
-            question={{ id: question.id, text: questionText, options }}
-            labels={{
-              eyebrow: tContext('eyebrow'),
-              title: tContext('title'),
-              body: tContext('body'),
-              ctaContinue: tContext('ctaContinue'),
-              ctaSkip: tContext('ctaSkip'),
-              formContinueLabel: t('ctaContinue'),
-              formErrorLabel: t('errorSelectOption')
-            }}
-          />
-        </div>
-      </main>
+      <div className="min-h-screen flex flex-col">
+        <EmployeeTopBar />
+        <main className="flex-1 flex flex-col items-center p-6 pt-10 lg:justify-center lg:pt-10">
+          <div className="w-full max-w-sm lg:max-w-xl">
+            <ContextFlow
+              // La pantalla de transición (explicando por qué se pregunta
+              // esto) solo se muestra la primera vez — si ya respondió
+              // alguna, va directo a la siguiente pregunta sin repetirla.
+              showIntro={answered === 0}
+              question={{ id: question.id, text: questionText, options }}
+              labels={{
+                eyebrow: tContext('eyebrow'),
+                title: tContext('title'),
+                body: tContext('body'),
+                ctaContinue: tContext('ctaContinue'),
+                ctaSkip: tContext('ctaSkip'),
+                formContinueLabel: t('ctaContinue'),
+                formErrorLabel: t('errorSelectOption')
+              }}
+            />
+          </div>
+        </main>
+      </div>
     );
   });
 }

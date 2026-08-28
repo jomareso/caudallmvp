@@ -6,6 +6,7 @@ import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-cont
 import { scoreToDimensionState, scoreToProgressTier } from '@/lib/engines/scoring';
 import { countContextAnsweredAndTotal } from '@/lib/engines/diagnostic';
 import { getNationalComparison } from '@/lib/engines/national-benchmark';
+import { EmployeeTopBar } from '../../employee-topbar';
 
 export default async function ResultadoPage() {
   const employee = await requireEmployee();
@@ -71,7 +72,9 @@ export default async function ResultadoPage() {
       : null;
 
     return (
-      <main className="min-h-screen flex flex-col items-center p-6 pt-16">
+      <div className="min-h-screen flex flex-col">
+        <EmployeeTopBar />
+        <main className="flex-1 flex flex-col items-center p-6 pt-10">
         <div className="w-full max-w-sm lg:max-w-2xl text-center">
           <div className="lg:max-w-md lg:mx-auto">
             <p className="text-xs text-nickel mb-1">{t('title')}</p>
@@ -163,7 +166,8 @@ export default async function ResultadoPage() {
             </Link>
           </div>
         </div>
-      </main>
+        </main>
+      </div>
     );
   });
 }

@@ -5,6 +5,7 @@ import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-cont
 import { getNextQuestion, countAnsweredAndTotal } from '@/lib/engines/diagnostic';
 import { finalizeDiagnostic } from '@/lib/engines/diagnostic-completion';
 import { QuestionForm } from './question-form';
+import { EmployeeTopBar } from '../employee-topbar';
 
 export default async function DiagnosticoPage() {
   const employee = await requireEmployee();
@@ -60,27 +61,30 @@ export default async function DiagnosticoPage() {
       });
 
     return (
-      <main className="min-h-screen flex flex-col items-center p-6 pt-16 lg:justify-center lg:pt-6">
-        <div className="w-full max-w-sm lg:max-w-md">
-          <div className="flex justify-end text-[11px] text-nickel mb-1">
-            <span>{dimension ? tDim(dimension.code) : tDim('BEHAVIORAL')}</span>
-          </div>
-          <div className="h-1 bg-silver/40 rounded-full overflow-hidden mb-5">
-            <div
-              className="h-full bg-gradient-to-r from-picton to-cola"
-              style={{ width: `${progressPercent}%` }}
+      <div className="min-h-screen flex flex-col">
+        <EmployeeTopBar />
+        <main className="flex-1 flex flex-col items-center p-6 pt-10 lg:justify-center lg:pt-10">
+          <div className="w-full max-w-sm lg:max-w-xl">
+            <div className="flex justify-end text-[11px] text-nickel mb-1">
+              <span>{dimension ? tDim(dimension.code) : tDim('BEHAVIORAL')}</span>
+            </div>
+            <div className="h-1 bg-silver/40 rounded-full overflow-hidden mb-5">
+              <div
+                className="h-full bg-gradient-to-r from-picton to-cola"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+
+            <QuestionForm
+              questionId={question.id}
+              questionText={questionText}
+              options={options}
+              continueLabel={t('ctaContinue')}
+              errorLabel={t('errorSelectOption')}
             />
           </div>
-
-          <QuestionForm
-            questionId={question.id}
-            questionText={questionText}
-            options={options}
-            continueLabel={t('ctaContinue')}
-            errorLabel={t('errorSelectOption')}
-          />
-        </div>
-      </main>
+        </main>
+      </div>
     );
   });
 }

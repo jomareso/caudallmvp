@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db/prisma';
-import type { DimensionCode, Intervention } from '@prisma/client';
+import type { DimensionCode, DimensionScore, Intervention } from '@prisma/client';
 import { buildFacts } from './diagnostic';
-import { computePriority, worstDimensionBySeverity } from './priority';
+import { computePriority, pickMostSevere } from './priority';
 import { computeEligibility, type EligibilityResult } from './eligibility';
 
 // spec-v2.md §28: FRICTION → TECHNIQUE, nunca al revés (regla CORE #19).
@@ -17,8 +17,11 @@ import { computeEligibility, type EligibilityResult } from './eligibility';
 // explica por qué falla Ahorro, aunque Control mismo ya esté saludable) —
 // y el catálogo de intervenciones solo tiene contenido para dimensiones
 // que necesitan mejorar. Si la dimensión que Priority señaló no tiene
-// ninguna intervención elegible, se cae a la dimensión con peor severidad
-// (la que sí tiene algo accionable) en vez de no mostrar nada.
+// ninguna intervención elegible (sin contenido cargado, o todo lo que
+// tenía ya fue descartado/completado), se prueba la siguiente dimensión
+// con brecha real en orden de severidad, y así sucesivamente, en vez de
+// rendirse en el primer intento — una dimensión agotada de contenido no
+// significa que las demás también lo estén.
 //
 // Mantenimiento: si NINGUNA dimensión evaluable tiene una brecha real
 // (todas MET o NA), no hay ninguna causa raíz que atender — mostrar "sin
@@ -76,6 +79,26 @@ export async function hasNoRealGap(employeeId: string): Promise<boolean> {
   return scores.length > 0 && scores.every((s) => !GAP_STATES.includes(s.state));
 }
 
+// Todas las dimensiones con brecha real (CRITICAL/UNMET/PARTIAL) del
+// empleado, ordenadas de peor a mejor severidad — mismo criterio que usa
+// Priority para elegir la peor (pickMostSevere), aplicado repetidamente
+// para obtener el orden completo en vez de solo la primera.
+async function gapDimensionsBySeverity(employeeId: string): Promise<string[]> {
+  const scores = await prisma.dimensionScore.findMany({ where: { employeeId, state: { not: 'NA' } } });
+  let remaining = scores.filter((s) => GAP_STATES.includes(s.state));
+  const ordered: DimensionScore[] = [];
+  while (remaining.length > 0) {
+    const worst = pickMostSevere(remaining);
+    ordered.push(worst);
+    remaining = remaining.filter((s) => s.dimensionId !== worst.dimensionId);
+  }
+
+  if (ordered.length === 0) return [];
+  const dimensions = await prisma.dimension.findMany({ where: { id: { in: ordered.map((s) => s.dimensionId) } } });
+  const codeById = new Map(dimensions.map((d) => [d.id, d.code as string]));
+  return ordered.map((s) => codeById.get(s.dimensionId)).filter((code): code is string => Boolean(code));
+}
+
 async function eligibleMaintenanceCourse(
   employeeId: string,
   eligibility: EligibilityResult
@@ -87,15 +110,30 @@ async function eligibleMaintenanceCourse(
   const finRank = eligibility.financialReadiness.state ? FIN_READINESS_ORDER[eligibility.financialReadiness.state] : -1;
   const behRank = eligibility.behavioralReadiness.state ? BEH_READINESS_ORDER[eligibility.behavioralReadiness.state] : -1;
 
-  const alreadyShown = await prisma.employeeIntervention.findMany({
-    where: { employeeId, status: { in: ['DISMISSED', 'COMPLETED'] } },
-    select: { interventionId: true }
-  });
-  const shownIds = new Set(alreadyShown.map((e) => e.interventionId));
-
-  const eligible = courses.filter((c) => !shownIds.has(c.id) && meetsReadinessGate(c, finRank, behRank));
+  const readinessEligible = courses.filter((c) => meetsReadinessGate(c, finRank, behRank));
+  const eligible = await excludeAlreadyResolved(employeeId, readinessEligible);
 
   return eligible[0] ?? null;
+}
+
+// Una intervención que el empleado ya descartó o ya completó nunca vuelve a
+// ofrecerse (ver nota en actions.ts) — pero eso no significa que ya no
+// tenga ninguna brecha en esta dimensión, solo que ESA sugerencia puntual
+// ya se resolvió. Antes esto se filtraba recién en actions.ts, después de
+// que este motor ya había elegido su única candidata: si esa candidata
+// resultaba ser justo la ya resuelta, el motor se rendía (NONE) aunque
+// hubiera otra intervención elegible sin probar, y actions.ts terminaba
+// mostrando "vas bien" con una dimensión todavía en UNMET/PARTIAL. Filtrar
+// acá, antes de elegir, deja que cualquier otra candidata elegible se
+// ofrezca en su lugar.
+async function excludeAlreadyResolved(employeeId: string, candidates: Intervention[]): Promise<Intervention[]> {
+  if (candidates.length === 0) return candidates;
+  const resolved = await prisma.employeeIntervention.findMany({
+    where: { employeeId, status: { in: ['DISMISSED', 'COMPLETED'] }, interventionId: { in: candidates.map((c) => c.id) } },
+    select: { interventionId: true }
+  });
+  const resolvedIds = new Set(resolved.map((r) => r.interventionId));
+  return candidates.filter((c) => !resolvedIds.has(c.id));
 }
 
 async function eligibleCandidatesForDimension(
@@ -123,7 +161,8 @@ async function eligibleCandidatesForDimension(
   const finRank = eligibility.financialReadiness.state ? FIN_READINESS_ORDER[eligibility.financialReadiness.state] : -1;
   const behRank = eligibility.behavioralReadiness.state ? BEH_READINESS_ORDER[eligibility.behavioralReadiness.state] : -1;
 
-  return candidates.filter((c) => meetsReadinessGate(c, finRank, behRank));
+  const eligible = candidates.filter((c) => meetsReadinessGate(c, finRank, behRank));
+  return excludeAlreadyResolved(employeeId, eligible);
 }
 
 export async function computeNextBestAction(employeeId: string): Promise<NextBestActionResult> {
@@ -153,13 +192,15 @@ export async function computeNextBestAction(employeeId: string): Promise<NextBes
   let usedActionabilityFallback = false;
 
   if (eligibleCandidates.length === 0) {
-    const severityFallback = await worstDimensionBySeverity(employeeId);
-    if (severityFallback.dimensionCode && severityFallback.dimensionCode !== dimensionCode) {
-      const fallbackCandidates = await eligibleCandidatesForDimension(employeeId, severityFallback.dimensionCode, eligibility);
+    const orderedGapDimensions = await gapDimensionsBySeverity(employeeId);
+    for (const candidateDimension of orderedGapDimensions) {
+      if (candidateDimension === priority.dimensionCode) continue;
+      const fallbackCandidates = await eligibleCandidatesForDimension(employeeId, candidateDimension, eligibility);
       if (fallbackCandidates.length > 0) {
-        dimensionCode = severityFallback.dimensionCode;
+        dimensionCode = candidateDimension;
         eligibleCandidates = fallbackCandidates;
         usedActionabilityFallback = true;
+        break;
       }
     }
   }
@@ -168,7 +209,7 @@ export async function computeNextBestAction(employeeId: string): Promise<NextBes
     return {
       intervention: null,
       method: 'NONE',
-      explanation: `Sin intervención elegible en ${priority.dimensionCode} (ni en su alternativa por severidad) con la disposición financiera/conductual actual del empleado.`
+      explanation: `Sin intervención elegible en ${priority.dimensionCode} ni en ninguna otra dimensión con brecha real, con la disposición financiera/conductual actual del empleado.`
     };
   }
 
