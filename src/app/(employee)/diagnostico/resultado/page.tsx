@@ -5,8 +5,9 @@ import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { scoreToDimensionState, scoreToProgressTier } from '@/lib/engines/scoring';
 import { countContextAnsweredAndTotal } from '@/lib/engines/diagnostic';
-import { getNationalComparison } from '@/lib/engines/national-benchmark';
+import { getNationalComparison, getSegmentComparison, type NationalComparison } from '@/lib/engines/national-benchmark';
 import { EmployeeTopBar } from '../../employee-topbar';
+import { SegmentComparison, type ComparisonRow, type ComparisonTab } from './segment-comparison';
 
 export default async function ResultadoPage() {
   const employee = await requireEmployee();
@@ -30,7 +31,12 @@ export default async function ResultadoPage() {
 
     const { answered: ctxAnswered, total: ctxTotal } = await countContextAnsweredAndTotal(employeeId);
     const showContextBanner = ctxTotal > 0 && ctxAnswered < ctxTotal;
-    const comparison = await getNationalComparison(employeeId);
+    const [generalComparison, ageComparison, incomeComparison, sexComparison] = await Promise.all([
+      getNationalComparison(employeeId),
+      getSegmentComparison(employeeId, 'AGE'),
+      getSegmentComparison(employeeId, 'INCOME'),
+      getSegmentComparison(employeeId, 'SEX')
+    ]);
 
     const t = await getTranslations('diagnostic.result');
     const tDim = await getTranslations('diagnostic.dimensions');
@@ -49,27 +55,46 @@ export default async function ResultadoPage() {
       DEBT: 'debt',
       PLANNING: 'planning'
     };
-    type ComparisonRow = { code: string; label: string; you: number; avg: number };
-    const comparisonRows: ComparisonRow[] = comparison
-      ? [
-          { code: 'CFHI', label: t('title'), you: cfhiRounded, avg: comparison.overall },
-          ...(methodology?.dimensions ?? [])
-            .filter((d) => d.code in BENCHMARK_FIELD_BY_DIMENSION)
-            .map((d): ComparisonRow | null => {
-              const ds = scoreByDimensionId.get(d.id);
-              const isNA = ds?.state === 'NA';
-              const score = ds && !isNA ? Math.round(ds.score) : null;
-              if (score === null) return null;
-              return { code: d.code, label: tDim(d.code), you: score, avg: comparison[BENCHMARK_FIELD_BY_DIMENSION[d.code]] };
-            })
-            .filter((row): row is ComparisonRow => row !== null)
-        ]
-      : [];
-    const comparisonSubtitle = comparison
-      ? comparison.scope === 'COHORT'
+    function buildComparisonRows(comparison: NationalComparison): ComparisonRow[] {
+      return [
+        { code: 'CFHI', label: t('title'), you: cfhiRounded, avg: comparison.overall },
+        ...(methodology?.dimensions ?? [])
+          .filter((d) => d.code in BENCHMARK_FIELD_BY_DIMENSION)
+          .map((d): ComparisonRow | null => {
+            const ds = scoreByDimensionId.get(d.id);
+            const isNA = ds?.state === 'NA';
+            const score = ds && !isNA ? Math.round(ds.score) : null;
+            if (score === null) return null;
+            return { code: d.code, label: tDim(d.code), you: score, avg: comparison[BENCHMARK_FIELD_BY_DIMENSION[d.code]] };
+          })
+          .filter((row): row is ComparisonRow => row !== null)
+      ];
+    }
+    function buildSubtitle(comparison: NationalComparison): string {
+      return comparison.scope === 'COHORT'
         ? t('comparison.subtitleCohort', { n: comparison.n })
-        : t('comparison.subtitleNational', { n: comparison.n })
-      : null;
+        : t('comparison.subtitleNational', { n: comparison.n });
+    }
+
+    // Ítem 9 de la auditoría UX: además del comparativo general (cohorte
+    // combinada sexo × edad × situación laboral, o nacional si esa
+    // cohorte es muy chica), el empleado puede elegir UNA variable a la
+    // vez. Una pestaña solo aparece si esa variable puntual tiene datos
+    // (el empleado la respondió y no la declinó) — ver getSegmentComparison.
+    const segmentDefs: { key: ComparisonTab['key']; labelKey: string; comparison: NationalComparison | null }[] = [
+      { key: 'GENERAL', labelKey: 'general', comparison: generalComparison },
+      { key: 'AGE', labelKey: 'age', comparison: ageComparison },
+      { key: 'INCOME', labelKey: 'income', comparison: incomeComparison },
+      { key: 'SEX', labelKey: 'sex', comparison: sexComparison }
+    ];
+    const comparisonTabs: ComparisonTab[] = segmentDefs
+      .filter((def): def is typeof def & { comparison: NationalComparison } => def.comparison !== null)
+      .map((def) => ({
+        key: def.key,
+        label: t(`comparison.tabs.${def.labelKey}`),
+        subtitle: buildSubtitle(def.comparison),
+        rows: buildComparisonRows(def.comparison)
+      }));
 
     return (
       <div className="min-h-screen flex flex-col">
@@ -131,22 +156,11 @@ export default async function ResultadoPage() {
           </div>
 
           <div className="lg:max-w-md lg:mx-auto">
-            {comparisonRows.length > 0 && comparisonSubtitle ? (
-              <div className="mt-6 border border-silver/50 rounded-lg p-4 bg-white text-left">
-                <p className="text-sm font-medium text-quartz mb-1">{t('comparison.title')}</p>
-                <p className="text-[11px] text-nickel mb-3">{comparisonSubtitle}</p>
-                <div className="space-y-2">
-                  {comparisonRows.map((row) => (
-                    <div key={row.code} className="flex items-center justify-between text-xs">
-                      <span className="text-nickel">{row.label}</span>
-                      <span className="text-quartz">
-                        {t('comparison.you')}: <span className="font-medium">{row.you}</span>
-                        <span className="text-nickel"> · {t('comparison.average')}: {row.avg}</span>
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {comparisonTabs.length > 0 ? (
+              <SegmentComparison
+                tabs={comparisonTabs}
+                labels={{ title: t('comparison.title'), you: t('comparison.you'), average: t('comparison.average') }}
+              />
             ) : null}
 
             {showContextBanner ? (
