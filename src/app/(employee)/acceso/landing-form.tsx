@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { validateEnrollmentCode } from './actions';
+import { validateEnrollmentCode } from '../actions';
 
 // formTitle/formSubtitle/timeEstimate/privacyGuarantee vienen del panel de
 // contenido (LandingBlock colaborador_form_intro/colaborador_trust) — este

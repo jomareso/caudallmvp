@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { BrandPanel } from '../../brand-panel';
+import { BrandPanel } from '../../acceso/brand-panel';
 
 export default async function EnviadoPage() {
   const t = await getTranslations('employee.confirmation');

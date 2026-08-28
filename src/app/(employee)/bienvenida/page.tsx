@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { getPlatformDiagnosticStats } from '@/lib/engines/diagnostic-stats';
-import { BrandPanel } from '../brand-panel';
+import { BrandPanel } from '../acceso/brand-panel';
 
 export default async function BienvenidaPage() {
   const baseEmployee = await requireEmployee();

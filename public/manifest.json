@@ -2,7 +2,7 @@
   "name": "Caudall — Bienestar financiero",
   "short_name": "Caudall",
   "description": "Tu salud financiera, como beneficio de tu empresa",
-  "start_url": "/",
+  "start_url": "/acceso",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F4F5F7",

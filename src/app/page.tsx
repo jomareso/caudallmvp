@@ -13,16 +13,22 @@ export const metadata: Metadata = {
 // usa cookies/headers) y queda congelada con el contenido de ese momento.
 export const dynamic = 'force-dynamic';
 
-// Landing pública para RRHH/empleadores (Decisión 7: desktop-first, pero
-// sigue siendo una pantalla real — tiene que verse bien en cualquier
-// tamaño, no solo en el canvas de 1440px del mockup de diseño).
+// Landing pública para RRHH/empleadores, en el dominio raíz (decisión de
+// Reynoso: este es el landing primario del modelo B2B2C). La entrada real
+// del colaborador (código de licencia + magic link) vive en /acceso, no
+// acá — se movió para no romper el start_url de la PWA ni la redirección
+// de sesión (ver public/manifest.json y src/middleware.ts).
+//
+// Decisión 7: desktop-first, pero sigue siendo una pantalla real — tiene
+// que verse bien en cualquier tamaño, no solo en el canvas de 1440px del
+// mockup de diseño.
 //
 // Todo el copy viene de LandingBlock (slug EMPLEADOR), administrable
 // desde /admin/contenido sin tocar código — igual que la landing
-// colaborador (ver brand-panel.tsx/landing-form.tsx). Cada sección se
-// omite si el bloque no existe o un admin lo marcó no visible (Decisión
-// 4: catálogo con overrides de activar/desactivar).
-export default async function EmpresasPage() {
+// colaborador (ver (employee)/acceso/brand-panel.tsx y landing-form.tsx).
+// Cada sección se omite si el bloque no existe o un admin lo marcó no
+// visible (Decisión 4: catálogo con overrides de activar/desactivar).
+export default async function HomePage() {
   const [hero, reto, solucion, metodologia, privacidad, cierre] = await Promise.all([
     getVisibleBlockContent('EMPLEADOR', 'empleador_hero'),
     getVisibleBlockContent('EMPLEADOR', 'empleador_reto'),

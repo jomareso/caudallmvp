@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { BrandPanel } from '@/app/(employee)/brand-panel';
+import { BrandPanel } from '@/app/(employee)/acceso/brand-panel';
 
 export default async function LicenciaVencidaPage({
   searchParams
