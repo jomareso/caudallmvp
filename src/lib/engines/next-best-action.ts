@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db/prisma';
-import type { DimensionCode, Intervention } from '@prisma/client';
+import type { DimensionCode, DimensionScore, Intervention } from '@prisma/client';
 import { buildFacts } from './diagnostic';
-import { computePriority, worstDimensionBySeverity } from './priority';
+import { computePriority, pickMostSevere } from './priority';
 import { computeEligibility, type EligibilityResult } from './eligibility';
 
 // spec-v2.md §28: FRICTION → TECHNIQUE, nunca al revés (regla CORE #19).
@@ -17,8 +17,11 @@ import { computeEligibility, type EligibilityResult } from './eligibility';
 // explica por qué falla Ahorro, aunque Control mismo ya esté saludable) —
 // y el catálogo de intervenciones solo tiene contenido para dimensiones
 // que necesitan mejorar. Si la dimensión que Priority señaló no tiene
-// ninguna intervención elegible, se cae a la dimensión con peor severidad
-// (la que sí tiene algo accionable) en vez de no mostrar nada.
+// ninguna intervención elegible (sin contenido cargado, o todo lo que
+// tenía ya fue descartado/completado), se prueba la siguiente dimensión
+// con brecha real en orden de severidad, y así sucesivamente, en vez de
+// rendirse en el primer intento — una dimensión agotada de contenido no
+// significa que las demás también lo estén.
 //
 // Mantenimiento: si NINGUNA dimensión evaluable tiene una brecha real
 // (todas MET o NA), no hay ninguna causa raíz que atender — mostrar "sin
@@ -74,6 +77,26 @@ export function meetsReadinessGate(
 export async function hasNoRealGap(employeeId: string): Promise<boolean> {
   const scores = await prisma.dimensionScore.findMany({ where: { employeeId, state: { not: 'NA' } } });
   return scores.length > 0 && scores.every((s) => !GAP_STATES.includes(s.state));
+}
+
+// Todas las dimensiones con brecha real (CRITICAL/UNMET/PARTIAL) del
+// empleado, ordenadas de peor a mejor severidad — mismo criterio que usa
+// Priority para elegir la peor (pickMostSevere), aplicado repetidamente
+// para obtener el orden completo en vez de solo la primera.
+async function gapDimensionsBySeverity(employeeId: string): Promise<string[]> {
+  const scores = await prisma.dimensionScore.findMany({ where: { employeeId, state: { not: 'NA' } } });
+  let remaining = scores.filter((s) => GAP_STATES.includes(s.state));
+  const ordered: DimensionScore[] = [];
+  while (remaining.length > 0) {
+    const worst = pickMostSevere(remaining);
+    ordered.push(worst);
+    remaining = remaining.filter((s) => s.dimensionId !== worst.dimensionId);
+  }
+
+  if (ordered.length === 0) return [];
+  const dimensions = await prisma.dimension.findMany({ where: { id: { in: ordered.map((s) => s.dimensionId) } } });
+  const codeById = new Map(dimensions.map((d) => [d.id, d.code as string]));
+  return ordered.map((s) => codeById.get(s.dimensionId)).filter((code): code is string => Boolean(code));
 }
 
 async function eligibleMaintenanceCourse(
@@ -169,13 +192,15 @@ export async function computeNextBestAction(employeeId: string): Promise<NextBes
   let usedActionabilityFallback = false;
 
   if (eligibleCandidates.length === 0) {
-    const severityFallback = await worstDimensionBySeverity(employeeId);
-    if (severityFallback.dimensionCode && severityFallback.dimensionCode !== dimensionCode) {
-      const fallbackCandidates = await eligibleCandidatesForDimension(employeeId, severityFallback.dimensionCode, eligibility);
+    const orderedGapDimensions = await gapDimensionsBySeverity(employeeId);
+    for (const candidateDimension of orderedGapDimensions) {
+      if (candidateDimension === priority.dimensionCode) continue;
+      const fallbackCandidates = await eligibleCandidatesForDimension(employeeId, candidateDimension, eligibility);
       if (fallbackCandidates.length > 0) {
-        dimensionCode = severityFallback.dimensionCode;
+        dimensionCode = candidateDimension;
         eligibleCandidates = fallbackCandidates;
         usedActionabilityFallback = true;
+        break;
       }
     }
   }
@@ -184,7 +209,7 @@ export async function computeNextBestAction(employeeId: string): Promise<NextBes
     return {
       intervention: null,
       method: 'NONE',
-      explanation: `Sin intervención elegible en ${priority.dimensionCode} (ni en su alternativa por severidad) con la disposición financiera/conductual actual del empleado.`
+      explanation: `Sin intervención elegible en ${priority.dimensionCode} ni en ninguna otra dimensión con brecha real, con la disposición financiera/conductual actual del empleado.`
     };
   }
 
