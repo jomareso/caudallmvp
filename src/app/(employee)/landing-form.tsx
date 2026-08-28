@@ -29,18 +29,22 @@ export function LandingForm({ hasLogo }: { hasLogo: boolean }) {
 
   return (
     <div className="flex flex-col items-center p-6 pt-16 lg:justify-center">
-      <div className="w-full max-w-sm text-center">
+      <div className="w-full max-w-md text-center">
         {hasLogo ? (
           // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
           <img
             src="/api/branding/logo"
             alt="Caudall"
-            className="h-14 mx-auto mb-2 mix-blend-multiply"
+            className="h-16 mx-auto mb-6 mix-blend-multiply"
           />
         ) : (
-          <h1 className="text-2xl font-medium text-yale mb-1">caudall</h1>
+          // eslint-disable-next-line @next/next/no-img-element -- logo estático propio del bundle, no necesita el optimizador de next/image
+          <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-8 mx-auto mb-6" />
         )}
-        <p className="text-nickel text-sm mb-8">{t('subtitle')}</p>
+        <p className="text-2xl font-semibold mb-2 leading-snug bg-gradient-to-r from-yale to-cola bg-clip-text text-transparent">
+          {t('formTitle')}
+        </p>
+        <p className="text-nickel text-base mb-10">{t('formSubtitle')}</p>
 
         <form onSubmit={handleSubmit} className="bg-white border border-silver/60 rounded-xl p-6 text-left">
           <label htmlFor="enrollmentCode" className="block text-xs text-nickel mb-1">
@@ -65,6 +69,7 @@ export function LandingForm({ hasLogo }: { hasLogo: boolean }) {
           >
             {isPending ? t('validating') : t('ctaContinue')}
           </button>
+          <p className="text-[11px] text-nickel text-center mt-3">{t('timeEstimate')}</p>
         </form>
 
         {/* En lg+ el panel de marca (brand-panel.tsx) ya muestra esta misma garantía — repetirla acá se vería duplicado */}

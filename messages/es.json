@@ -5,12 +5,16 @@
   },
   "employee": {
     "landing": {
-      "title": "Sabes dónde estás. Caudall te conecta.",
-      "subtitle": "Un espacio privado para conocer tu salud financiera y mejorarla.",
+      "titleLine1": "Entiende tu salud financiera",
+      "titleLine2": "Sabe qué hacer después",
+      "subtitle": "Conoce mejor tu situación financiera y recibe <em>una orientación clara</em> sobre cuál podría ser tu próximo paso.",
+      "formTitle": "Tu espacio privado de salud financiera.",
+      "formSubtitle": "Ingresa el código que te proporcionó tu empresa para comenzar.",
       "enrollmentCodeLabel": "Tu código de acceso",
-      "enrollmentCodePlaceholder": "Código que te dio tu empresa",
+      "enrollmentCodePlaceholder": "Código de acceso",
       "ctaContinue": "Continuar",
-      "validating": "Verificando..."
+      "validating": "Verificando...",
+      "timeEstimate": "Toma aproximadamente 5–8 minutos."
     },
     "email": {
       "title": "Tu correo personal",
@@ -45,7 +49,7 @@
       }
     },
     "trust": {
-      "privacyGuarantee": "Tu empresa nunca verá tus respuestas individuales. Solo métricas agregadas y anónimas."
+      "privacyGuarantee": "Tus respuestas son privadas. Tu empresa no verá tus respuestas individuales ni tu diagnóstico personal — solo información agregada y anónima."
     }
   },
   "hr": {
