@@ -1533,6 +1533,12 @@
       },
       "comparison": {
         "title": "Cómo te comparás",
+        "tabs": {
+          "general": "General",
+          "age": "Edad",
+          "income": "Ingresos",
+          "sex": "Sexo"
+        },
         "subtitleCohort": "Comparado con personas en una situación similar a la tuya ({n} personas)",
         "subtitleNational": "Comparado con el promedio nacional ({n} personas · Estudio de Salud Financiera 2021-2024)",
         "you": "Tú",
