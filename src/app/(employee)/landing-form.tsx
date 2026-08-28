@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { validateEnrollmentCode } from './actions';
 
-export function LandingForm({ hasLogo }: { hasLogo: boolean }) {
+export function LandingForm() {
   const t = useTranslations('employee.landing');
   const tTrust = useTranslations('employee.trust');
   const router = useRouter();
@@ -30,17 +30,12 @@ export function LandingForm({ hasLogo }: { hasLogo: boolean }) {
   return (
     <div className="flex flex-col items-center p-6 pt-16 lg:justify-center">
       <div className="w-full max-w-md text-center">
-        {hasLogo ? (
-          // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-          <img
-            src="/api/branding/logo"
-            alt="Caudall"
-            className="h-16 mx-auto mb-6 mix-blend-multiply"
-          />
-        ) : (
-          // eslint-disable-next-line @next/next/no-img-element -- logo estático propio del bundle, no necesita el optimizador de next/image
-          <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-8 mx-auto mb-6" />
-        )}
+        {/* Logo real y estático, igual que brand-panel.tsx — no depende del
+            logo que se pueda subir en /admin/configuracion (ese mecanismo
+            era un reemplazo manual de antes de tener el archivo real; hoy
+            solo generaría inconsistencia de tamaño entre los dos lados). */}
+        {/* eslint-disable-next-line @next/next/no-img-element -- logo estático propio del bundle, no necesita el optimizador de next/image */}
+        <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-8 mx-auto mb-6" />
         <p className="text-2xl font-semibold mb-2 leading-snug bg-gradient-to-r from-yale to-cola bg-clip-text text-transparent">
           {t('formTitle')}
         </p>
