@@ -31,7 +31,8 @@ export default async function LandingPage() {
     }
   }
 
-  const [formIntro, trust] = await Promise.all([
+  const [hero, formIntro, trust] = await Promise.all([
+    getVisibleBlockContent('COLABORADOR', 'colaborador_hero'),
     getVisibleBlockContent('COLABORADOR', 'colaborador_form_intro'),
     getVisibleBlockContent('COLABORADOR', 'colaborador_trust')
   ]);
@@ -39,11 +40,16 @@ export default async function LandingPage() {
     formIntro && trust
       ? { formTitle: formIntro.formTitle, formSubtitle: formIntro.formSubtitle, timeEstimate: formIntro.timeEstimate, privacyGuarantee: trust.privacyGuarantee }
       : null;
+  // El titular de marca (BrandPanel) vive oculto bajo `lg` — en mobile
+  // nunca se veía ningún titular, solo el formulario, directo. Esta línea
+  // condensada reusa el mismo contenido de colaborador_hero en vez de
+  // pedir un texto nuevo en el CMS.
+  const mobileHook = hero ? `${hero.titleLine1}. ${hero.titleLine2}.` : null;
 
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-2">
       <BrandPanel />
-      <LandingForm content={formContent} />
+      <LandingForm content={formContent} mobileHook={mobileHook} />
     </main>
   );
 }

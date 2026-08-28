@@ -8,6 +8,7 @@
       "enrollmentCodeLabel": "Tu código de acceso",
       "enrollmentCodePlaceholder": "Código de acceso",
       "ctaContinue": "Continuar",
+      "ctaRetry": "Reintentar",
       "validating": "Verificando..."
     },
     "email": {
@@ -18,22 +19,26 @@
       "ctaSendLink": "Enviarme un link para entrar",
       "sending": "Enviando...",
       "or": "o",
-      "ctaGoogle": "Continuar con Google"
+      "ctaGoogle": "Continuar con Google",
+      "ctaBack": "← Volver"
     },
     "confirmation": {
       "title": "Revisa tu correo",
       "subtitle": "Te enviamos un link para entrar. Vence en 15 minutos y solo funciona una vez. Si no lo ves, revisa spam.",
-      "existingNotice": "Ya existe una cuenta con este correo — te enviamos un link para entrar, no para registrarte de nuevo."
+      "existingNotice": "Ya existe una cuenta con este correo — te enviamos un link para entrar, no para registrarte de nuevo.",
+      "ctaOtherEmail": "← Usar otro correo"
     },
     "invalidLink": {
-      "title": "Este link ya no funciona",
-      "subtitle": "Puede que haya vencido o que ya lo hayas usado. Pide uno nuevo con tu código de acceso y tu correo.",
-      "ctaRetry": "Intentar de nuevo"
+      "title": "Este link ya venció",
+      "subtitle": "Los links de acceso duran 15 minutos y solo funcionan una vez, por tu seguridad. Pide uno nuevo con tu código de acceso y tu correo.",
+      "ctaRetry": "Pedir un link nuevo"
     },
     "licenseExpired": {
       "title": "Tu acceso venció",
       "subtitle": "Tu empresa contrató tu licencia por un tiempo limitado y ya se cumplió. Contacta a tu equipo de RRHH si necesitas seguir usando Caudall.",
-      "subtitleSuspended": "Tu empresa pausó temporalmente su cuenta de Caudall. Contacta a tu equipo de RRHH si tienes preguntas."
+      "subtitleWithDate": "Tu licencia venció el {date}. Tus respuestas y tu diagnóstico siguen guardados — no se borran — pero necesitas que tu empresa renueve tu acceso para volver a entrar.",
+      "subtitleSuspended": "Tu empresa pausó temporalmente su cuenta de Caudall. Contacta a tu equipo de RRHH si tienes preguntas.",
+      "logout": "Cerrar sesión"
     },
     "welcome": {
       "title": "Ya estás dentro, bienvenido a {tenantName}",
@@ -1557,6 +1562,8 @@
       },
       "comparison": {
         "title": "Cómo te comparás",
+        "vsAverage": "vs. promedio",
+        "privacyNote": "Por privacidad, solo te comparamos con segmentos con suficientes personas — nunca con grupos tan pequeños que puedan identificarte.",
         "tabs": {
           "general": "General",
           "age": "Edad",

@@ -35,7 +35,9 @@ export function EmailForm({
         setError(result.message);
         return;
       }
-      router.push(result.isExisting ? '/registro/enviado?existente=1' : '/registro/enviado');
+      const params = new URLSearchParams({ code: enrollmentCode });
+      if (result.isExisting) params.set('existente', '1');
+      router.push(`/registro/enviado?${params.toString()}`);
     });
   }
 
@@ -99,6 +101,14 @@ export function EmailForm({
             <p className="text-[11px] text-yale/90">{tTrust('privacyGuarantee')}</p>
           </div>
         </form>
+
+        <button
+          type="button"
+          onClick={() => router.push('/acceso')}
+          className="block mx-auto mt-4 text-xs text-nickel underline"
+        >
+          {t('ctaBack')}
+        </button>
       </div>
     </div>
   );
