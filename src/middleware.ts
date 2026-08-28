@@ -34,5 +34,5 @@ export const config = {
   // vive en /admin mismo — con :path* también matchearía ahí y crearía
   // un bucle (sin sesión de admin -> redirige a /admin -> se vuelve a
   // proteger -> redirige...).
-  matcher: ['/bienvenida', '/diagnostico/:path*', '/admin/:path+']
+  matcher: ['/bienvenida', '/inicio', '/diagnostico/:path*', '/admin/:path+']
 };
