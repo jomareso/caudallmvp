@@ -1,7 +1,8 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, CSSProperties } from 'react';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
+import { hexToTailwindRgbTriplet } from '@/lib/theme/tenant-color';
 
 // Decisión 6 (actualizada): una licencia vencida le quita el acceso al
 // empleado (confirmado por Reynoso). El chequeo vive acá, no en cada
@@ -18,6 +19,12 @@ export default async function EmployeeLayout({ children }: { children: ReactNode
   const sessionUser = session?.user as
     | { id?: string; tenantId?: string; role?: 'employee' | 'admin' }
     | undefined;
+
+  // ADR-003 (co-branding): el color primario del tenant solo se conoce una
+  // vez que hay sesión de empleado — antes de eso (acceso/registro), el
+  // valor por defecto de --tenant-primary-rgb en globals.css ya alcanza,
+  // sin necesitar tenant.
+  let tenantPrimaryRgb: string | null = null;
 
   if (sessionUser?.role === 'employee' && sessionUser.id && sessionUser.tenantId) {
     // El JWT del empleado ya trae tenantId firmado — contexto 'tenant'
@@ -47,7 +54,15 @@ export default async function EmployeeLayout({ children }: { children: ReactNode
       if (justExpired || license?.status === 'EXPIRED') {
         redirect('/licencia-vencida');
       }
+
+      if (employee) {
+        tenantPrimaryRgb = hexToTailwindRgbTriplet(employee.tenant.primaryColor);
+      }
     });
+  }
+
+  if (tenantPrimaryRgb) {
+    return <div style={{ '--tenant-primary-rgb': tenantPrimaryRgb } as CSSProperties}>{children}</div>;
   }
 
   return <>{children}</>;
