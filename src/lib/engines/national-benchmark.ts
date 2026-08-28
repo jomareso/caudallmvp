@@ -65,6 +65,23 @@ function toComparison(scope: ComparisonScope, n: number, avg: BenchmarkAverages)
   };
 }
 
+const BENCHMARK_AVG_SELECT = {
+  overallScore: true,
+  controlScore: true,
+  savingScore: true,
+  debtScore: true,
+  planningScore: true
+} as const;
+
+async function fetchNationalFallback(version: string): Promise<NationalComparison> {
+  const nationalAgg = await prisma.nationalBenchmarkRecord.aggregate({
+    where: { version },
+    _avg: BENCHMARK_AVG_SELECT,
+    _count: true
+  });
+  return toComparison('NATIONAL', nationalAgg._count, nationalAgg._avg);
+}
+
 export async function getNationalComparison(employeeId: string): Promise<NationalComparison | null> {
   const facts = await buildFacts(employeeId);
   if (facts.get('CTX_COMPARE_OPT_IN')?.state !== 'YES') return null;
@@ -83,7 +100,7 @@ export async function getNationalComparison(employeeId: string): Promise<Nationa
 
   const cohortAgg = await prisma.nationalBenchmarkRecord.aggregate({
     where: { version: latest.version, ...cohortWhere },
-    _avg: { overallScore: true, controlScore: true, savingScore: true, debtScore: true, planningScore: true },
+    _avg: BENCHMARK_AVG_SELECT,
     _count: true
   });
 
@@ -91,11 +108,74 @@ export async function getNationalComparison(employeeId: string): Promise<Nationa
     return toComparison('COHORT', cohortAgg._count, cohortAgg._avg);
   }
 
-  const nationalAgg = await prisma.nationalBenchmarkRecord.aggregate({
-    where: { version: latest.version },
-    _avg: { overallScore: true, controlScore: true, savingScore: true, debtScore: true, planningScore: true },
+  return fetchNationalFallback(latest.version);
+}
+
+export type SegmentVariable = 'AGE' | 'INCOME' | 'SEX';
+
+// El estudio de origen (CTX_INCOME_BAND del banco de preguntas) usa
+// rangos de RD$ distintos a los de este benchmark (incomeRangeRaw viene
+// de encuestas de 2021-2024 con sus propios cortes) — no hay forma de
+// alinearlos exacto sin el ingreso puntual de cada encuestado, que no
+// existe. Cada rango de incomeRangeRaw se asigna al rango de
+// CTX_INCOME_BAND que contiene su punto medio: es una aproximación
+// (decisión de Reynoso, 28 ago — ver el PR), no un cruce exacto, por eso
+// el comparativo de Ingresos usa scope COHORT/NATIONAL igual que los
+// demás, sin pretender más precisión de la que hay.
+export const INCOME_BAND_TO_RAW_RANGES: Record<string, string[]> = {
+  INC_LT_25K: ['Menos de RD$ 13,500', 'RD$ 13,501 -RD$ 27,000'],
+  INC_25_49K: ['RD$ 27,001 -RD$ 40,500', 'RD$ 40,501 -RD$ 54,000'],
+  INC_50_74K: ['RD$ 54,001 -RD$ 81,000'],
+  INC_75_99K: ['RD$ 81,001 -RD$ 108,000'],
+  INC_100_149K: ['RD$ 108,001 -RD$ 135,000'],
+  INC_150_199K: ['RD$ 135,001 -RD$ 202,500'],
+  INC_200K_PLUS: ['Más de RD$ 202,500']
+};
+
+// A diferencia de getNationalComparison (que arma una sola cohorte
+// cruzando sexo × edad × situación laboral), esto compara contra UNA sola
+// variable a la vez — es lo que alimenta el selector de tabs en Resultado
+// (ítem 9 de la auditoría UX). Si el empleado no respondió (o declinó)
+// esa variable puntual, no hay cohorte que armar y se devuelve null: la
+// pantalla simplemente no ofrece esa pestaña.
+export async function getSegmentComparison(
+  employeeId: string,
+  variable: SegmentVariable
+): Promise<NationalComparison | null> {
+  const facts = await buildFacts(employeeId);
+  if (facts.get('CTX_COMPARE_OPT_IN')?.state !== 'YES') return null;
+
+  const latest = await prisma.nationalBenchmarkRecord.findFirst({
+    select: { version: true },
+    orderBy: { createdAt: 'desc' }
+  });
+  if (!latest) return null;
+
+  let segmentWhere: Record<string, unknown>;
+  if (variable === 'AGE') {
+    const ageBand = facts.get('CTX_AGE_BAND')?.state;
+    if (!ageBand || ageBand === 'DECLINED') return null;
+    segmentWhere = { ageBand };
+  } else if (variable === 'SEX') {
+    const sex = facts.get('CTX_SEX')?.state;
+    if (!sex || sex === 'DECLINED') return null;
+    segmentWhere = { sex };
+  } else {
+    const incomeBand = facts.get('CTX_INCOME_BAND')?.state;
+    const rawRanges = incomeBand ? INCOME_BAND_TO_RAW_RANGES[incomeBand] : undefined;
+    if (!rawRanges) return null;
+    segmentWhere = { incomeRangeRaw: { in: rawRanges } };
+  }
+
+  const cohortAgg = await prisma.nationalBenchmarkRecord.aggregate({
+    where: { version: latest.version, ...segmentWhere },
+    _avg: BENCHMARK_AVG_SELECT,
     _count: true
   });
 
-  return toComparison('NATIONAL', nationalAgg._count, nationalAgg._avg);
+  if (selectComparisonScope(cohortAgg._count) === 'COHORT') {
+    return toComparison('COHORT', cohortAgg._count, cohortAgg._avg);
+  }
+
+  return fetchNationalFallback(latest.version);
 }

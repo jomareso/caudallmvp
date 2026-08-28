@@ -130,6 +130,8 @@ model Employee {
   safetyFlags     SafetyFlag[]
   interventions   EmployeeIntervention[]
   pushSubscriptions PushSubscription[]
+  notificationPreference NotificationPreference?
+  notificationLogs NotificationLog[]
 
   @@unique([tenantId, personalEmail])
   @@index([tenantId])
@@ -152,6 +154,55 @@ model PushSubscription {
 
   @@index([employeeId])
   @@map("push_subscriptions")
+}
+
+// Panel de Configuración del empleado (auditoría UX, revisión 2). Fila
+// única por empleado, no una por tipo — son 6 booleanos (5 tipos de
+// notificación + el canal de correo), no vale la pena una tabla aparte
+// por tipo. Todos empiezan en true (Decisión de UX ya mockeada: "todas
+// empiezan activadas, el empleado apaga las que no le interesen").
+model NotificationPreference {
+  employeeId          String   @id
+  emailChannelEnabled Boolean  @default(true)
+  commitment          Boolean  @default(true)
+  incomplete          Boolean  @default(true)
+  resultUpdated       Boolean  @default(true)
+  newStep             Boolean  @default(true)
+  licenseExpiring     Boolean  @default(true)
+  updatedAt           DateTime @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+// Motor de envío (Decisión 9 + ítem 7 de la auditoría UX): registra cada
+// push ya enviado para no repetirlo. refId identifica QUÉ disparó el envío
+// dentro de cada tipo (el id del EmployeeIntervention para COMMITMENT, el
+// id de la Intervention del catálogo para NEW_STEP, el id de la License
+// para LICENSE_EXPIRING) — así, si la causa cambia (un compromiso nuevo,
+// otra licencia), sí se vuelve a avisar; si sigue siendo la misma, no. Para
+// INCOMPLETE y RESULT_UPDATED, que son una única alerta por evento en vez
+// de por-entidad, refId queda null.
+model NotificationLog {
+  id         String           @id @default(cuid())
+  employeeId String
+  type       NotificationType
+  refId      String?
+  sentAt     DateTime         @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId, type])
+  @@map("notification_logs")
+}
+
+enum NotificationType {
+  COMMITMENT
+  INCOMPLETE
+  RESULT_UPDATED
+  NEW_STEP
+  LICENSE_EXPIRING
 }
 
 enum AuthMethod {

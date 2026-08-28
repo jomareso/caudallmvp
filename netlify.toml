@@ -14,3 +14,11 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# Motor de notificaciones push (Decisión 9 / ítem 7 auditoría UX) —
+# netlify/functions/notifications-cron.mts corre una vez al día y llama a
+# POST /api/cron/notifications con CRON_SECRET. Configurar CRON_SECRET en
+# las variables de entorno del sitio en Netlify (no vive en .env.example
+# con un valor real, ver ese archivo).
+[functions]
+  directory = "netlify/functions"

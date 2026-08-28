@@ -5,6 +5,7 @@ import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireAdm } from '@/lib/auth/admin-context';
 import { GenerateLicensesForm } from './generate-licenses-form';
 import { TenantNameForm } from './tenant-name-form';
+import { TenantBrandingForm } from './tenant-branding-form';
 import { SuspendTenantButton } from './suspend-tenant-button';
 
 const STATUS_LABEL_KEY: Record<string, string> = {
@@ -69,6 +70,21 @@ export default async function EmpresaDetallePage({ params }: { params: { id: str
             }}
           />
         </div>
+
+        <TenantBrandingForm
+          tenantId={tenant.id}
+          initialPrimaryColor={tenant.primaryColor}
+          initialLogoUrl={tenant.logoUrl}
+          labels={{
+            title: t('brandingTitle'),
+            colorLabel: t('brandingColorLabel'),
+            logoLabel: t('brandingLogoLabel'),
+            logoPlaceholder: t('brandingLogoPlaceholder'),
+            cta: t('saveCta'),
+            saving: t('saving'),
+            errorGeneric: t('errorGeneric')
+          }}
+        />
 
         <GenerateLicensesForm
           tenantId={tenant.id}
