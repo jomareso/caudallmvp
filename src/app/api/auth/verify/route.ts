@@ -2,6 +2,7 @@ import { AuthError } from 'next-auth';
 import { NextResponse } from 'next/server';
 import { signIn } from '@/lib/auth/auth';
 import { verifyMagicLinkToken } from '@/lib/auth/magic-link';
+import { getEmployeePostLoginDestination } from '@/lib/auth/post-login-destination';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -16,7 +17,10 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL('/registro/invalido', request.url));
   }
 
-  const destination = payload.type === 'admin' ? '/admin' : '/bienvenida';
+  const destination =
+    payload.type === 'admin'
+      ? '/admin'
+      : await getEmployeePostLoginDestination(payload.employeeId, payload.tenantId);
 
   try {
     await signIn('magic-link', { token, redirectTo: destination });

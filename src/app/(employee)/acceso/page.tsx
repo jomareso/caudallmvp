@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { getVisibleBlockContent } from '@/lib/landing/get-landing-content';
+import { getEmployeePostLoginDestination } from '@/lib/auth/post-login-destination';
 import { LandingForm } from './landing-form';
 import { BrandPanel } from './brand-panel';
 
@@ -13,8 +14,8 @@ export default async function LandingPage() {
   //
   // No basta con que exista la sesión: si el empleado fue borrado (ej.
   // limpieza de datos de prueba) pero el navegador todavía tiene la
-  // cookie, /bienvenida no lo encuentra y redirige de vuelta acá — sin
-  // esta verificación eso es un bucle infinito entre /acceso y /bienvenida.
+  // cookie, la pantalla de destino no lo encuentra y redirige de vuelta
+  // acá — sin esta verificación eso es un bucle infinito.
   const session = await auth();
   // Ver src/lib/auth/auth.ts sobre por qué el cast local.
   const sessionUser = session?.user as
@@ -25,7 +26,9 @@ export default async function LandingPage() {
       { kind: 'tenant', tenantId: sessionUser.tenantId },
       () => prisma.employee.findUnique({ where: { id: sessionUser.id! } })
     );
-    if (employee) redirect('/bienvenida');
+    if (employee) {
+      redirect(await getEmployeePostLoginDestination(employee.id, employee.tenantId));
+    }
   }
 
   const [formIntro, trust] = await Promise.all([
