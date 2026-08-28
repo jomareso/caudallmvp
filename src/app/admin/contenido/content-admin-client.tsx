@@ -408,14 +408,19 @@ function MediaLibrary({ media, labels }: { media: MediaDTO[]; labels: Labels }) 
   function handleUpload(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-    const formData = new FormData(event.currentTarget);
+    // React reutiliza/anula el SyntheticEvent después de que este handler
+    // retorna — como startTransition sigue corriendo tras un await, hay
+    // que guardar la referencia al <form> ahora, no leerla desde `event`
+    // dentro del callback.
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     startTransition(async () => {
       const result = await uploadMediaAsset(formData);
       if (!result.ok) {
         setError(result.message);
         return;
       }
-      event.currentTarget.reset();
+      form.reset();
       router.refresh();
     });
   }
