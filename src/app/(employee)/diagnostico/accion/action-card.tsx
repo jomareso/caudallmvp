@@ -7,6 +7,9 @@ import { PushOptIn } from './push-opt-in';
 
 type Status = 'SUGGESTED' | 'COMMITTED' | 'IN_PROGRESS' | 'COMPLETED' | 'DISMISSED';
 
+// Ver comentario en el bloque de video más abajo.
+const SHOW_INTERVENTION_VIDEOS = false;
+
 // El contenido debe sentirse parte de Caudall, no un salto a YouTube: se
 // incrusta con youtube-nocookie.com (sin cookies de seguimiento) en vez de
 // abrir el link en una pestaña nueva. Si la URL no es de YouTube, no hay
@@ -99,7 +102,13 @@ export function ActionCard({
         <p className="text-sm text-quartz">{actionText}</p>
       </div>
 
-      {embedUrl ? (
+      {/* SHOW_INTERVENTION_VIDEOS en false (decisión de Reynoso, 28 ago):
+          los videoUrl cargados en el catálogo de intervenciones son
+          placeholders de terceros (ej. un webinar externo), no contenido
+          de marca propio — se oculta el video hasta que existan videos
+          reales, sin tocar los datos guardados. Para reactivarlo, cambiar
+          esta constante a true. */}
+      {SHOW_INTERVENTION_VIDEOS && embedUrl ? (
         <div className="mb-3 aspect-video rounded-lg overflow-hidden">
           <iframe
             src={embedUrl}
@@ -109,7 +118,7 @@ export function ActionCard({
             allowFullScreen
           />
         </div>
-      ) : videoUrl ? (
+      ) : SHOW_INTERVENTION_VIDEOS && videoUrl ? (
         <a
           href={videoUrl}
           target="_blank"
