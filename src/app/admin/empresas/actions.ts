@@ -183,6 +183,63 @@ export async function updateTenant(input: unknown): Promise<{ ok: true } | { ok:
   });
 }
 
+const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
+
+const updateTenantBrandingSchema = z.object({
+  tenantId: z.string().trim().min(1),
+  primaryColor: z.string().trim().regex(HEX_COLOR_PATTERN),
+  // Vacío = "sin logo propio" (solo caudall en el header) — no todo tenant
+  // tiene uno todavía. Netlify no tiene storage persistente de archivos
+  // (mismo motivo que PlatformSettings.logoData para el logo de Caudall),
+  // pero acá no hace falta: logoUrl es simplemente la URL pública que ya
+  // aloja la propia empresa (su sitio, su CDN), no un archivo que Caudall
+  // suba y guarde.
+  logoUrl: z.union([z.string().trim().url(), z.literal('')])
+});
+
+// ADR-003: co-branding pleno — logo + color primario configurables por
+// tenant. Separado de updateTenant (nombre) porque son formularios
+// distintos en la UI, mismo patrón que GenerateLicensesForm/
+// SuspendTenantButton siendo piezas propias.
+export async function updateTenantBranding(input: unknown): Promise<{ ok: true } | { ok: false; message: string }> {
+  const admin = await requireAdm();
+  const t = await getTranslations('admin.empresas');
+
+  const parsed = updateTenantBrandingSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, message: t('errorGeneric') };
+  }
+  const { tenantId, primaryColor } = parsed.data;
+  const logoUrl = parsed.data.logoUrl === '' ? null : parsed.data.logoUrl;
+
+  return runWithTenantContext({ kind: 'platform-admin' }, async () => {
+    const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
+    if (!tenant) {
+      return { ok: false, message: t('errorGeneric') };
+    }
+    if (tenant.primaryColor === primaryColor && tenant.logoUrl === logoUrl) {
+      return { ok: true };
+    }
+
+    await prisma.tenant.update({ where: { id: tenantId }, data: { primaryColor, logoUrl } });
+
+    await prisma.auditLog.create({
+      data: {
+        whoId: admin.id,
+        whoData: { email: admin.email, profileType: admin.profileType },
+        what: 'UPDATE_TENANT_BRANDING',
+        entityType: 'Tenant',
+        entityId: tenantId,
+        previousValue: { primaryColor: tenant.primaryColor, logoUrl: tenant.logoUrl },
+        newValue: { primaryColor, logoUrl }
+      }
+    });
+
+    revalidatePath(`/admin/empresas/${tenantId}`);
+    return { ok: true };
+  });
+}
+
 export async function setTenantSuspended(
   input: unknown
 ): Promise<{ ok: true } | { ok: false; message: string }> {

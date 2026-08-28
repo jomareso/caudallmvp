@@ -301,6 +301,10 @@
     "empresas": {
       "title": "Empresas",
       "nameLabel": "Nombre de la empresa",
+      "brandingTitle": "Marca de la empresa",
+      "brandingColorLabel": "Color primario",
+      "brandingLogoLabel": "URL del logo (opcional)",
+      "brandingLogoPlaceholder": "https://tuempresa.com/logo.png",
       "namePlaceholder": "Ej. Empresa Acme",
       "licenseCountLabel": "Cantidad de licencias",
       "durationLabel": "Vigencia de cada licencia",
