@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireAdm } from '@/lib/auth/admin-context';
@@ -48,6 +49,13 @@ export default async function EmpresaDetallePage({ params }: { params: { id: str
           />
         </div>
         {suspended ? <p className="text-xs text-bad mb-4">{t('suspendedNotice')}</p> : null}
+
+        <Link
+          href={`/admin/empresas/${tenant.id}/dashboard`}
+          className="inline-block text-xs text-yale font-medium mb-6 hover:underline"
+        >
+          {t('viewDashboardCta')}
+        </Link>
 
         <div className="bg-white border border-silver/60 rounded-xl p-4 mb-6">
           <TenantNameForm

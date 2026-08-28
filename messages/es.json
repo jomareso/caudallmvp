@@ -68,6 +68,10 @@
       "logout": "Cerrar sesión",
       "notifications": "Notificaciones"
     },
+    "viewAs": {
+      "banner": "Estás viendo el panel de {tenantName} como administrador de plataforma.",
+      "exit": "Volver"
+    },
     "metodologia": {
       "title": "Metodología",
       "currentVersion": "Versión vigente",
@@ -266,6 +270,7 @@
       "reactivateCta": "Reactivar empresa",
       "confirmSuspend": "¿Suspender esta empresa? Sus empleados y administradores perderán acceso de inmediato. No se borra ningún dato y puedes reactivarla cuando quieras.",
       "suspendedNotice": "Esta empresa está suspendida — sus empleados y administradores no pueden entrar.",
+      "viewDashboardCta": "Ver dashboard de RRHH",
       "suspendedBadge": "Suspendida"
     },
     "administradores": {
