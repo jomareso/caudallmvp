@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { BrandPanel } from '../../brand-panel';
+import { BrandPanel } from '../../acceso/brand-panel';
 
 export default async function InvalidoPage() {
   const t = await getTranslations('employee.invalidLink');
@@ -16,7 +16,7 @@ export default async function InvalidoPage() {
           <h1 className="text-lg font-medium text-quartz mb-2">{t('title')}</h1>
           <p className="text-sm text-nickel mb-6">{t('subtitle')}</p>
           <Link
-            href="/"
+            href="/acceso"
             className="inline-block bg-yale text-white rounded-lg py-2.5 px-6 text-sm"
           >
             {t('ctaRetry')}

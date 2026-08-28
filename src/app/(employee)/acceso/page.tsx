@@ -14,7 +14,7 @@ export default async function LandingPage() {
   // No basta con que exista la sesión: si el empleado fue borrado (ej.
   // limpieza de datos de prueba) pero el navegador todavía tiene la
   // cookie, /bienvenida no lo encuentra y redirige de vuelta acá — sin
-  // esta verificación eso es un bucle infinito entre / y /bienvenida.
+  // esta verificación eso es un bucle infinito entre /acceso y /bienvenida.
   const session = await auth();
   // Ver src/lib/auth/auth.ts sobre por qué el cast local.
   const sessionUser = session?.user as

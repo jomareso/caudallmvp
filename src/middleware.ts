@@ -25,7 +25,7 @@ export default auth((req) => {
   }
 
   if (!req.auth) {
-    return NextResponse.redirect(new URL('/', req.url));
+    return NextResponse.redirect(new URL('/acceso', req.url));
   }
 });
 

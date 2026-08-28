@@ -17,14 +17,14 @@ export async function requireEmployee(): Promise<Employee> {
     | { id?: string; tenantId?: string; role?: 'employee' | 'admin' }
     | undefined;
   if (sessionUser?.role !== 'employee' || !sessionUser.id || !sessionUser.tenantId) {
-    redirect('/');
+    redirect('/acceso');
   }
 
   const employee = await runWithTenantContext(
     { kind: 'tenant', tenantId: sessionUser.tenantId },
     () => prisma.employee.findUnique({ where: { id: sessionUser.id! } })
   );
-  if (!employee) redirect('/');
+  if (!employee) redirect('/acceso');
   return employee;
 }
 

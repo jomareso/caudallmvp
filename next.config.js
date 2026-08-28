@@ -26,6 +26,12 @@ const nextConfig = {
   poweredByHeader: false,
   experimental: {
     typedRoutes: true
+  },
+  // La landing empleador se movió de /empresas a / (dominio raíz —
+  // decisión de Reynoso, modelo B2B2C). Redirect permanente para no
+  // romper el link si alguien ya lo compartió.
+  async redirects() {
+    return [{ source: '/empresas', destination: '/', permanent: true }];
   }
 };
 
