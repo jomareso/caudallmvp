@@ -27,13 +27,10 @@ export default async function LandingPage() {
     if (employee) redirect('/bienvenida');
   }
 
-  const settings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } });
-  const hasLogo = Boolean(settings?.logoData);
-
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-2">
       <BrandPanel />
-      <LandingForm hasLogo={hasLogo} />
+      <LandingForm />
     </main>
   );
 }
