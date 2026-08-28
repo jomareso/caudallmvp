@@ -34,7 +34,13 @@ const contentSchemas = {
   empleador_hero: z.object({
     headline: z.string().min(1),
     subtitle: z.string().min(1),
-    ctaLabel: z.string().min(1)
+    ctaLabel: z.string().min(1),
+    // Destino del botón "Solicitar una demostración" (barra superior,
+    // hero y cierre lo comparten — ver empresas/page.tsx) — todavía no
+    // hay un mecanismo real de contacto/CRM (Decisión 2 no lo cubre, es
+    // el journey de la empresa, no del empleado), así que arranca en "#"
+    // hasta que se cargue un enlace real desde /admin/contenido.
+    ctaUrl: z.string().min(1)
   }),
   empleador_reto: z.object({
     title: z.string().min(1),
@@ -121,7 +127,8 @@ export const LANDING_BLOCK_FIELDS: Record<LandingBlockType, LandingFieldDescript
   empleador_hero: [
     { key: 'headline', kind: 'textarea', labelKey: 'headline', helpKey: 'highlightHelp' },
     { key: 'subtitle', kind: 'textarea', labelKey: 'subtitle' },
-    { key: 'ctaLabel', kind: 'text', labelKey: 'ctaLabel' }
+    { key: 'ctaLabel', kind: 'text', labelKey: 'ctaLabel' },
+    { key: 'ctaUrl', kind: 'text', labelKey: 'ctaUrl', helpKey: 'ctaUrlHelp' }
   ],
   empleador_reto: [
     { key: 'title', kind: 'textarea', labelKey: 'title' },

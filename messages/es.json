@@ -52,6 +52,12 @@
     },
     "aggregationNotice": "Todos los datos son agregados y anónimos. Segmentos con menos de {min} personas no se muestran, para proteger la confidencialidad de tus empleados."
   },
+  "landingEmpleador": {
+    "illustrativeLabel": "Ejemplo ilustrativo",
+    "cfhiOutOf": "de 100",
+    "cfhiVsNational": "+5 vs. promedio nacional",
+    "teamDistributionLabel": "Distribución del equipo"
+  },
   "admin": {
     "nav": {
       "settings": "Configuración",
@@ -170,6 +176,7 @@
       "invalidContent": "Contenido inválido — revisa que ningún campo esté vacío.",
       "highlightHelp": "Envuelve una frase entre ** ** para resaltarla con los colores de la marca.",
       "oneLinePerItem": "Un elemento por línea.",
+      "ctaUrlHelp": "El botón \"Solicitar una demostración\" (barra superior, hero y cierre) usa este enlace. Pega la URL real cuando la tengas (Calendly, WhatsApp Business, etc.) — mientras tanto puede quedar en \"#\".",
       "milestoneYear": "Año",
       "milestoneTitle": "Título",
       "milestoneDescription": "Descripción",
@@ -187,6 +194,7 @@
         "privacyGuarantee": "Garantía de privacidad",
         "headline": "Titular",
         "ctaLabel": "Texto del botón",
+        "ctaUrl": "Enlace del botón",
         "title": "Título",
         "body": "Cuerpo",
         "tags": "Etiquetas",

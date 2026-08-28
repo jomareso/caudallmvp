@@ -43,6 +43,7 @@ export default async function AdminContenidoPage() {
     saveError: t('saveError'),
     highlightHelp: t('highlightHelp'),
     oneLinePerItem: t('oneLinePerItem'),
+    ctaUrlHelp: t('ctaUrlHelp'),
     milestoneYear: t('milestoneYear'),
     milestoneTitle: t('milestoneTitle'),
     milestoneDescription: t('milestoneDescription'),

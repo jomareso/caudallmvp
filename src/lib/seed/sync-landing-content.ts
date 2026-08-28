@@ -33,7 +33,10 @@ const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
   empleador_hero: {
     headline: 'Convierte la salud financiera de tus colaboradores en **decisiones de bienestar**.',
     subtitle: 'Identifica brechas, entiende qué grupos necesitan más apoyo y prioriza mejor.',
-    ctaLabel: 'Solicitar una demostración'
+    ctaLabel: 'Solicitar una demostración',
+    // Todavía no hay un mecanismo real de contacto — placeholder hasta
+    // que se cargue un enlace real desde /admin/contenido.
+    ctaUrl: '#'
   },
   empleador_reto: {
     title: 'Invertir en bienestar financiero sin datos es intervenir a ciegas.',

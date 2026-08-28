@@ -40,6 +40,7 @@ type Labels = {
   saveError: string;
   highlightHelp: string;
   oneLinePerItem: string;
+  ctaUrlHelp: string;
   milestoneYear: string;
   milestoneTitle: string;
   milestoneDescription: string;
@@ -272,7 +273,7 @@ function FieldInput({
   onChange: (next: unknown) => void;
 }) {
   const label = labels.fields[field.labelKey] ?? field.key;
-  const help = field.helpKey ? labels[field.helpKey as 'highlightHelp' | 'oneLinePerItem'] : undefined;
+  const help = field.helpKey ? labels[field.helpKey as 'highlightHelp' | 'oneLinePerItem' | 'ctaUrlHelp'] : undefined;
 
   if (field.kind === 'text') {
     return (
