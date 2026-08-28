@@ -68,6 +68,15 @@
       "logout": "Cerrar sesión",
       "notifications": "Notificaciones"
     },
+    "version": {
+      "label": "Versión {sha}",
+      "context": {
+        "production": "Producción",
+        "deployPreview": "Vista previa de PR",
+        "branchDeploy": "Rama",
+        "local": "Local"
+      }
+    },
     "metodologia": {
       "title": "Metodología",
       "currentVersion": "Versión vigente",
