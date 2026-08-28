@@ -44,6 +44,24 @@
     },
     "trust": {
       "privacyGuarantee": "Tus respuestas son privadas. Tu empresa no verá tus respuestas individuales ni tu diagnóstico personal — solo información agregada y anónima."
+    },
+    "inicio": {
+      "greeting": "Hola de nuevo",
+      "scoreLabel": "Tu Índice de Salud Financiera",
+      "ctaResult": "Ver mi resultado completo",
+      "commitment": {
+        "title": "Tu compromiso",
+        "cta": "Ver mi compromiso"
+      },
+      "nextStep": {
+        "title": "Tu próximo paso",
+        "cta": "Ver mi próximo paso"
+      },
+      "followup": {
+        "title": "Han pasado varios meses desde tu último diagnóstico",
+        "body": "Tu situación puede haber cambiado — actualízalo para que tus recomendaciones sigan siendo precisas.",
+        "cta": "Actualizar mi diagnóstico"
+      }
     }
   },
   "hr": {
