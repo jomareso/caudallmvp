@@ -1,8 +1,18 @@
 import { getTranslations } from 'next-intl/server';
 import { BrandPanel } from '../../acceso/brand-panel';
 
-export default async function EnviadoPage() {
+export default async function EnviadoPage({
+  searchParams
+}: {
+  searchParams: { existente?: string };
+}) {
   const t = await getTranslations('employee.confirmation');
+  // Nunca se le dice "correo inválido" ni "ya existe una cuenta" como
+  // error — requestMagicLink ((employee)/actions.ts) trata registro y
+  // login como la misma acción y siempre manda el link. Esto solo cambia
+  // el aviso para que quien ya tenía cuenta entienda que es un login, no
+  // un registro nuevo que se perdió.
+  const isExisting = searchParams.existente === '1';
 
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-2">
@@ -14,6 +24,11 @@ export default async function EnviadoPage() {
           </div>
           <h1 className="text-lg font-medium text-quartz mb-2">{t('title')}</h1>
           <p className="text-sm text-nickel">{t('subtitle')}</p>
+          {isExisting ? (
+            <p className="text-xs text-yale bg-picton/10 rounded-lg px-3 py-2.5 mt-4 text-left">
+              {t('existingNotice')}
+            </p>
+          ) : null}
         </div>
       </div>
     </main>

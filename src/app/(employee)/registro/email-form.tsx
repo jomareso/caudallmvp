@@ -29,7 +29,7 @@ export function EmailForm({
         setError(result.message);
         return;
       }
-      router.push('/registro/enviado');
+      router.push(result.isExisting ? '/registro/enviado?existente=1' : '/registro/enviado');
     });
   }
 

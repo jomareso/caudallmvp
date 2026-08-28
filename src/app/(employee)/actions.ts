@@ -48,7 +48,9 @@ const requestLinkSchema = z.object({
   email: z.string().trim().toLowerCase().email('Ingresa un correo válido.')
 });
 
-export async function requestMagicLink(input: { enrollmentCode: string; email: string }): Promise<ActionResult> {
+export async function requestMagicLink(
+  input: { enrollmentCode: string; email: string }
+): Promise<ActionResult<{ isExisting: boolean }>> {
   const parsed = requestLinkSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -127,6 +129,10 @@ export async function requestMagicLink(input: { enrollmentCode: string; email: s
       return { ok: false, message: 'No pudimos enviar el correo ahora mismo. Intenta de nuevo en un momento.' };
     }
 
-    return { ok: true };
+    // No bloquear a alguien que ya tiene cuenta con un error — se le manda
+    // el mismo link de siempre (arriba), y la pantalla de "revisa tu
+    // correo" solo cambia el copy para que sepa que es un login, no un
+    // registro nuevo (ver enviado/page.tsx).
+    return { ok: true, isExisting: existingEmployee !== null };
   });
 }

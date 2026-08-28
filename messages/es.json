@@ -20,7 +20,8 @@
     },
     "confirmation": {
       "title": "Revisa tu correo",
-      "subtitle": "Te enviamos un link para entrar. Vence en 15 minutos y solo funciona una vez. Si no lo ves, revisa spam."
+      "subtitle": "Te enviamos un link para entrar. Vence en 15 minutos y solo funciona una vez. Si no lo ves, revisa spam.",
+      "existingNotice": "Ya existe una cuenta con este correo — te enviamos un link para entrar, no para registrarte de nuevo."
     },
     "invalidLink": {
       "title": "Este link ya no funciona",
