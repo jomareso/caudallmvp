@@ -11,9 +11,11 @@ import { validateEnrollmentCode } from '../actions';
 // que page.tsx los resuelve del lado del servidor y los pasa como props.
 // El resto (labels funcionales, botones) se queda en next-intl.
 export function LandingForm({
-  content
+  content,
+  mobileHook
 }: {
   content: { formTitle: string; formSubtitle: string; timeEstimate: string; privacyGuarantee: string } | null;
+  mobileHook: string | null;
 }) {
   const t = useTranslations('employee.landing');
   const router = useRouter();
@@ -44,6 +46,9 @@ export function LandingForm({
             solo generaría inconsistencia de tamaño entre los dos lados). */}
         {/* eslint-disable-next-line @next/next/no-img-element -- logo estático propio del bundle, no necesita el optimizador de next/image */}
         <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-8 mx-auto mb-6" />
+        {/* Solo en mobile — en lg+ el mismo mensaje ya lo muestra BrandPanel
+            a la izquierda, repetirlo acá se vería duplicado. */}
+        {mobileHook ? <p className="text-sm text-nickel mb-4 lg:hidden">{mobileHook}</p> : null}
         {content ? (
           <>
             <p className="text-2xl font-semibold mb-2 leading-snug bg-gradient-to-r from-yale to-cola bg-clip-text text-transparent">
@@ -74,7 +79,7 @@ export function LandingForm({
             disabled={isPending}
             className="w-full bg-yale text-white rounded-lg py-2.5 text-sm disabled:opacity-60"
           >
-            {isPending ? t('validating') : t('ctaContinue')}
+            {isPending ? t('validating') : error ? t('ctaRetry') : t('ctaContinue')}
           </button>
           {content ? <p className="text-[11px] text-nickel text-center mt-3">{content.timeEstimate}</p> : null}
         </form>

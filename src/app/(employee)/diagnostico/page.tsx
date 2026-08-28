@@ -4,6 +4,7 @@ import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { getNextQuestion, countAnsweredAndTotal } from '@/lib/engines/diagnostic';
 import { finalizeDiagnostic } from '@/lib/engines/diagnostic-completion';
+import { DIMENSION_ICON, DEFAULT_DIMENSION_ICON } from '@/lib/engines/commitment-triggers';
 import { QuestionForm } from './question-form';
 import { EmployeeTopBar } from '../employee-topbar';
 
@@ -65,8 +66,11 @@ export default async function DiagnosticoPage() {
         <EmployeeTopBar />
         <main className="flex-1 flex flex-col items-center p-6 pt-10 lg:justify-center lg:pt-10">
           <div className="w-full max-w-sm lg:max-w-xl">
-            <div className="flex justify-end text-[11px] text-nickel mb-1">
-              <span>{dimension ? tDim(dimension.code) : tDim('BEHAVIORAL')}</span>
+            <div className="flex justify-end mb-1">
+              <span className="inline-flex items-center gap-1 text-[11px] text-yale bg-picton/10 rounded-full px-2.5 py-1">
+                <span aria-hidden="true">{DIMENSION_ICON[dimension?.code ?? ''] ?? DEFAULT_DIMENSION_ICON}</span>
+                {dimension ? tDim(dimension.code) : tDim('BEHAVIORAL')}
+              </span>
             </div>
             <div className="h-1 bg-silver/40 rounded-full overflow-hidden mb-5">
               <div

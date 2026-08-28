@@ -8,6 +8,7 @@ import { countContextAnsweredAndTotal } from '@/lib/engines/diagnostic';
 import { getNationalComparison, getSegmentComparison, type NationalComparison } from '@/lib/engines/national-benchmark';
 import { EmployeeTopBar } from '../../employee-topbar';
 import { SegmentComparison, type ComparisonRow, type ComparisonTab } from './segment-comparison';
+import { ScoreGauge } from './score-gauge';
 
 export default async function ResultadoPage() {
   const employee = await requireEmployee();
@@ -102,10 +103,14 @@ export default async function ResultadoPage() {
         <main className="flex-1 flex flex-col items-center p-6 pt-10">
         <div className="w-full max-w-sm lg:max-w-2xl text-center">
           <div className="lg:max-w-md lg:mx-auto">
-            <p className="text-xs text-nickel mb-1">{t('title')}</p>
-            <p className="text-5xl font-medium text-yale leading-none mb-1">{cfhiRounded}</p>
-            <p className="text-[11px] text-nickel mb-2">{t('outOf100')}</p>
-            <span className="inline-block text-[11px] px-2.5 py-1 rounded-lg bg-picton/10 text-yale">
+            <p className="text-xs text-nickel mb-2">{t('title')}</p>
+            <ScoreGauge
+              score={cfhiRounded}
+              vsAverage={generalComparison ? cfhiRounded - generalComparison.overall : null}
+              outOfLabel={t('outOf100')}
+              vsAverageLabel={t('comparison.vsAverage')}
+            />
+            <span className="inline-block text-[11px] px-2.5 py-1 rounded-lg bg-picton/10 text-yale mt-2">
               {tLevel('prefix')}: {tLevel(cfhiLevel)}
             </span>
 
@@ -159,7 +164,13 @@ export default async function ResultadoPage() {
             {comparisonTabs.length > 0 ? (
               <SegmentComparison
                 tabs={comparisonTabs}
-                labels={{ title: t('comparison.title'), you: t('comparison.you'), average: t('comparison.average') }}
+                labels={{
+                  title: t('comparison.title'),
+                  you: t('comparison.you'),
+                  average: t('comparison.average'),
+                  vsAverage: t('comparison.vsAverage'),
+                  privacyNote: t('comparison.privacyNote')
+                }}
               />
             ) : null}
 

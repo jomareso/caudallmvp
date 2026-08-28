@@ -28,7 +28,7 @@ export async function validateEnrollmentCode(rawCode: string): Promise<ActionRes
     const found = await findTenantByCode(code);
 
     if (!found || found.tenant.status === 'SUSPENDED') {
-      return { ok: false, message: 'No encontramos ese código. Verifícalo con tu equipo de RRHH.' };
+      return { ok: false, message: 'Ese código no es válido. Revisa que lo copiaste completo o pídeselo de nuevo a tu empresa.' };
     }
 
     if (found.license && found.license.status === 'EXPIRED') {
@@ -64,7 +64,7 @@ export async function requestMagicLink(
     const found = await findTenantByCode(enrollmentCode);
 
     if (!found || found.tenant.status === 'SUSPENDED') {
-      return { ok: false, message: 'No encontramos ese código. Verifícalo con tu equipo de RRHH.' };
+      return { ok: false, message: 'Ese código no es válido. Revisa que lo copiaste completo o pídeselo de nuevo a tu empresa.' };
     }
     const { tenant, license } = found;
 
