@@ -49,6 +49,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const payload = await verifyMagicLinkToken(token);
         if (!payload) return null;
+        // Un token de "email-change" no es un login válido — es de un solo
+        // propósito (confirmar el nuevo correo, ver post-login-destination
+        // no, ver src/app/api/auth/verify-email-change/route.ts). Sin este
+        // guardia, caería en la rama de employee de abajo y dejaría entrar
+        // con un token que no fue emitido para eso.
+        if (payload.type === 'email-change') return null;
 
         // Resolver "quién es este id" es, por definición, lo primero que pasa
         // en cualquier sesión — todavía no hay tenant conocido para fijar

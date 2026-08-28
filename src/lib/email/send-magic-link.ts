@@ -89,6 +89,43 @@ export async function sendAdminWelcomeEmail(params: { to: string; tenantName: st
   }
 }
 
+// Va a la dirección NUEVA, no a la actual — es justamente lo que confirma
+// que el empleado controla esa bandeja antes de aplicar el cambio (ver
+// requestEmailChange en (employee)/perfil/actions.ts).
+export async function sendEmailChangeConfirmation(params: { to: string; verifyUrl: string }): Promise<void> {
+  const { to, verifyUrl } = params;
+  const from = process.env.EMAIL_FROM ?? 'Caudall <no-reply@caudall.com>';
+
+  const { error } = await getResendClient().emails.send({
+    from,
+    to,
+    subject: 'Confirma tu nuevo correo en Caudall',
+    html: `
+      <div style="font-family:Helvetica,Arial,sans-serif;max-width:420px;margin:0 auto;color:#4B4C4C">
+        <h1 style="color:#0F5499;font-size:20px;font-weight:500">caudall</h1>
+        <p style="font-size:14px;line-height:1.5">
+          Pediste cambiar el correo de tu cuenta de Caudall a esta dirección.
+          Confirma para completar el cambio. El link vence en 15 minutos.
+        </p>
+        <p style="margin:24px 0">
+          <a href="${verifyUrl}"
+             style="background:#0F5499;color:#fff;padding:12px 20px;border-radius:8px;
+                    text-decoration:none;font-size:14px;display:inline-block">
+            Confirmar mi correo nuevo
+          </a>
+        </p>
+        <p style="font-size:12px;color:#737373;line-height:1.5">
+          Si no pediste este cambio, ignora este correo — tu cuenta sigue igual.
+        </p>
+      </div>
+    `
+  });
+
+  if (error) {
+    throw new Error(`No se pudo enviar el correo: ${error.message}`);
+  }
+}
+
 export async function sendAdminMagicLinkEmail(params: { to: string; verifyUrl: string }): Promise<void> {
   const { to, verifyUrl } = params;
   const from = process.env.EMAIL_FROM ?? 'Caudall <no-reply@caudall.com>';
