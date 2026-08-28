@@ -130,6 +130,7 @@ model Employee {
   safetyFlags     SafetyFlag[]
   interventions   EmployeeIntervention[]
   pushSubscriptions PushSubscription[]
+  notificationPreference NotificationPreference?
 
   @@unique([tenantId, personalEmail])
   @@index([tenantId])
@@ -152,6 +153,26 @@ model PushSubscription {
 
   @@index([employeeId])
   @@map("push_subscriptions")
+}
+
+// Panel de Configuración del empleado (auditoría UX, revisión 2). Fila
+// única por empleado, no una por tipo — son 6 booleanos (5 tipos de
+// notificación + el canal de correo), no vale la pena una tabla aparte
+// por tipo. Todos empiezan en true (Decisión de UX ya mockeada: "todas
+// empiezan activadas, el empleado apaga las que no le interesen").
+model NotificationPreference {
+  employeeId          String   @id
+  emailChannelEnabled Boolean  @default(true)
+  commitment          Boolean  @default(true)
+  incomplete          Boolean  @default(true)
+  resultUpdated       Boolean  @default(true)
+  newStep             Boolean  @default(true)
+  licenseExpiring     Boolean  @default(true)
+  updatedAt           DateTime @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
 }
 
 enum AuthMethod {

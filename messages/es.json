@@ -44,6 +44,63 @@
     },
     "trust": {
       "privacyGuarantee": "Tus respuestas son privadas. Tu empresa no verá tus respuestas individuales ni tu diagnóstico personal — solo información agregada y anónima."
+    },
+    "profile": {
+      "title": "Configuración",
+      "back": "Volver",
+      "account": {
+        "title": "Cuenta",
+        "companyLabel": "Empresa",
+        "licenseExpiresLabel": "Tu licencia vence",
+        "logout": "Cerrar sesión"
+      },
+      "email": {
+        "title": "Correo",
+        "subtitle": "Además de las notificaciones push, puedes recibir avisos por correo.",
+        "channelLabel": "Notificaciones por correo",
+        "channelDesc": "Recibe por email lo mismo que eliges abajo.",
+        "currentLabel": "Tu correo",
+        "change": "Cambiar",
+        "newEmailLabel": "Correo nuevo",
+        "changeNotice": "Te enviaremos un link de confirmación a la dirección nueva antes de hacer el cambio.",
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "invalidEmail": "Ingresa un correo válido.",
+        "changeRequested": "Revisa {email} — te enviamos un link para confirmar el cambio.",
+        "changeError": "No pudimos enviar el correo de confirmación. Intenta de nuevo."
+      },
+      "notifications": {
+        "title": "Notificaciones",
+        "subtitle": "Todas empiezan activadas — puedes apagar las que no te interesen.",
+        "criteriaNote": "Cada tipo se apoya en un dato que el sistema ya calcula (fecha de compromiso, estado del diagnóstico, recálculo del CFHI, motor de próximo paso, vigencia de la licencia) — no se inventa ningún criterio nuevo.",
+        "types": {
+          "commitment": {
+            "name": "Compromiso próximo",
+            "desc": "1 día antes de la fecha que elegiste para un compromiso pendiente."
+          },
+          "incomplete": {
+            "name": "Diagnóstico incompleto",
+            "desc": "Dejaste el diagnóstico a medias y pasaron 2 días sin volver."
+          },
+          "resultUpdated": {
+            "name": "Resultado actualizado",
+            "desc": "Tu Índice de Salud Financiera cambió tras responder algo nuevo."
+          },
+          "newStep": {
+            "name": "Nuevo paso disponible",
+            "desc": "Tenemos una recomendación nueva para ti."
+          },
+          "licenseExpiring": {
+            "name": "Tu licencia está por vencer",
+            "desc": "7 días antes de que venza tu acceso a Caudall."
+          }
+        }
+      },
+      "emailChangeConfirm": {
+        "title": "Correo actualizado",
+        "subtitle": "Tu correo se actualizó correctamente. Úsalo la próxima vez que pidas tu link de acceso.",
+        "ctaBack": "Volver a Configuración"
+      }
     }
   },
   "hr": {
