@@ -5,16 +5,10 @@
   },
   "employee": {
     "landing": {
-      "titleLine1": "Entiende tu salud financiera",
-      "titleLine2": "Sabe qué hacer después",
-      "subtitle": "Conoce mejor tu situación financiera y recibe <em>una orientación clara</em> sobre cuál podría ser tu próximo paso.",
-      "formTitle": "Tu espacio privado de salud financiera.",
-      "formSubtitle": "Ingresa el código que te proporcionó tu empresa para comenzar.",
       "enrollmentCodeLabel": "Tu código de acceso",
       "enrollmentCodePlaceholder": "Código de acceso",
       "ctaContinue": "Continuar",
-      "validating": "Verificando...",
-      "timeEstimate": "Toma aproximadamente 5–8 minutos."
+      "validating": "Verificando..."
     },
     "email": {
       "title": "Tu correo personal",
@@ -61,6 +55,7 @@
   "admin": {
     "nav": {
       "settings": "Configuración",
+      "content": "Contenido",
       "admins": "Administradores",
       "methodology": "Metodología",
       "companies": "Empresas",
@@ -155,6 +150,75 @@
       "uploadErrorType": "El archivo debe ser una imagen (PNG, JPG, WEBP o SVG).",
       "uploadErrorSize": "El archivo es muy grande — el máximo es 2 MB.",
       "uploadErrorGeneric": "No pudimos guardar el logo. Intenta de nuevo."
+    },
+    "content": {
+      "title": "Contenido de landings",
+      "tabEmpleador": "Empleador (RRHH)",
+      "tabColaborador": "Colaborador",
+      "tabMedia": "Banco de imágenes",
+      "visibleLabel": "Visible",
+      "hiddenLabel": "Oculto",
+      "moveUp": "Subir",
+      "moveDown": "Bajar",
+      "edit": "Editar",
+      "save": "Guardar",
+      "saving": "Guardando...",
+      "cancel": "Cancelar",
+      "saveSuccess": "Contenido actualizado.",
+      "saveError": "No pudimos guardar el contenido. Intenta de nuevo.",
+      "blockNotFound": "Bloque no encontrado.",
+      "invalidContent": "Contenido inválido — revisa que ningún campo esté vacío.",
+      "highlightHelp": "Envuelve una frase entre ** ** para resaltarla con los colores de la marca.",
+      "oneLinePerItem": "Un elemento por línea.",
+      "milestoneYear": "Año",
+      "milestoneTitle": "Título",
+      "milestoneDescription": "Descripción",
+      "milestoneImage": "Imagen",
+      "milestoneImageNone": "Sin imagen (se muestra el ícono de referencia)",
+      "addMilestone": "Agregar hito",
+      "removeMilestone": "Quitar",
+      "fields": {
+        "titleLine1": "Línea 1 del título",
+        "titleLine2": "Línea 2 del título",
+        "subtitle": "Subtítulo",
+        "formTitle": "Título del formulario",
+        "formSubtitle": "Subtítulo del formulario",
+        "timeEstimate": "Tiempo estimado",
+        "privacyGuarantee": "Garantía de privacidad",
+        "headline": "Titular",
+        "ctaLabel": "Texto del botón",
+        "title": "Título",
+        "body": "Cuerpo",
+        "tags": "Etiquetas",
+        "steps": "Pasos",
+        "eyebrow": "Antetítulo",
+        "milestones": "Línea de tiempo",
+        "closingLine": "Línea de cierre"
+      },
+      "blockTypeLabels": {
+        "colaborador_hero": "Encabezado",
+        "colaborador_form_intro": "Formulario de acceso",
+        "colaborador_trust": "Garantía de privacidad",
+        "empleador_hero": "Hero",
+        "empleador_reto": "El reto",
+        "empleador_solucion": "La solución",
+        "empleador_metodologia": "Respaldo metodológico",
+        "empleador_privacidad": "Privacidad",
+        "empleador_cierre": "Cierre"
+      },
+      "media": {
+        "uploadLabel": "Subir una imagen",
+        "uploadCta": "Subir",
+        "uploading": "Subiendo...",
+        "uploadSuccess": "Imagen subida.",
+        "uploadErrorType": "El archivo debe ser una imagen (PNG, JPG o WEBP).",
+        "uploadErrorSize": "El archivo es muy grande — el máximo es 4 MB.",
+        "empty": "Todavía no hay imágenes en el banco.",
+        "delete": "Borrar",
+        "deleteConfirm": "¿Borrar esta imagen? Los bloques que la estén usando no se actualizan automáticamente.",
+        "copyUrl": "Copiar URL",
+        "urlCopied": "URL copiada."
+      }
     },
     "empresas": {
       "title": "Empresas",

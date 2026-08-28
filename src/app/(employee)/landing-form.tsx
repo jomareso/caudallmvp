@@ -5,9 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { validateEnrollmentCode } from './actions';
 
-export function LandingForm() {
+// formTitle/formSubtitle/timeEstimate/privacyGuarantee vienen del panel de
+// contenido (LandingBlock colaborador_form_intro/colaborador_trust) — este
+// es un Client Component y no puede leer la base de datos directo, así
+// que page.tsx los resuelve del lado del servidor y los pasa como props.
+// El resto (labels funcionales, botones) se queda en next-intl.
+export function LandingForm({
+  content
+}: {
+  content: { formTitle: string; formSubtitle: string; timeEstimate: string; privacyGuarantee: string } | null;
+}) {
   const t = useTranslations('employee.landing');
-  const tTrust = useTranslations('employee.trust');
   const router = useRouter();
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -36,10 +44,14 @@ export function LandingForm() {
             solo generaría inconsistencia de tamaño entre los dos lados). */}
         {/* eslint-disable-next-line @next/next/no-img-element -- logo estático propio del bundle, no necesita el optimizador de next/image */}
         <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-8 mx-auto mb-6" />
-        <p className="text-2xl font-semibold mb-2 leading-snug bg-gradient-to-r from-yale to-cola bg-clip-text text-transparent">
-          {t('formTitle')}
-        </p>
-        <p className="text-nickel text-base mb-10">{t('formSubtitle')}</p>
+        {content ? (
+          <>
+            <p className="text-2xl font-semibold mb-2 leading-snug bg-gradient-to-r from-yale to-cola bg-clip-text text-transparent">
+              {content.formTitle}
+            </p>
+            <p className="text-nickel text-base mb-10">{content.formSubtitle}</p>
+          </>
+        ) : null}
 
         <form onSubmit={handleSubmit} className="bg-white border border-silver/60 rounded-xl p-6 text-left">
           <label htmlFor="enrollmentCode" className="block text-xs text-nickel mb-1">
@@ -64,11 +76,11 @@ export function LandingForm() {
           >
             {isPending ? t('validating') : t('ctaContinue')}
           </button>
-          <p className="text-[11px] text-nickel text-center mt-3">{t('timeEstimate')}</p>
+          {content ? <p className="text-[11px] text-nickel text-center mt-3">{content.timeEstimate}</p> : null}
         </form>
 
         {/* En lg+ el panel de marca (brand-panel.tsx) ya muestra esta misma garantía — repetirla acá se vería duplicado */}
-        <p className="text-[11px] text-nickel mt-4 lg:hidden">{tTrust('privacyGuarantee')}</p>
+        {content ? <p className="text-[11px] text-nickel mt-4 lg:hidden">{content.privacyGuarantee}</p> : null}
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ import { PrismaClient, InterventionType } from '@prisma/client';
 import interventionCatalogDraft from './seed-data/intervention-catalog-draft.json';
 import { syncBancoMaestro } from '../src/lib/seed/sync-banco-maestro';
 import { syncNationalBenchmark } from '../src/lib/seed/sync-national-benchmark';
+import { syncLandingContent } from '../src/lib/seed/sync-landing-content';
 
 const prisma = new PrismaClient();
 
@@ -114,6 +115,9 @@ async function main() {
     `- Catálogo de intervenciones ${interventionCatalog.version} (${interventionCatalog.status}) con ${interventionCatalogDraft.interventions.length} intervenciones`
   );
   console.log(`- Admin inicial (ADM): ${founderAdmin.email}`);
+
+  const landingSummary = await syncLandingContent(prisma);
+  console.log(`- Contenido de landings: ${landingSummary.pagesCreated} landing(s) y ${landingSummary.blocksCreated} bloque(s) creados`);
 }
 
 main()
