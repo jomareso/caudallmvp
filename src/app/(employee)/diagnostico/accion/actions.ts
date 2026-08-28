@@ -59,18 +59,10 @@ export async function getActionSuggestion(): Promise<ActionResult> {
       return { kind: 'none' as const, reason: healthy ? ('HEALTHY' as const) : ('PENDING' as const) };
     }
 
-    // No volver a ofrecer algo que el empleado ya resolvió (lo descartó, o ya
-    // reportó un resultado) — el motor todavía no busca "la siguiente mejor
-    // opción" ni ajusta la sugerencia según si le fue bien o mal (eso es
-    // Learning Fase 8, spec §31, pendiente), así que por ahora se prefiere
-    // no sugerir nada antes que repetir en bucle la misma tarjeta que el
-    // empleado ya dijo "ahora no" o que ya marcó como hecha/en parte/no
-    // hecha.
-    const alreadyResolved = await prisma.employeeIntervention.findFirst({
-      where: { employeeId, interventionId: nba.intervention.id, status: { in: ['DISMISSED', 'COMPLETED'] } }
-    });
-    if (alreadyResolved) return { kind: 'none' as const, reason: 'HEALTHY' as const };
-
+    // computeNextBestAction ya excluye internamente cualquier intervención
+    // que el empleado haya descartado o completado (ver excludeAlreadyResolved
+    // en next-best-action.ts) — nba.intervention nunca llega acá siendo una
+    // ya resuelta, así que no hace falta repetir ese filtro.
     const employee = await prisma.employee.findUniqueOrThrow({ where: { id: employeeId } });
     const created = await prisma.employeeIntervention.create({
       data: { employeeId, interventionId: nba.intervention.id, status: 'SUGGESTED' }

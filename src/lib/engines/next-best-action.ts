@@ -87,15 +87,30 @@ async function eligibleMaintenanceCourse(
   const finRank = eligibility.financialReadiness.state ? FIN_READINESS_ORDER[eligibility.financialReadiness.state] : -1;
   const behRank = eligibility.behavioralReadiness.state ? BEH_READINESS_ORDER[eligibility.behavioralReadiness.state] : -1;
 
-  const alreadyShown = await prisma.employeeIntervention.findMany({
-    where: { employeeId, status: { in: ['DISMISSED', 'COMPLETED'] } },
-    select: { interventionId: true }
-  });
-  const shownIds = new Set(alreadyShown.map((e) => e.interventionId));
-
-  const eligible = courses.filter((c) => !shownIds.has(c.id) && meetsReadinessGate(c, finRank, behRank));
+  const readinessEligible = courses.filter((c) => meetsReadinessGate(c, finRank, behRank));
+  const eligible = await excludeAlreadyResolved(employeeId, readinessEligible);
 
   return eligible[0] ?? null;
+}
+
+// Una intervención que el empleado ya descartó o ya completó nunca vuelve a
+// ofrecerse (ver nota en actions.ts) — pero eso no significa que ya no
+// tenga ninguna brecha en esta dimensión, solo que ESA sugerencia puntual
+// ya se resolvió. Antes esto se filtraba recién en actions.ts, después de
+// que este motor ya había elegido su única candidata: si esa candidata
+// resultaba ser justo la ya resuelta, el motor se rendía (NONE) aunque
+// hubiera otra intervención elegible sin probar, y actions.ts terminaba
+// mostrando "vas bien" con una dimensión todavía en UNMET/PARTIAL. Filtrar
+// acá, antes de elegir, deja que cualquier otra candidata elegible se
+// ofrezca en su lugar.
+async function excludeAlreadyResolved(employeeId: string, candidates: Intervention[]): Promise<Intervention[]> {
+  if (candidates.length === 0) return candidates;
+  const resolved = await prisma.employeeIntervention.findMany({
+    where: { employeeId, status: { in: ['DISMISSED', 'COMPLETED'] }, interventionId: { in: candidates.map((c) => c.id) } },
+    select: { interventionId: true }
+  });
+  const resolvedIds = new Set(resolved.map((r) => r.interventionId));
+  return candidates.filter((c) => !resolvedIds.has(c.id));
 }
 
 async function eligibleCandidatesForDimension(
@@ -123,7 +138,8 @@ async function eligibleCandidatesForDimension(
   const finRank = eligibility.financialReadiness.state ? FIN_READINESS_ORDER[eligibility.financialReadiness.state] : -1;
   const behRank = eligibility.behavioralReadiness.state ? BEH_READINESS_ORDER[eligibility.behavioralReadiness.state] : -1;
 
-  return candidates.filter((c) => meetsReadinessGate(c, finRank, behRank));
+  const eligible = candidates.filter((c) => meetsReadinessGate(c, finRank, behRank));
+  return excludeAlreadyResolved(employeeId, eligible);
 }
 
 export async function computeNextBestAction(employeeId: string): Promise<NextBestActionResult> {
