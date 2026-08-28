@@ -1,8 +1,12 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
+import Google from 'next-auth/providers/google';
+import { cookies } from 'next/headers';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { verifyMagicLinkToken } from './magic-link';
 import { authConfig } from './auth.config';
+import { ENROLLMENT_CODE_COOKIE } from './google-cookie';
+import { resolveOrCreateEmployeeForGoogle } from './google-employee';
 import type {} from './types';
 
 type EmployeeAuthUser = {
@@ -37,6 +41,29 @@ type AdminAuthUser = {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
+    // ADR-008: OAuth con Google, cuenta personal, como opción junto al
+    // magic link — no lo reemplaza. profile() (no signIn/jwt) es donde
+    // corre la resolución de Employee: es el único callback de un
+    // provider OAuth que puede devolver directamente el shape de `user`
+    // que después usa el callback jwt() compartido (ver auth.config.ts) —
+    // así ese callback no necesita saber que existe Google, solo ve un
+    // EmployeeAuthUser igual que si hubiera entrado por magic link.
+    Google({
+      // Explícitos, no la convención AUTH_GOOGLE_ID/SECRET de Auth.js v5:
+      // .env.example ya documentaba GOOGLE_CLIENT_ID/SECRET desde antes
+      // (comentario "OAuth con Google — ADR-008"), y no vale la pena
+      // pedirle a Reynoso que renombre variables de entorno en Netlify
+      // por una convención que el resto del proyecto no sigue.
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      async profile(profile) {
+        const enrollmentCode = cookies().get(ENROLLMENT_CODE_COOKIE)?.value;
+        if (!enrollmentCode) {
+          throw new Error('NO_CODE');
+        }
+        return resolveOrCreateEmployeeForGoogle({ enrollmentCode, email: profile.email });
+      }
+    }),
     Credentials({
       id: 'magic-link',
       name: 'Magic link',

@@ -16,7 +16,9 @@
       "emailLabel": "Correo personal",
       "emailPlaceholder": "tucorreo@ejemplo.com",
       "ctaSendLink": "Enviarme un link para entrar",
-      "sending": "Enviando..."
+      "sending": "Enviando...",
+      "or": "o",
+      "ctaGoogle": "Continuar con Google"
     },
     "confirmation": {
       "title": "Revisa tu correo",
