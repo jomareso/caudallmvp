@@ -27,6 +27,15 @@ const nextConfig = {
   experimental: {
     typedRoutes: true
   },
+  // Netlify inyecta COMMIT_REF/CONTEXT como variables de entorno del
+  // build, no del runtime de las funciones — `env` acá las "hornea" en
+  // process.env en tiempo de build para que sí estén disponibles al
+  // renderizar (ver el indicador de versión en admin/layout.tsx, útil
+  // para no confundir un deploy preview de un PR con producción).
+  env: {
+    APP_COMMIT_SHA: process.env.COMMIT_REF || 'local',
+    APP_DEPLOY_CONTEXT: process.env.CONTEXT || 'local'
+  },
   // La landing empleador se movió de /empresas a / (dominio raíz —
   // decisión de Reynoso, modelo B2B2C). Redirect permanente para no
   // romper el link si alguien ya lo compartió.

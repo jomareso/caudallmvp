@@ -72,6 +72,15 @@
       "banner": "Estás viendo el panel de {tenantName} como administrador de plataforma.",
       "exit": "Volver"
     },
+    "version": {
+      "label": "Versión {sha}",
+      "context": {
+        "production": "Producción",
+        "deployPreview": "Vista previa de PR",
+        "branchDeploy": "Rama",
+        "local": "Local"
+      }
+    },
     "metodologia": {
       "title": "Metodología",
       "currentVersion": "Versión vigente",
