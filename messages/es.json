@@ -1528,6 +1528,21 @@
       "commit": "Me comprometo",
       "dismiss": "Ahora no",
       "committedNotice": "Te comprometiste a este paso.",
+      "committedWith": "Te comprometiste: {trigger} · {date}",
+      "commitStep": {
+        "intro": "Los compromisos con fecha se cumplen más — dale forma al tuyo.",
+        "triggerPrompt": "¿Con qué lo vas a lograr?",
+        "datePrompt": "¿Para cuándo?",
+        "confirm": "Confirmar compromiso",
+        "cancel": "Cancelar",
+        "triggers": {
+          "PROXIMO_INGRESO": "Con mi próximo ingreso",
+          "DIA_ESPECIFICO": "Un día que yo elija",
+          "DESPUES_GASTOS_FIJOS": "Después de pagar mis gastos fijos",
+          "PRIMERA_HORA_DIA": "A primera hora del día",
+          "FIN_DE_SEMANA": "Este fin de semana"
+        }
+      },
       "didYouDoIt": "¿Ya lo hiciste?",
       "achieved": "Sí, lo hice",
       "partial": "En parte",

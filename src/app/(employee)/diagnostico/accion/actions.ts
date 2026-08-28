@@ -5,15 +5,20 @@ import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { computeNextBestAction, hasNoRealGap } from '@/lib/engines/next-best-action';
 import { logLearningEvent, reportInterventionOutcome } from '@/lib/engines/learning';
+import { isCommitmentTrigger, type CommitmentTrigger } from '@/lib/engines/commitment-triggers';
+
+export type CommitmentData = { triggerCode: CommitmentTrigger; targetDate: string };
 
 export type ActionSuggestion = {
   employeeInterventionId: string;
   status: EmployeeInterventionStatus;
+  dimensionCode: string;
   titleI18nKey: string;
   descriptionI18nKey: string;
   actionTextI18nKey: string | null;
   whyThisStepI18nKey: string | null;
   videoUrl: string | null;
+  commitmentData: CommitmentData | null;
 };
 
 // Distingue dos motivos muy distintos de no mostrar ninguna tarjeta: que el
@@ -34,21 +39,27 @@ export async function getActionSuggestion(): Promise<ActionResult> {
   return runWithTenantContext(employeeTenantContext(baseEmployee), async () => {
     const existing = await prisma.employeeIntervention.findFirst({
       where: { employeeId, status: { in: ['SUGGESTED', 'COMMITTED', 'IN_PROGRESS'] } },
-      include: { intervention: true },
+      include: { intervention: { include: { dimension: true } } },
       orderBy: { assignedAt: 'desc' }
     });
 
     if (existing) {
+      // commitmentData nace null (ver Prisma schema) y solo tiene forma
+      // conocida una vez que commitToAction la escribe — de ahí el cast acá
+      // en vez de tipar la columna Json en el schema.
+      const commitmentData = existing.commitmentData as CommitmentData | null;
       return {
         kind: 'suggestion' as const,
         suggestion: {
           employeeInterventionId: existing.id,
           status: existing.status,
+          dimensionCode: existing.intervention.dimension.code,
           titleI18nKey: existing.intervention.titleI18nKey,
           descriptionI18nKey: existing.intervention.descriptionI18nKey,
           actionTextI18nKey: existing.intervention.actionTextI18nKey,
           whyThisStepI18nKey: existing.intervention.whyThisStepI18nKey,
-          videoUrl: existing.intervention.videoUrl
+          videoUrl: existing.intervention.videoUrl,
+          commitmentData
         }
       };
     }
@@ -63,7 +74,10 @@ export async function getActionSuggestion(): Promise<ActionResult> {
     // que el empleado haya descartado o completado (ver excludeAlreadyResolved
     // en next-best-action.ts) — nba.intervention nunca llega acá siendo una
     // ya resuelta, así que no hace falta repetir ese filtro.
-    const employee = await prisma.employee.findUniqueOrThrow({ where: { id: employeeId } });
+    const [employee, dimension] = await Promise.all([
+      prisma.employee.findUniqueOrThrow({ where: { id: employeeId } }),
+      prisma.dimension.findUniqueOrThrow({ where: { id: nba.intervention.dimensionId } })
+    ]);
     const created = await prisma.employeeIntervention.create({
       data: { employeeId, interventionId: nba.intervention.id, status: 'SUGGESTED' }
     });
@@ -79,11 +93,13 @@ export async function getActionSuggestion(): Promise<ActionResult> {
       suggestion: {
         employeeInterventionId: created.id,
         status: 'SUGGESTED' as const,
+        dimensionCode: dimension.code,
         titleI18nKey: nba.intervention.titleI18nKey,
         descriptionI18nKey: nba.intervention.descriptionI18nKey,
         actionTextI18nKey: nba.intervention.actionTextI18nKey,
         whyThisStepI18nKey: nba.intervention.whyThisStepI18nKey,
-        videoUrl: nba.intervention.videoUrl
+        videoUrl: nba.intervention.videoUrl,
+        commitmentData: null
       }
     };
   });
@@ -98,18 +114,40 @@ async function requireOwnEmployeeIntervention(employeeInterventionId: string) {
   });
 }
 
-export async function commitToAction(employeeInterventionId: string): Promise<{ ok: true } | { ok: false; message: string }> {
+// spec-v2.md §30: TRIGGER + DATE son los dos parámetros del compromiso que
+// se capturan (ver comentario en commitment-triggers.ts sobre por qué no
+// AMOUNT/FREQUENCY/DURATION). Ambos se validan acá, no solo en el cliente
+// — el <input type="date"> del navegador no impide un valor manipulado.
+export async function commitToAction(
+  employeeInterventionId: string,
+  triggerCode: string,
+  targetDate: string
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (!isCommitmentTrigger(triggerCode)) {
+    return { ok: false, message: 'Elige con qué vas a cumplir este compromiso.' };
+  }
+  const parsedDate = new Date(`${targetDate}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (Number.isNaN(parsedDate.getTime()) || parsedDate < today) {
+    return { ok: false, message: 'Elige una fecha válida, hoy o más adelante.' };
+  }
+
   const found = await requireOwnEmployeeIntervention(employeeInterventionId);
   if (!found) return { ok: false, message: 'No encontramos esa recomendación.' };
 
   return runWithTenantContext(found.tenantContext, async () => {
-    await prisma.employeeIntervention.update({ where: { id: employeeInterventionId }, data: { status: 'COMMITTED' } });
+    const commitmentData: CommitmentData = { triggerCode, targetDate };
+    await prisma.employeeIntervention.update({
+      where: { id: employeeInterventionId },
+      data: { status: 'COMMITTED', commitmentData }
+    });
     const employee = await prisma.employee.findUniqueOrThrow({ where: { id: found.employeeId } });
     await logLearningEvent({
       eventType: 'INTERVENTION_COMMITTED',
       tenantId: employee.tenantId,
       employeeId: found.employeeId,
-      context: { employeeInterventionId }
+      context: { employeeInterventionId, triggerCode, targetDate }
     });
     return { ok: true };
   });
