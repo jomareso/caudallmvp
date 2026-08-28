@@ -173,7 +173,7 @@ export function ActionCard({
               type="button"
               onClick={() => handleOutcome('ACHIEVED')}
               disabled={isPending}
-              className="flex-1 bg-ok text-white rounded-lg py-2 text-xs disabled:opacity-60"
+              className="flex-1 bg-yale text-white rounded-lg py-2 text-xs disabled:opacity-60"
             >
               {labels.achieved}
             </button>
@@ -181,7 +181,7 @@ export function ActionCard({
               type="button"
               onClick={() => handleOutcome('PARTIAL')}
               disabled={isPending}
-              className="flex-1 bg-warn text-white rounded-lg py-2 text-xs disabled:opacity-60"
+              className="flex-1 border border-yale text-yale rounded-lg py-2 text-xs disabled:opacity-60"
             >
               {labels.partial}
             </button>
