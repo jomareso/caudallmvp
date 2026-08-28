@@ -36,6 +36,22 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   const settings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } });
   const hasLogo = Boolean(settings?.logoData);
   const t = await getTranslations('admin.nav');
+  const tVersion = await getTranslations('admin.version');
+
+  // COMMIT_REF/CONTEXT son variables de build de Netlify, horneadas en
+  // process.env vía `env` en next.config.js (no están disponibles tal
+  // cual en runtime) — sirve para no confundir un deploy preview de un
+  // PR con producción, algo que pasó de verdad revisando el sitio hoy.
+  const commitSha = process.env.APP_COMMIT_SHA ?? 'local';
+  const deployContext = process.env.APP_DEPLOY_CONTEXT ?? 'local';
+  const shortSha = commitSha === 'local' ? commitSha : commitSha.slice(0, 7);
+  const CONTEXT_KEY: Record<string, 'production' | 'deployPreview' | 'branchDeploy' | 'local'> = {
+    production: 'production',
+    'deploy-preview': 'deployPreview',
+    'branch-deploy': 'branchDeploy',
+    local: 'local'
+  };
+  const contextLabel = tVersion(`context.${CONTEXT_KEY[deployContext] ?? 'local'}`);
 
   // Nota: este layout NO envuelve `children` en runWithTenantContext — ese
   // contexto no se propaga a la Page anidada en Next.js App Router (cada
@@ -97,6 +113,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       </header>
 
       <div className="flex-1 flex flex-col">{children}</div>
+
+      <footer className="border-t border-silver/40 shrink-0 py-2 text-center">
+        <p className="text-[10px] text-silver">
+          {tVersion('label', { sha: shortSha })} · {contextLabel}
+        </p>
+      </footer>
     </div>
   );
 }
