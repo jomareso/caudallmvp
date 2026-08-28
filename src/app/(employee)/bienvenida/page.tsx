@@ -1,12 +1,23 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { getPlatformDiagnosticStats } from '@/lib/engines/diagnostic-stats';
+import { getEmployeePostLoginDestination } from '@/lib/auth/post-login-destination';
 import { BrandPanel } from '../acceso/brand-panel';
 
 export default async function BienvenidaPage() {
   const baseEmployee = await requireEmployee();
+
+  // Quien ya completó su diagnóstico puede llegar aquí de vuelta por un
+  // marcador viejo o el botón "atrás" del navegador, no solo por el link
+  // de acceso — la regla (auditoría UX, 28 ago) es la misma sin importar
+  // la puerta de entrada: ya no le toca ver "ahora vamos a conocer tu
+  // salud financiera".
+  const destination = await getEmployeePostLoginDestination(baseEmployee.id, baseEmployee.tenantId);
+  if (destination !== '/bienvenida') redirect(destination);
+
   const [employee, stats] = await Promise.all([
     runWithTenantContext(employeeTenantContext(baseEmployee), () =>
       prisma.employee.findUniqueOrThrow({ where: { id: baseEmployee.id }, include: { tenant: true } })
