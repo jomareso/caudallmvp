@@ -838,3 +838,70 @@ model NationalBenchmarkRecord {
   @@index([educationLevel])
   @@map("national_benchmark_records")
 }
+
+// ============================================================
+// BLOQUE 6 — CONTENIDO DE LANDINGS (administrable desde /admin)
+// ============================================================
+//
+// Copy de las landings públicas (empleador/RRHH y colaborador), editable
+// por ADM sin tocar código. Igual que Question/Intervention/
+// NationalBenchmarkRecord: contenido de plataforma, no de un tenant ni de
+// un empleado — sin tenantId propio, sin RLS (mismo criterio que esas
+// tablas, ver 20260826225832_enable_rls).
+//
+// Fase 1 (actual): edición directa, sin versionado ni borrador/preview/
+// publicación — lo que se guarda se refleja de inmediato. Eso queda para
+// una fase posterior si Reynoso lo pide.
+enum LandingSlug {
+  EMPLEADOR
+  COLABORADOR
+}
+
+model LandingPage {
+  id        String      @id @default(cuid())
+  slug      LandingSlug @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  blocks LandingBlock[]
+
+  @@map("landing_pages")
+}
+
+// `content` es Json porque cada `type` de bloque tiene una forma de
+// campos distinta (headline con dos líneas, timeline con hitos, etc.) —
+// la forma concreta por tipo se valida con zod en landing-content.ts, no
+// a nivel de base de datos.
+model LandingBlock {
+  id            String   @id @default(cuid())
+  landingPageId String
+  type          String
+  order         Int
+  visible       Boolean  @default(true)
+  content       Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  landingPage LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+
+  // Fase 1: un bloque por tipo por landing (ver src/lib/landing/blocks.ts)
+  // — no hay todavía UI para agregar bloques repetidos del mismo tipo.
+  @@unique([landingPageId, type])
+  @@index([landingPageId])
+  @@map("landing_blocks")
+}
+
+// Banco de imágenes del panel de contenido (ej. fotos de los estudios en
+// la sección de metodología). Netlify no tiene storage persistente, así
+// que igual que PlatformSettings.logoData, los bytes se guardan directo
+// en la base de datos.
+model MediaAsset {
+  id        String   @id @default(cuid())
+  filename  String
+  mimeType  String
+  data      Bytes
+  size      Int
+  createdAt DateTime @default(now())
+
+  @@map("media_assets")
+}

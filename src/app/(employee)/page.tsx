@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth/auth';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
+import { getVisibleBlockContent } from '@/lib/landing/get-landing-content';
 import { LandingForm } from './landing-form';
 import { BrandPanel } from './brand-panel';
 
@@ -27,10 +28,19 @@ export default async function LandingPage() {
     if (employee) redirect('/bienvenida');
   }
 
+  const [formIntro, trust] = await Promise.all([
+    getVisibleBlockContent('COLABORADOR', 'colaborador_form_intro'),
+    getVisibleBlockContent('COLABORADOR', 'colaborador_trust')
+  ]);
+  const formContent =
+    formIntro && trust
+      ? { formTitle: formIntro.formTitle, formSubtitle: formIntro.formSubtitle, timeEstimate: formIntro.timeEstimate, privacyGuarantee: trust.privacyGuarantee }
+      : null;
+
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-2">
       <BrandPanel />
-      <LandingForm />
+      <LandingForm content={formContent} />
     </main>
   );
 }
