@@ -107,25 +107,30 @@ export async function submitDiagnosticAnswer(input: {
     await recomputeCfhi(employeeId);
     await evaluateSafety(employeeId);
 
-    // Regla CORE #15: una inferencia fuerte puede sustituir una pregunta.
-    // Las 10 reglas activas de sustitución solo tienen variables CTRL_/RES_/
-    // DEBT_/SAV_/PLAN_ como fuente o destino — ninguna toca CTX_* (el
-    // bloque de contexto, opcional, corre después del financiero y usa este
-    // mismo Server Action). Este chequeo evita 3 queries siempre-en-vacío
-    // por cada pregunta de contexto respondida — encontrado armando el e2e:
-    // sumado a que getNextQuestion()/finalizeDiagnostic() ya se re-ejecutan
-    // en cada respuesta de contexto (bug preexistente, no de este cambio —
-    // ver comentario en getNextQuestion), el diagnóstico financiero corre
-    // rápido pero el bloque de contexto se vuelve notablemente más lento.
-    if (!variable.code.startsWith('CTX_')) {
-      // Corre después de guardar la respuesta directa (para ver los hechos
-      // más recientes) y antes de pedir la siguiente pregunta (para que
-      // isApplicable() ya vea cualquier variable recién inferida y salte la
-      // pregunta correspondiente en esta misma vuelta, no en la próxima).
-      const facts = await buildFacts(employeeId);
-      await materializeInferences(employeeId, facts);
-      await recomputeCfhi(employeeId);
+    // Las preguntas de contexto (CTX_*) reusan este mismo Server Action
+    // (ver question-form.tsx mode='context') pero el cliente ignora
+    // `done` en ese modo — su propio comentario ahí lo dice: "el campo
+    // done refleja la parte financiera (ya terminada en este punto), así
+    // que no sirve para decidir acá". Bug real de rendimiento encontrado
+    // armando el e2e: sin este corte, cada respuesta de contexto volvía a
+    // llamar getNextQuestion() (agota financieras -> null) y por lo tanto
+    // finalizeDiagnostic() — que recalcula causa raíz, prioridad Y
+    // eligibility desde cero — una vez por cada una de las ~15-20
+    // preguntas de contexto, en vez de una sola vez al terminar lo
+    // financiero. Nunca cambiaba el resultado (el cliente lo descarta) y
+    // ralentizaba notablemente el bloque de contexto para nada.
+    if (variable.code.startsWith('CTX_')) {
+      return { ok: true, done: false };
     }
+
+    // Regla CORE #15: una inferencia fuerte puede sustituir una pregunta.
+    // Corre después de guardar la respuesta directa (para ver los hechos
+    // más recientes) y antes de pedir la siguiente pregunta (para que
+    // isApplicable() ya vea cualquier variable recién inferida y salte la
+    // pregunta correspondiente en esta misma vuelta, no en la próxima).
+    const facts = await buildFacts(employeeId);
+    await materializeInferences(employeeId, facts);
+    await recomputeCfhi(employeeId);
 
     const nextQuestion = await getNextQuestion(employeeId);
     const done = !nextQuestion;
