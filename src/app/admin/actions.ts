@@ -9,6 +9,16 @@ import { createMagicLinkToken } from '@/lib/auth/magic-link';
 import { sendAdminMagicLinkEmail } from '@/lib/email/send-magic-link';
 import { getRequestOrigin } from '@/lib/http/request-origin';
 
+// Sin ningún límite antes de esto, requestAdminMagicLink se podía invocar
+// sin restricción: bombardear la bandeja de un admin real, o golpear el
+// endpoint como vector de costo/abuso sobre el proveedor de correo
+// (Resend). 60s es deliberadamente corto — no es un límite de seguridad
+// fuerte tipo "5 por hora", es el mínimo que impide un loop automatizado
+// sin estorbar a alguien reintentando a mano. Constante fija en código
+// (no PlatformSettings): es un parámetro de seguridad, no de producto —
+// no debería quedar editable desde /admin/configuracion.
+const MAGIC_LINK_REQUEST_COOLDOWN_MS = 60_000;
+
 export async function requestAdminMagicLink(
   rawEmail: string
 ): Promise<{ ok: true } | { ok: false; message: string }> {
@@ -41,8 +51,22 @@ export async function requestAdminMagicLink(
     return { ok: true };
   }
 
+  // Mismo trato silencioso que un correo inexistente/desactivado (arriba):
+  // la respuesta no distingue "se envió" de "está en cooldown", para no
+  // darle a quien esté probando una señal de que ese correo sí es admin.
+  if (admin.lastMagicLinkRequestedAt && Date.now() - admin.lastMagicLinkRequestedAt.getTime() < MAGIC_LINK_REQUEST_COOLDOWN_MS) {
+    return { ok: true };
+  }
+
   const token = await createMagicLinkToken({ type: 'admin', adminUserId: admin.id, email: admin.email });
   const verifyUrl = `${getRequestOrigin()}/api/auth/verify?token=${encodeURIComponent(token)}`;
+
+  // Se marca ANTES de enviar (no después): si el envío se queda colgado o
+  // reintenta, el cooldown ya está corriendo — más seguro contra un loop
+  // que golpea el endpoint más rápido que el propio timeout de Resend.
+  await runWithTenantContext({ kind: 'platform-admin' }, () =>
+    prisma.adminUser.update({ where: { id: admin.id }, data: { lastMagicLinkRequestedAt: new Date() } })
+  );
 
   try {
     await sendAdminMagicLinkEmail({ to: admin.email, verifyUrl });

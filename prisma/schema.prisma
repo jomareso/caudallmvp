@@ -280,6 +280,11 @@ model AdminUser {
   active         Boolean          @default(true)
   createdAt      DateTime         @default(now())
   lastActiveAt   DateTime?
+  // Cooldown para pedir un magic link nuevo (ver
+  // src/app/admin/actions.ts, requestAdminMagicLink) — sin esto, no hay
+  // ningún límite a cuántos correos se pueden disparar a la bandeja de un
+  // admin, ni ningún freno de costo/abuso sobre el proveedor de correo.
+  lastMagicLinkRequestedAt DateTime?
 
   tenant    Tenant?    @relation(fields: [tenantId], references: [id])
   auditLogs AuditLog[]
