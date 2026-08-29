@@ -5,8 +5,9 @@ import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { recomputeCfhi, recomputeConstructScore, recomputeDimensionScore, type EvidencePayload } from '@/lib/engines/cfhi';
 import { recomputeBehavioralBiasState } from '@/lib/engines/behavioral-state';
-import { getNextQuestion } from '@/lib/engines/diagnostic';
+import { getNextQuestion, buildFacts } from '@/lib/engines/diagnostic';
 import { evaluateSafety } from '@/lib/engines/safety';
+import { materializeInferences } from '@/lib/engines/inference-substitution';
 import { finalizeDiagnostic } from '@/lib/engines/diagnostic-completion';
 
 export async function submitDiagnosticAnswer(input: {
@@ -105,6 +106,15 @@ export async function submitDiagnosticAnswer(input: {
 
     await recomputeCfhi(employeeId);
     await evaluateSafety(employeeId);
+
+    // Regla CORE #15: una inferencia fuerte puede sustituir una pregunta.
+    // Corre después de guardar la respuesta directa (para ver los hechos
+    // más recientes) y antes de pedir la siguiente pregunta (para que
+    // isApplicable() ya vea cualquier variable recién inferida y salte la
+    // pregunta correspondiente en esta misma vuelta, no en la próxima).
+    const facts = await buildFacts(employeeId);
+    await materializeInferences(employeeId, facts);
+    await recomputeCfhi(employeeId);
 
     const nextQuestion = await getNextQuestion(employeeId);
     const done = !nextQuestion;
