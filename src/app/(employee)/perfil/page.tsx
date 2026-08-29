@@ -40,7 +40,7 @@ export default async function PerfilPage() {
           </div>
 
           {/* Cuenta */}
-          <section className="bg-white border border-silver/60 rounded-xl p-4.5 mb-3.5">
+          <section className="bg-white border border-silver/60 rounded-xl p-6 mb-3.5">
             <h2 className="text-sm font-semibold text-quartz mb-3">{tAccount('title')}</h2>
             <div className="flex justify-between text-xs py-2 border-t border-silver/20 first:border-t-0 first:pt-0">
               <span className="text-nickel">{tAccount('companyLabel')}</span>
@@ -58,7 +58,7 @@ export default async function PerfilPage() {
           </section>
 
           {/* Correo */}
-          <section className="bg-white border border-silver/60 rounded-xl p-4.5 mb-3.5">
+          <section className="bg-white border border-silver/60 rounded-xl p-6 mb-3.5">
             <h2 className="text-sm font-semibold text-quartz mb-1">{tEmail('title')}</h2>
             <p className="text-[11px] text-nickel mb-3 leading-relaxed">{tEmail('subtitle')}</p>
 
@@ -88,7 +88,7 @@ export default async function PerfilPage() {
           </section>
 
           {/* Notificaciones */}
-          <section className="bg-white border border-silver/60 rounded-xl p-4.5">
+          <section className="bg-white border border-silver/60 rounded-xl p-6">
             <h2 className="text-sm font-semibold text-quartz mb-1">{tNotif('title')}</h2>
             <p className="text-[11px] text-nickel mb-3 leading-relaxed">{tNotif('subtitle')}</p>
 
