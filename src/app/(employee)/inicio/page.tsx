@@ -63,7 +63,7 @@ export default async function InicioPage() {
             </div>
           ) : null}
 
-          <div className="bg-white border border-silver/60 rounded-xl p-4.5 mb-3.5 flex items-center gap-4">
+          <div className="bg-white border border-silver/60 rounded-xl p-6 mb-3.5 flex items-center gap-4">
             <span className="text-3xl font-semibold text-yale leading-none">{cfhiRounded}</span>
             <div>
               <p className="text-xs font-semibold text-quartz">
@@ -74,7 +74,7 @@ export default async function InicioPage() {
           </div>
 
           {actionResult.kind === 'suggestion' ? (
-            <div className="bg-white border border-silver/60 rounded-xl p-4.5 mb-3.5">
+            <div className="bg-white border border-silver/60 rounded-xl p-6 mb-3.5">
               <p className="text-xs font-semibold text-quartz mb-1">
                 {actionResult.suggestion.status === 'COMMITTED' ? t('commitment.title') : t('nextStep.title')}
               </p>
