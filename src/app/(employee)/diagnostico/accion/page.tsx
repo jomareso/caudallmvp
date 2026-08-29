@@ -41,7 +41,7 @@ export default async function AccionPage() {
       <main className="flex-1 flex flex-col items-center p-6 pt-10 lg:justify-center lg:pt-10">
         <div className="w-full max-w-sm lg:max-w-xl">
           <BackHomeLink />
-          <p className="text-sm font-medium text-quartz mb-2 text-center">{tAction('eyebrow')}</p>
+          <p className="text-sm font-semibold text-yale mb-2 text-center">{tAction('eyebrow')}</p>
 
           {result.kind === 'suggestion' ? (
             <ActionCard

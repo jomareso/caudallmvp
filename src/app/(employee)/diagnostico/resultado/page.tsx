@@ -114,7 +114,7 @@ export default async function ResultadoPage() {
             <BackHomeLink />
           </div>
           <div className="lg:max-w-md lg:mx-auto">
-            <p className="text-xs text-nickel mb-2">{t('title')}</p>
+            <p className="text-sm font-semibold text-yale mb-2">{t('title')}</p>
             <ScoreGauge
               score={cfhiRounded}
               vsAverage={generalComparison ? cfhiRounded - generalComparison.overall : null}
