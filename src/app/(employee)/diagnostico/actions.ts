@@ -108,13 +108,24 @@ export async function submitDiagnosticAnswer(input: {
     await evaluateSafety(employeeId);
 
     // Regla CORE #15: una inferencia fuerte puede sustituir una pregunta.
-    // Corre después de guardar la respuesta directa (para ver los hechos
-    // más recientes) y antes de pedir la siguiente pregunta (para que
-    // isApplicable() ya vea cualquier variable recién inferida y salte la
-    // pregunta correspondiente en esta misma vuelta, no en la próxima).
-    const facts = await buildFacts(employeeId);
-    await materializeInferences(employeeId, facts);
-    await recomputeCfhi(employeeId);
+    // Las 10 reglas activas de sustitución solo tienen variables CTRL_/RES_/
+    // DEBT_/SAV_/PLAN_ como fuente o destino — ninguna toca CTX_* (el
+    // bloque de contexto, opcional, corre después del financiero y usa este
+    // mismo Server Action). Este chequeo evita 3 queries siempre-en-vacío
+    // por cada pregunta de contexto respondida — encontrado armando el e2e:
+    // sumado a que getNextQuestion()/finalizeDiagnostic() ya se re-ejecutan
+    // en cada respuesta de contexto (bug preexistente, no de este cambio —
+    // ver comentario en getNextQuestion), el diagnóstico financiero corre
+    // rápido pero el bloque de contexto se vuelve notablemente más lento.
+    if (!variable.code.startsWith('CTX_')) {
+      // Corre después de guardar la respuesta directa (para ver los hechos
+      // más recientes) y antes de pedir la siguiente pregunta (para que
+      // isApplicable() ya vea cualquier variable recién inferida y salte la
+      // pregunta correspondiente en esta misma vuelta, no en la próxima).
+      const facts = await buildFacts(employeeId);
+      await materializeInferences(employeeId, facts);
+      await recomputeCfhi(employeeId);
+    }
 
     const nextQuestion = await getNextQuestion(employeeId);
     const done = !nextQuestion;
