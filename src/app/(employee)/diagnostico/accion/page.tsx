@@ -5,19 +5,30 @@ import { getActionSuggestion } from './actions';
 import { ActionCard } from './action-card';
 import { EmployeeTopBar } from '../../employee-topbar';
 import { BackHomeLink } from '../../back-home-link';
+import { getEnabledCommitmentTriggers, getCommitmentTriggerLabel } from '@/lib/engines/commitment-triggers';
+import { getEnabledOutcomeReasons } from '@/lib/engines/outcome-reasons';
 
 export default async function AccionPage() {
   // getActionSuggestion() (en ./actions, un Server Action) ya resuelve su
   // propia sesión/contexto de RLS — no hace falta duplicarlo acá.
-  const result = await getActionSuggestion();
-  const { showInterventionVideos } = await getPlatformSettings();
+  const [result, { showInterventionVideos }, triggers, outcomeReasons] = await Promise.all([
+    getActionSuggestion(),
+    getPlatformSettings(),
+    getEnabledCommitmentTriggers(),
+    getEnabledOutcomeReasons()
+  ]);
   const t = await getTranslations();
   const tAction = await getTranslations('diagnostic.action');
 
   const commitmentData = result.kind === 'suggestion' ? result.suggestion.commitmentData : null;
+  // El label del trigger ya elegido se resuelve por separado de la lista de
+  // triggers ACTIVOS de arriba — si esa opción se desactivó después de
+  // comprometerse, igual debe poder mostrar con qué se comprometió (ver
+  // getCommitmentTriggerLabel).
+  const committedTriggerLabel = commitmentData ? await getCommitmentTriggerLabel(commitmentData.triggerCode) : null;
   const committedWith = commitmentData
     ? tAction('committedWith', {
-        trigger: tAction(`commitStep.triggers.${commitmentData.triggerCode}`),
+        trigger: committedTriggerLabel ?? commitmentData.triggerCode,
         date: new Intl.DateTimeFormat('es-DO', { day: 'numeric', month: 'long' }).format(
           new Date(`${commitmentData.targetDate}T00:00:00`)
         )
@@ -44,6 +55,8 @@ export default async function AccionPage() {
               videoUrl={result.suggestion.videoUrl}
               showVideo={showInterventionVideos}
               committedWith={committedWith}
+              triggers={triggers}
+              outcomeReasons={outcomeReasons}
               labels={{
                 whyThisStep: tAction('whyThisStep'),
                 commit: tAction('commit'),
@@ -54,24 +67,12 @@ export default async function AccionPage() {
                 commitStepDatePrompt: tAction('commitStep.datePrompt'),
                 commitStepConfirm: tAction('commitStep.confirm'),
                 commitStepCancel: tAction('commitStep.cancel'),
-                triggers: {
-                  PROXIMO_INGRESO: tAction('commitStep.triggers.PROXIMO_INGRESO'),
-                  DIA_ESPECIFICO: tAction('commitStep.triggers.DIA_ESPECIFICO'),
-                  DESPUES_GASTOS_FIJOS: tAction('commitStep.triggers.DESPUES_GASTOS_FIJOS'),
-                  PRIMERA_HORA_DIA: tAction('commitStep.triggers.PRIMERA_HORA_DIA'),
-                  FIN_DE_SEMANA: tAction('commitStep.triggers.FIN_DE_SEMANA')
-                },
                 didYouDoIt: tAction('didYouDoIt'),
                 achieved: tAction('achieved'),
                 partial: tAction('partial'),
                 notAchieved: tAction('notAchieved'),
                 outcomeReasonPrompt: tAction('outcomeReason.prompt'),
                 outcomeReasonBack: tAction('outcomeReason.back'),
-                outcomeReasons: {
-                  NO_TIME: tAction('outcomeReason.reasons.NO_TIME'),
-                  TOO_HARD: tAction('outcomeReason.reasons.TOO_HARD'),
-                  CHANGED_MIND: tAction('outcomeReason.reasons.CHANGED_MIND')
-                },
                 watchVideo: tAction('watchVideo'),
                 pushEnable: tAction('pushEnable'),
                 pushEnabled: tAction('pushEnabled')

@@ -5,10 +5,10 @@ import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { computeNextBestAction, hasNoRealGap } from '@/lib/engines/next-best-action';
 import { logLearningEvent, reportInterventionOutcome } from '@/lib/engines/learning';
-import { isCommitmentTrigger, type CommitmentTrigger } from '@/lib/engines/commitment-triggers';
+import { isCommitmentTrigger } from '@/lib/engines/commitment-triggers';
 import { isOutcomeReason } from '@/lib/engines/outcome-reasons';
 
-export type CommitmentData = { triggerCode: CommitmentTrigger; targetDate: string };
+export type CommitmentData = { triggerCode: string; targetDate: string };
 
 export type ActionSuggestion = {
   employeeInterventionId: string;
@@ -124,7 +124,7 @@ export async function commitToAction(
   triggerCode: string,
   targetDate: string
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  if (!isCommitmentTrigger(triggerCode)) {
+  if (!(await isCommitmentTrigger(triggerCode))) {
     return { ok: false, message: 'Elige con qué vas a cumplir este compromiso.' };
   }
   const parsedDate = new Date(`${targetDate}T00:00:00`);
@@ -165,16 +165,16 @@ export async function dismissAction(employeeInterventionId: string): Promise<{ o
 }
 
 // reason es opcional (ACHIEVED no lo pide — no hay fricción que explicar
-// cuando sí se logró) pero cuando viene, ya fue validado contra
-// OUTCOME_REASONS por el picker de chips en action-card.tsx; se re-valida
-// acá porque un Server Action es un endpoint público, no solo lo que
-// permite la UI.
+// cuando sí se logró) pero cuando viene, ya fue elegido de las opciones
+// activas de OutcomeReasonOption por el picker de chips en
+// action-card.tsx; se re-valida acá porque un Server Action es un
+// endpoint público, no solo lo que permite la UI.
 export async function reportOutcome(
   employeeInterventionId: string,
   outcome: InterventionOutcome,
   reason?: string
 ): Promise<{ ok: true } | { ok: false; message: string }> {
-  if (reason !== undefined && !isOutcomeReason(reason)) {
+  if (reason !== undefined && !(await isOutcomeReason(reason))) {
     return { ok: false, message: 'Motivo inválido.' };
   }
 

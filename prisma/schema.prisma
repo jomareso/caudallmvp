@@ -338,6 +338,44 @@ model PlatformSettings {
   @@map("platform_settings")
 }
 
+// Opciones de disparador para el compromiso de una acción (spec §28/§30:
+// implementation intentions) — auditoría de valores hardcodeados, 29 ago.
+// Antes una lista fija en código (commitment-triggers.ts); ahora el admin
+// puede editar texto/ícono, reordenar, desactivar, o crear una opción
+// nueva desde /admin/metodologia/conductual. `code` es estable: queda
+// guardado tal cual en EmployeeIntervention.commitmentData.triggerCode, así
+// que nunca debería reciclarse para otra cosa — por eso no hay acción de
+// borrar, solo desactivar (una fila desactivada sigue resolviendo su label
+// para compromisos ya guardados con ese código).
+model CommitmentTriggerOption {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  icon      String
+  label     String
+  enabled   Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("commitment_trigger_options")
+}
+
+// Motivos de "en parte"/"todavía no" al reportar un compromiso (spec §29,
+// regla CORE 19/20: FRICTION -> TECHNIQUE — alimenta al Learning Engine).
+// Mismo criterio que arriba: `code` queda guardado en
+// EmployeeIntervention.feedback.reason, solo desactivar, no borrar.
+model OutcomeReasonOption {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  label     String
+  enabled   Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("outcome_reason_options")
+}
+
 // ============================================================
 // BLOQUE 2 — METODOLOGÍA Y BANCO (VERSIONADO)
 // ============================================================
