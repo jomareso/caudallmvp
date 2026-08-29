@@ -9,7 +9,9 @@ function AdminLogo({ hasLogo }: { hasLogo: boolean }) {
   // logueado — antes esta pantalla ignoraba el logo real subido y, encima,
   // el estado "sent" ni siquiera tenía el texto "caudall", así que la
   // identidad de marca cambiaba de una pantalla a otra dentro del mismo
-  // flujo de login.
+  // flujo de login. h-14 tiene que calzar con el h-14 de AdminLayout — es
+  // el mismo logo, mostrado en el mismo rol de "marca de entrada", solo
+  // que antes de loguearse en vez de después.
   return hasLogo ? (
     // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
     <img src="/api/branding/logo" alt="Caudall" className="h-14 mx-auto mb-3 mix-blend-multiply" />

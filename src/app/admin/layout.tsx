@@ -78,11 +78,15 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             className="flex items-center"
           >
             {hasLogo ? (
+              // h-14: mismo tamaño que el logo en la pantalla de login
+              // (login-form.tsx) — antes este header lo mostraba a h-20
+              // (80px) mientras que login usaba h-14 (56px), mismo archivo
+              // en dos tamaños distintos según la pantalla.
               // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
               <img
                 src="/api/branding/logo"
                 alt="Caudall"
-                className="h-20 mix-blend-multiply"
+                className="h-14 mix-blend-multiply"
               />
             ) : (
               <span className="text-2xl font-medium text-yale">caudall</span>
