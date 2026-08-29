@@ -7,6 +7,12 @@
     "errors": {
       "invalidEmail": "Ingresa un correo válido.",
       "emailSendFailed": "No pudimos enviar el correo ahora mismo. Intenta de nuevo en un momento."
+    },
+    "errorPage": {
+      "title": "Algo no salió bien",
+      "body": "Puede haber sido tu conexión — intenta de nuevo en un momento.",
+      "retry": "Reintentar",
+      "backHome": "Volver al inicio"
     }
   },
   "employee": {
