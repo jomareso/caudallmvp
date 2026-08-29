@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { getActionSuggestion } from './actions';
 import { ActionCard } from './action-card';
 import { EmployeeTopBar } from '../../employee-topbar';
+import { BackHomeLink } from '../../back-home-link';
 
 export default async function AccionPage() {
   // getActionSuggestion() (en ./actions, un Server Action) ya resuelve su
@@ -26,7 +27,8 @@ export default async function AccionPage() {
       <EmployeeTopBar />
       <main className="flex-1 flex flex-col items-center p-6 pt-10 lg:justify-center lg:pt-10">
         <div className="w-full max-w-sm lg:max-w-xl">
-          <p className="text-xs text-nickel mb-2 text-center">{tAction('eyebrow')}</p>
+          <BackHomeLink />
+          <p className="text-sm font-medium text-quartz mb-2 text-center">{tAction('eyebrow')}</p>
 
           {result.kind === 'suggestion' ? (
             <ActionCard

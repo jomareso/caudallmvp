@@ -7,6 +7,7 @@ import { scoreToDimensionState, scoreToProgressTier } from '@/lib/engines/scorin
 import { countContextAnsweredAndTotal } from '@/lib/engines/diagnostic';
 import { getNationalComparison, getSegmentComparison, type NationalComparison } from '@/lib/engines/national-benchmark';
 import { EmployeeTopBar } from '../../employee-topbar';
+import { BackHomeLink } from '../../back-home-link';
 import { SegmentComparison, type ComparisonRow, type ComparisonTab } from './segment-comparison';
 import { ScoreGauge } from './score-gauge';
 
@@ -102,6 +103,9 @@ export default async function ResultadoPage() {
         <EmployeeTopBar />
         <main className="flex-1 flex flex-col items-center p-6 pt-10">
         <div className="w-full max-w-sm lg:max-w-2xl text-center">
+          <div className="lg:max-w-md lg:mx-auto text-left">
+            <BackHomeLink />
+          </div>
           <div className="lg:max-w-md lg:mx-auto">
             <p className="text-xs text-nickel mb-2">{t('title')}</p>
             <ScoreGauge

@@ -31,11 +31,16 @@ export default async function EnviadoPage({
               {t('existingNotice')}
             </p>
           ) : null}
-          {code ? (
-            <Link href={`/registro?code=${encodeURIComponent(code)}`} className="block mt-4 text-xs text-nickel underline">
-              {t('ctaOtherEmail')}
-            </Link>
-          ) : null}
+          {/* Siempre hay una salida de esta pantalla, con o sin `code` en la
+              URL (ej. alguien que llega acá con un link viejo/incompleto,
+              sin pasar por email-form.tsx) — sin este fallback, ese caso
+              quedaba sin ninguna forma de volver. */}
+          <Link
+            href={code ? `/registro?code=${encodeURIComponent(code)}` : '/acceso'}
+            className="block mt-4 text-xs text-nickel underline"
+          >
+            {t('ctaOtherEmail')}
+          </Link>
         </div>
       </div>
     </main>

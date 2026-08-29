@@ -5,6 +5,7 @@ import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-cont
 import { countContextAnsweredAndTotal, getNextContextQuestion } from '@/lib/engines/diagnostic';
 import { ContextFlow } from './context-flow';
 import { EmployeeTopBar } from '../../employee-topbar';
+import { BackHomeLink } from '../../back-home-link';
 
 export default async function DiagnosticoContextoPage() {
   const employee = await requireEmployee();
@@ -41,6 +42,7 @@ export default async function DiagnosticoContextoPage() {
         <EmployeeTopBar />
         <main className="flex-1 flex flex-col items-center p-6 pt-10 lg:justify-center lg:pt-10">
           <div className="w-full max-w-sm lg:max-w-xl">
+            <BackHomeLink />
             <ContextFlow
               // La pantalla de transición (explicando por qué se pregunta
               // esto) solo se muestra la primera vez — si ya respondió

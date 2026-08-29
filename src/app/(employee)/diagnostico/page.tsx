@@ -7,6 +7,7 @@ import { finalizeDiagnostic } from '@/lib/engines/diagnostic-completion';
 import { DIMENSION_ICON, DEFAULT_DIMENSION_ICON } from '@/lib/engines/commitment-triggers';
 import { QuestionForm } from './question-form';
 import { EmployeeTopBar } from '../employee-topbar';
+import { BackHomeLink } from '../back-home-link';
 
 export default async function DiagnosticoPage() {
   const employee = await requireEmployee();
@@ -66,6 +67,7 @@ export default async function DiagnosticoPage() {
         <EmployeeTopBar />
         <main className="flex-1 flex flex-col items-center p-6 pt-10 lg:justify-center lg:pt-10">
           <div className="w-full max-w-sm lg:max-w-xl">
+            <BackHomeLink />
             <div className="flex justify-end mb-1">
               <span className="inline-flex items-center gap-1 text-[11px] text-yale bg-picton/10 rounded-full px-2.5 py-1">
                 <span aria-hidden="true">{DIMENSION_ICON[dimension?.code ?? ''] ?? DEFAULT_DIMENSION_ICON}</span>
