@@ -69,7 +69,7 @@
       "beforeStart": {
         "title": "Antes de empezar",
         "body": "Te tomará unos 5–8 minutos. Busca un momento donde puedas concentrarte — entre más honestas sean tus respuestas, más útil va a ser tu diagnóstico.",
-        "bodyWithStats": "Te tomará cerca de {minutes} minutos y unas {questions} preguntas — así les tomó en promedio a quienes ya lo hicieron. Busca un momento donde puedas concentrarte — entre más honestas sean tus respuestas, más útil va a ser tu diagnóstico."
+        "bodyWithStats": "Te tomará cerca de {minutes, plural, one {# minuto} other {# minutos}} y {questions, plural, one {una pregunta} other {unas # preguntas}} — así les tomó en promedio a quienes ya lo hicieron. Busca un momento donde puedas concentrarte — entre más honestas sean tus respuestas, más útil va a ser tu diagnóstico."
       }
     },
     "trust": {
