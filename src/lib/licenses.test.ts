@@ -2,16 +2,23 @@ import { describe, expect, it } from 'vitest';
 import { addMonths, generateUniqueLicenseCodes, isLicenseDurationMonths } from './licenses';
 
 describe('isLicenseDurationMonths', () => {
-  it('acepta 3, 6 y 12', () => {
-    expect(isLicenseDurationMonths(3)).toBe(true);
-    expect(isLicenseDurationMonths(6)).toBe(true);
-    expect(isLicenseDurationMonths(12)).toBe(true);
+  const allowed = [3, 6, 12];
+
+  it('acepta valores dentro de la lista permitida', () => {
+    expect(isLicenseDurationMonths(3, allowed)).toBe(true);
+    expect(isLicenseDurationMonths(6, allowed)).toBe(true);
+    expect(isLicenseDurationMonths(12, allowed)).toBe(true);
   });
 
-  it('rechaza cualquier otro número', () => {
-    expect(isLicenseDurationMonths(1)).toBe(false);
-    expect(isLicenseDurationMonths(24)).toBe(false);
-    expect(isLicenseDurationMonths(0)).toBe(false);
+  it('rechaza cualquier valor fuera de la lista permitida', () => {
+    expect(isLicenseDurationMonths(1, allowed)).toBe(false);
+    expect(isLicenseDurationMonths(24, allowed)).toBe(false);
+    expect(isLicenseDurationMonths(0, allowed)).toBe(false);
+  });
+
+  it('respeta una lista permitida distinta (configurable por plataforma)', () => {
+    expect(isLicenseDurationMonths(1, [1, 24])).toBe(true);
+    expect(isLicenseDurationMonths(12, [1, 24])).toBe(false);
   });
 });
 

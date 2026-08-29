@@ -3,11 +3,11 @@ import { prisma } from '@/lib/db/prisma';
 
 // Decisión 6 (actualizada): cada empleado se registra con su propia
 // licencia individual, no con un código compartido por toda la empresa.
-export const LICENSE_DURATIONS_MONTHS = [3, 6, 12] as const;
-export type LicenseDurationMonths = (typeof LICENSE_DURATIONS_MONTHS)[number];
-
-export function isLicenseDurationMonths(value: number): value is LicenseDurationMonths {
-  return (LICENSE_DURATIONS_MONTHS as readonly number[]).includes(value);
+// Las duraciones permitidas ya no son una lista fija en código — viven en
+// PlatformSettings.licenseDurationsMonths (editable desde
+// /admin/configuracion) y se pasan acá como `allowed`.
+export function isLicenseDurationMonths(value: number, allowed: readonly number[]): boolean {
+  return allowed.includes(value);
 }
 
 // Sin 0/O ni 1/I: se escriben a mano al entrar a la app, esos pares se

@@ -1,18 +1,24 @@
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireAdm } from '@/lib/auth/admin-context';
+import { getPlatformSettings } from '@/lib/settings/platform-settings';
 import { LogoUploadForm } from './upload-form';
+import { ParametersForm } from './parameters-form';
 
 export default async function AdminConfiguracionPage() {
-  // Solo ADM (control total de la plataforma) administra el logo de
-  // Caudall — EMPRESA y FUNCIONAL no tienen ese alcance.
+  // Solo ADM (control total de la plataforma) administra la configuración
+  // de Caudall — EMPRESA y FUNCIONAL no tienen ese alcance.
   await requireAdm();
 
   // platform_settings es un singleton global sin tenantId, no lleva RLS.
-  const settings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } });
+  const [settings, parameters] = await Promise.all([
+    prisma.platformSettings.findUnique({ where: { id: 'singleton' } }),
+    getPlatformSettings()
+  ]);
   const hasLogo = Boolean(settings?.logoData);
 
   const t = await getTranslations('admin.settings');
+  const tParams = await getTranslations('admin.settings.parameters');
 
   return (
     <main className="flex-1 p-6">
@@ -43,6 +49,29 @@ export default async function AdminConfiguracionPage() {
             }}
           />
         </div>
+
+        <h2 className="text-sm font-medium text-quartz mt-8 mb-1">{tParams('title')}</h2>
+        <p className="text-xs text-nickel mb-3">{tParams('description')}</p>
+
+        <ParametersForm
+          initial={parameters}
+          labels={{
+            followupInviteAfterDaysLabel: tParams('followupInviteAfterDaysLabel'),
+            followupInviteAfterDaysHelp: tParams('followupInviteAfterDaysHelp'),
+            licenseDurationsMonthsLabel: tParams('licenseDurationsMonthsLabel'),
+            licenseDurationsMonthsHelp: tParams('licenseDurationsMonthsHelp'),
+            minCohortSizeLabel: tParams('minCohortSizeLabel'),
+            minCohortSizeHelp: tParams('minCohortSizeHelp'),
+            minSampleSizeLabel: tParams('minSampleSizeLabel'),
+            minSampleSizeHelp: tParams('minSampleSizeHelp'),
+            magicLinkTtlMinutesLabel: tParams('magicLinkTtlMinutesLabel'),
+            magicLinkTtlMinutesHelp: tParams('magicLinkTtlMinutesHelp'),
+            showInterventionVideosLabel: tParams('showInterventionVideosLabel'),
+            saveCta: tParams('saveCta'),
+            saving: tParams('saving'),
+            saveSuccess: tParams('saveSuccess')
+          }}
+        />
       </div>
     </main>
   );

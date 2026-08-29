@@ -304,7 +304,20 @@ model PlatformSettings {
   id           String   @id @default("singleton")
   logoData     Bytes?
   logoMimeType String?
-  updatedAt    DateTime @updatedAt
+
+  // Parámetros globales de plataforma editables desde /admin/configuracion
+  // (auditoría de valores hardcodeados, 29 ago) — antes eran constantes en
+  // código, así que los defaults acá son EXACTAMENTE los valores que ya
+  // estaban hardcodeados, para no cambiar comportamiento con el deploy de
+  // esta migración. Ver src/lib/settings/platform-settings.ts.
+  followupInviteAfterDays Int     @default(90)
+  showInterventionVideos  Boolean @default(false)
+  licenseDurationsMonths  Int[]   @default([3, 6, 12])
+  minCohortSize           Int     @default(30)
+  minSampleSize           Int     @default(20)
+  magicLinkTtlMinutes     Int     @default(15)
+
+  updatedAt DateTime @updatedAt
 
   @@map("platform_settings")
 }

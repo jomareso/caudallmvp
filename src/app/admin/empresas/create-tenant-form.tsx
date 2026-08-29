@@ -4,11 +4,22 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createTenant, type AdminEmailOutcome } from './actions';
 
-export function CreateTenantForm({ labels }: { labels: Record<string, string> }) {
+export function CreateTenantForm({
+  durationOptions,
+  labels
+}: {
+  durationOptions: { value: number; label: string }[];
+  labels: Record<string, string>;
+}) {
   const router = useRouter();
   const [name, setName] = useState('');
   const [licenseCount, setLicenseCount] = useState('20');
-  const [durationMonths, setDurationMonths] = useState('12');
+  // Preselecciona la duración más larga (mismo default de siempre: con
+  // [3, 6, 12] cae en 12) — ver durationOptions, viene ordenado desde
+  // PlatformSettings.licenseDurationsMonths.
+  const [durationMonths, setDurationMonths] = useState(
+    String(durationOptions[durationOptions.length - 1]?.value ?? '')
+  );
   const [adminEmails, setAdminEmails] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [adminResults, setAdminResults] = useState<AdminEmailOutcome[] | null>(null);
@@ -100,9 +111,11 @@ export function CreateTenantForm({ labels }: { labels: Record<string, string> })
         onChange={(event) => setDurationMonths(event.target.value)}
         className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-3 focus:outline-none focus:border-cola"
       >
-        <option value="3">{labels.duration3}</option>
-        <option value="6">{labels.duration6}</option>
-        <option value="12">{labels.duration12}</option>
+        {durationOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
       </select>
 
       <label htmlFor="adminEmails" className="block text-xs text-nickel mb-1">

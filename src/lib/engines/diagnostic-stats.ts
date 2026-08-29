@@ -1,12 +1,5 @@
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
-
-// Umbral mínimo de diagnósticos completados antes de confiar en el
-// promedio real — con muy pocos casos, un par de valores atípicos (ej.
-// alguien que dejó la pestaña abierta media hora) distorsionan el
-// estimado más de lo que ayudan. Por debajo de esto, la pantalla de
-// bienvenida usa el texto fijo de siempre en vez de un número inventado
-// a partir de poca muestra.
-const MIN_SAMPLE_SIZE = 20;
+import { getPlatformSettings } from '@/lib/settings/platform-settings';
 
 export type DiagnosticStats = {
   averageMinutes: number;
@@ -23,16 +16,26 @@ export type DiagnosticStats = {
 // src/lib/db/prisma.ts.
 export async function getPlatformDiagnosticStats(): Promise<DiagnosticStats | null> {
   return runWithTenantContext({ kind: 'platform-admin' }, async () => {
-    const result = await prisma.financialState.aggregate({
-      where: {
-        diagnosticDurationSeconds: { not: null },
-        questionsAnsweredCount: { not: null }
-      },
-      _avg: { diagnosticDurationSeconds: true, questionsAnsweredCount: true },
-      _count: { employeeId: true }
-    });
+    const [result, settings] = await Promise.all([
+      prisma.financialState.aggregate({
+        where: {
+          diagnosticDurationSeconds: { not: null },
+          questionsAnsweredCount: { not: null }
+        },
+        _avg: { diagnosticDurationSeconds: true, questionsAnsweredCount: true },
+        _count: { employeeId: true }
+      }),
+      getPlatformSettings()
+    ]);
 
-    if (result._count.employeeId < MIN_SAMPLE_SIZE) return null;
+    // Umbral mínimo de diagnósticos completados antes de confiar en el
+    // promedio real — con muy pocos casos, un par de valores atípicos (ej.
+    // alguien que dejó la pestaña abierta media hora) distorsionan el
+    // estimado más de lo que ayudan. Por debajo de esto, la pantalla de
+    // bienvenida usa el texto fijo de siempre en vez de un número inventado
+    // a partir de poca muestra. Editable desde /admin/configuracion
+    // (PlatformSettings.minSampleSize).
+    if (result._count.employeeId < settings.minSampleSize) return null;
     if (result._avg.diagnosticDurationSeconds == null || result._avg.questionsAnsweredCount == null) return null;
 
     return {

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireAdm } from '@/lib/auth/admin-context';
+import { getPlatformSettings } from '@/lib/settings/platform-settings';
 import { GenerateLicensesForm } from './generate-licenses-form';
 import { TenantNameForm } from './tenant-name-form';
 import { TenantBrandingForm } from './tenant-branding-form';
@@ -22,6 +23,11 @@ export default async function EmpresaDetallePage({ params }: { params: { id: str
     dateStyle: 'medium',
     timeZone: 'America/Santo_Domingo'
   });
+  const settings = await getPlatformSettings();
+  const durationOptions = settings.licenseDurationsMonths.map((months) => ({
+    value: months,
+    label: t('durationValue', { months })
+  }));
 
   // ADM ve el detalle de CUALQUIER tenant a propósito, de ahí platform-admin.
   const tenant = await runWithTenantContext({ kind: 'platform-admin' }, () =>
@@ -88,13 +94,11 @@ export default async function EmpresaDetallePage({ params }: { params: { id: str
 
         <GenerateLicensesForm
           tenantId={tenant.id}
+          durationOptions={durationOptions}
           labels={{
             title: t('generateTitle'),
             licenseCountLabel: t('licenseCountLabel'),
             durationLabel: t('durationLabel'),
-            duration3: t('duration3'),
-            duration6: t('duration6'),
-            duration12: t('duration12'),
             cta: t('generateCta'),
             creating: t('creating'),
             errorGeneric: t('errorGeneric'),

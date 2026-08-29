@@ -4,20 +4,18 @@ import { getTranslations } from 'next-intl/server';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { scoreToProgressTier } from '@/lib/engines/scoring';
+import { getPlatformSettings } from '@/lib/settings/platform-settings';
 import { getActionSuggestion } from '../diagnostico/accion/actions';
 import { EmployeeTopBar } from '../employee-topbar';
 
-// Reynoso (auditoría UX, revisión 2): sin importar cuánto tiempo pase
-// desde que completó el diagnóstico, el destino de login sigue siendo
-// Inicio (ver post-login-destination.ts) — lo único que cambia con el
-// tiempo es esta invitación a actualizarlo. Parámetro fijo por ahora: no
-// hay todavía un lugar obvio en el modelo (¿por tenant, en Tenant?
-// ¿global, en PlatformSettings?) para hacerlo configurable sin agregar
-// una decisión de producto nueva primero.
-const FOLLOWUP_INVITE_AFTER_DAYS = 90;
-
 export default async function InicioPage() {
   const baseEmployee = await requireEmployee();
+  // Reynoso (auditoría UX, revisión 2): sin importar cuánto tiempo pase
+  // desde que completó el diagnóstico, el destino de login sigue siendo
+  // Inicio (ver post-login-destination.ts) — lo único que cambia con el
+  // tiempo es esta invitación a actualizarlo. Editable desde
+  // /admin/configuracion (PlatformSettings.followupInviteAfterDays).
+  const { followupInviteAfterDays } = await getPlatformSettings();
 
   const financialState = await runWithTenantContext(employeeTenantContext(baseEmployee), () =>
     prisma.financialState.findUnique({ where: { employeeId: baseEmployee.id } })
@@ -43,7 +41,7 @@ export default async function InicioPage() {
   const daysSinceCompleted = Math.floor(
     (Date.now() - financialState.lastDiagnosticCompletedAt.getTime()) / (1000 * 60 * 60 * 24)
   );
-  const showFollowupInvite = daysSinceCompleted >= FOLLOWUP_INVITE_AFTER_DAYS;
+  const showFollowupInvite = daysSinceCompleted >= followupInviteAfterDays;
 
   return (
     <div className="min-h-screen flex flex-col">
