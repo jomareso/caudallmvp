@@ -15,6 +15,8 @@ export function ParametersForm({
     minCohortSize: number;
     minSampleSize: number;
     magicLinkTtlMinutes: number;
+    sampleConfidenceLevel: number;
+    sampleMarginOfError: number;
   };
   labels: Record<string, string>;
 }) {
@@ -25,6 +27,8 @@ export function ParametersForm({
   const [minCohortSize, setMinCohortSize] = useState(String(initial.minCohortSize));
   const [minSampleSize, setMinSampleSize] = useState(String(initial.minSampleSize));
   const [magicLinkTtlMinutes, setMagicLinkTtlMinutes] = useState(String(initial.magicLinkTtlMinutes));
+  const [sampleConfidenceLevel, setSampleConfidenceLevel] = useState(String(initial.sampleConfidenceLevel));
+  const [sampleMarginOfError, setSampleMarginOfError] = useState(String(initial.sampleMarginOfError));
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -41,7 +45,9 @@ export function ParametersForm({
         licenseDurationsMonths,
         minCohortSize,
         minSampleSize,
-        magicLinkTtlMinutes
+        magicLinkTtlMinutes,
+        sampleConfidenceLevel,
+        sampleMarginOfError
       });
       if (!result.ok) {
         setError(result.message);
@@ -122,6 +128,36 @@ export function ParametersForm({
         className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-1 focus:outline-none focus:border-cola"
       />
       <p className="text-[11px] text-nickel mb-3">{labels.magicLinkTtlMinutesHelp}</p>
+
+      <label htmlFor="sampleConfidenceLevel" className="block text-xs text-nickel mb-1">
+        {labels.sampleConfidenceLevelLabel}
+      </label>
+      <input
+        id="sampleConfidenceLevel"
+        type="number"
+        min={0.5}
+        max={0.999}
+        step={0.001}
+        value={sampleConfidenceLevel}
+        onChange={(event) => setSampleConfidenceLevel(event.target.value)}
+        className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-1 focus:outline-none focus:border-cola"
+      />
+      <p className="text-[11px] text-nickel mb-3">{labels.sampleConfidenceLevelHelp}</p>
+
+      <label htmlFor="sampleMarginOfError" className="block text-xs text-nickel mb-1">
+        {labels.sampleMarginOfErrorLabel}
+      </label>
+      <input
+        id="sampleMarginOfError"
+        type="number"
+        min={0.001}
+        max={0.5}
+        step={0.001}
+        value={sampleMarginOfError}
+        onChange={(event) => setSampleMarginOfError(event.target.value)}
+        className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-1 focus:outline-none focus:border-cola"
+      />
+      <p className="text-[11px] text-nickel mb-3">{labels.sampleMarginOfErrorHelp}</p>
 
       <label className="flex items-center gap-2 text-xs text-quartz mb-4">
         <input

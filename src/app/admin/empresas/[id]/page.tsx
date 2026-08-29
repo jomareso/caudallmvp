@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireAdm } from '@/lib/auth/admin-context';
 import { getPlatformSettings } from '@/lib/settings/platform-settings';
+import { calculateSampleSize } from '@/lib/engines/sample-size';
 import { GenerateLicensesForm } from './generate-licenses-form';
 import { TenantNameForm } from './tenant-name-form';
 import { TenantBrandingForm } from './tenant-branding-form';
@@ -40,6 +41,16 @@ export default async function EmpresaDetallePage({ params }: { params: { id: str
 
   const suspended = tenant.status === 'SUSPENDED';
 
+  const requiredSampleSize = calculateSampleSize({
+    populationSize: tenant.employeeCount,
+    confidenceLevel: settings.sampleConfidenceLevel,
+    marginOfError: settings.sampleMarginOfError
+  });
+  const requiredSampleSizeText =
+    requiredSampleSize !== null
+      ? t('requiredSampleSizeLabel', { n: requiredSampleSize, total: tenant.employeeCount! })
+      : null;
+
   return (
     <main className="flex-1 p-6">
       <div className="w-full max-w-md">
@@ -68,8 +79,13 @@ export default async function EmpresaDetallePage({ params }: { params: { id: str
           <TenantNameForm
             tenantId={tenant.id}
             initialName={tenant.name}
+            initialEmployeeCount={tenant.employeeCount}
+            requiredSampleSizeText={requiredSampleSizeText}
             labels={{
               nameLabel: t('nameLabel'),
+              employeeCountLabel: t('employeeCountLabel'),
+              employeeCountPlaceholder: t('employeeCountPlaceholder'),
+              employeeCountHelp: t('employeeCountHelp'),
               cta: t('saveCta'),
               saving: t('saving'),
               errorGeneric: t('errorGeneric')
