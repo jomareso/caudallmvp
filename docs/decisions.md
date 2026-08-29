@@ -128,11 +128,12 @@ Este documento captura las decisiones estructurales del MVP en formato ADR (Arch
 **Decisión:**
 - **Empleado:** mobile-first. La experiencia se diseña primero para móvil y se adapta a pantallas más grandes.
 - **RRHH (tenant admin):** desktop-first. Optimizado para dashboards, filtros, exportar. Móvil funcional pero secundario.
-- **Admin Caudall (interno):** desktop-only razonable. No se optimiza para móvil.
+- **Admin Caudall (interno):** desktop-first. Optimizado para dashboards, filtros y tablas densas — pero funcional en móvil, no bloqueado ni roto ahí. *(Actualizado — antes era "desktop-only, no se optimiza para móvil"; Reynoso pidió que todo el panel admin/RRHH funcione en móvil y desktop, alineado a marca.)*
 
 **Alternativas consideradas:**
 - Los tres totalmente responsive con el mismo esfuerzo. Rechazado: cuesta varias veces más y no aporta valor proporcional.
 - Empleado y RRHH mobile-first. Rechazado: los dashboards de RRHH se degradan sin diseño desktop-primero.
+- Admin Caudall desktop-only sin soporte móvil. Rechazado (revertido): Reynoso necesita poder operar el admin desde el celular cuando haga falta, aunque el uso típico siga siendo desktop.
 
 **Consecuencias:**
 - Grupos de rutas en Next.js: `(employee)`, `(hr)`, `(admin)`.
