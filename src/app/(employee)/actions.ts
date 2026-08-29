@@ -1,6 +1,7 @@
 'use server';
 
 import { z } from 'zod';
+import { getTranslations } from 'next-intl/server';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { createMagicLinkToken } from '@/lib/auth/magic-link';
 import { sendMagicLinkEmail } from '@/lib/email/send-magic-link';
@@ -19,42 +20,46 @@ type ActionResult<T = undefined> =
 // login de admin (ver src/app/admin/actions.ts).
 export async function validateEnrollmentCode(rawCode: string): Promise<ActionResult<{ tenantName: string }>> {
   const code = rawCode.trim().toUpperCase();
+  const t = await getTranslations('employee.access.errors');
 
   if (!code) {
-    return { ok: false, message: 'Ingresa tu código de acceso.' };
+    return { ok: false, message: t('emptyCode') };
   }
 
   return runWithTenantContext({ kind: 'platform-admin' }, async () => {
     const found = await findTenantByCode(code);
 
     if (!found || found.tenant.status === 'SUSPENDED') {
-      return { ok: false, message: 'Ese código no es válido. Revisa que lo copiaste completo o pídeselo de nuevo a tu empresa.' };
+      return { ok: false, message: t('invalidCode') };
     }
 
     if (found.license && found.license.status === 'EXPIRED') {
-      return { ok: false, message: 'Esta licencia ya venció. Pide un código nuevo a tu equipo de RRHH.' };
+      return { ok: false, message: t('licenseExpired') };
     }
 
     if (found.license?.status === 'ACTIVE' && found.license.expiresAt && found.license.expiresAt < new Date()) {
-      return { ok: false, message: 'Esta licencia ya venció. Pide un código nuevo a tu equipo de RRHH.' };
+      return { ok: false, message: t('licenseExpired') };
     }
 
     return { ok: true, tenantName: found.tenant.name };
   });
 }
 
-const requestLinkSchema = z.object({
-  enrollmentCode: z.string().trim().min(1),
-  email: z.string().trim().toLowerCase().email('Ingresa un correo válido.')
-});
-
 export async function requestMagicLink(
   input: { enrollmentCode: string; email: string }
 ): Promise<ActionResult<{ isExisting: boolean }>> {
+  const [t, tCommon] = await Promise.all([
+    getTranslations('employee.access.errors'),
+    getTranslations('common.errors')
+  ]);
+  const requestLinkSchema = z.object({
+    enrollmentCode: z.string().trim().min(1),
+    email: z.string().trim().toLowerCase().email(tCommon('invalidEmail'))
+  });
   const parsed = requestLinkSchema.safeParse(input);
 
   if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message ?? 'Revisa los datos ingresados.' };
+    return { ok: false, message: parsed.error.issues[0]?.message ?? t('invalidInput') };
   }
 
   const enrollmentCode = parsed.data.enrollmentCode.toUpperCase();
@@ -64,12 +69,12 @@ export async function requestMagicLink(
     const found = await findTenantByCode(enrollmentCode);
 
     if (!found || found.tenant.status === 'SUSPENDED') {
-      return { ok: false, message: 'Ese código no es válido. Revisa que lo copiaste completo o pídeselo de nuevo a tu empresa.' };
+      return { ok: false, message: t('invalidCode') };
     }
     const { tenant, license } = found;
 
     if (license?.status === 'EXPIRED' || (license?.expiresAt && license.expiresAt < new Date())) {
-      return { ok: false, message: 'Esta licencia ya venció. Pide un código nuevo a tu equipo de RRHH.' };
+      return { ok: false, message: t('licenseExpired') };
     }
 
     // Decisión 6 (docs/decisions.md): el correo debe ser personal, no corporativo.
@@ -78,7 +83,7 @@ export async function requestMagicLink(
       if (domain === tenant.corporateEmailDomain.toLowerCase()) {
         return {
           ok: false,
-          message: 'Usa tu correo personal, no el de la empresa. Esta cuenta es solo tuya.'
+          message: t('useCorporateEmail')
         };
       }
     }
@@ -90,7 +95,7 @@ export async function requestMagicLink(
     // Una licencia ACTIVE ya le pertenece a un empleado — si alguien más
     // intenta usar ese código con otro correo, no le presta el cupo.
     if (license?.status === 'ACTIVE' && existingEmployee?.licenseId !== license.id) {
-      return { ok: false, message: 'Este código ya está asignado a otra persona.' };
+      return { ok: false, message: t('codeAlreadyAssigned') };
     }
 
     const employee =
@@ -126,7 +131,7 @@ export async function requestMagicLink(
       await sendMagicLinkEmail({ to: email, verifyUrl, tenantName: tenant.name });
     } catch (error) {
       console.error('[requestMagicLink] fallo al enviar correo', error);
-      return { ok: false, message: 'No pudimos enviar el correo ahora mismo. Intenta de nuevo en un momento.' };
+      return { ok: false, message: tCommon('emailSendFailed') };
     }
 
     // No bloquear a alguien que ya tiene cuenta con un error — se le manda

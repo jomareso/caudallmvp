@@ -1,6 +1,7 @@
 'use server';
 
 import type { EmployeeInterventionStatus, InterventionOutcome } from '@prisma/client';
+import { getTranslations } from 'next-intl/server';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { computeNextBestAction, hasNoRealGap } from '@/lib/engines/next-best-action';
@@ -124,18 +125,20 @@ export async function commitToAction(
   triggerCode: string,
   targetDate: string
 ): Promise<{ ok: true } | { ok: false; message: string }> {
+  const t = await getTranslations('diagnostic.action.errors');
+
   if (!(await isCommitmentTrigger(triggerCode))) {
-    return { ok: false, message: 'Elige con qué vas a cumplir este compromiso.' };
+    return { ok: false, message: t('noTrigger') };
   }
   const parsedDate = new Date(`${targetDate}T00:00:00`);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   if (Number.isNaN(parsedDate.getTime()) || parsedDate < today) {
-    return { ok: false, message: 'Elige una fecha válida, hoy o más adelante.' };
+    return { ok: false, message: t('invalidDate') };
   }
 
   const found = await requireOwnEmployeeIntervention(employeeInterventionId);
-  if (!found) return { ok: false, message: 'No encontramos esa recomendación.' };
+  if (!found) return { ok: false, message: t('notFound') };
 
   return runWithTenantContext(found.tenantContext, async () => {
     const commitmentData: CommitmentData = { triggerCode, targetDate };
@@ -155,11 +158,26 @@ export async function commitToAction(
 }
 
 export async function dismissAction(employeeInterventionId: string): Promise<{ ok: true } | { ok: false; message: string }> {
+  const t = await getTranslations('diagnostic.action.errors');
   const found = await requireOwnEmployeeIntervention(employeeInterventionId);
-  if (!found) return { ok: false, message: 'No encontramos esa recomendación.' };
+  if (!found) return { ok: false, message: t('notFound') };
 
   return runWithTenantContext(found.tenantContext, async () => {
     await prisma.employeeIntervention.update({ where: { id: employeeInterventionId }, data: { status: 'DISMISSED' } });
+
+    // Bug real encontrado en la auditoría de la fase de empleado: a
+    // diferencia de sugerir/comprometerse/reportar resultado, descartar una
+    // sugerencia ("Ahora no") no dejaba ningún registro — el Learning
+    // Engine (regla CORE #20: aprende de conducta observada) se quedaba
+    // ciego justo ante una de las señales de conducta más relevantes.
+    const employee = await prisma.employee.findUniqueOrThrow({ where: { id: found.employeeId } });
+    await logLearningEvent({
+      eventType: 'INTERVENTION_DISMISSED',
+      tenantId: employee.tenantId,
+      employeeId: found.employeeId,
+      context: { employeeInterventionId }
+    });
+
     return { ok: true };
   });
 }
@@ -174,12 +192,14 @@ export async function reportOutcome(
   outcome: InterventionOutcome,
   reason?: string
 ): Promise<{ ok: true } | { ok: false; message: string }> {
+  const t = await getTranslations('diagnostic.action.errors');
+
   if (reason !== undefined && !(await isOutcomeReason(reason))) {
-    return { ok: false, message: 'Motivo inválido.' };
+    return { ok: false, message: t('invalidReason') };
   }
 
   const found = await requireOwnEmployeeIntervention(employeeInterventionId);
-  if (!found) return { ok: false, message: 'No encontramos esa recomendación.' };
+  if (!found) return { ok: false, message: t('notFound') };
 
   return runWithTenantContext(found.tenantContext, async () => {
     // "No todavía" no cierra el ciclo — el empleado sigue comprometido, solo

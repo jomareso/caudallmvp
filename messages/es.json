@@ -3,7 +3,23 @@
     "name": "Caudall",
     "tagline": "Bienestar financiero, como beneficio de tu empresa"
   },
+  "common": {
+    "errors": {
+      "invalidEmail": "Ingresa un correo válido.",
+      "emailSendFailed": "No pudimos enviar el correo ahora mismo. Intenta de nuevo en un momento."
+    }
+  },
   "employee": {
+    "access": {
+      "errors": {
+        "emptyCode": "Ingresa tu código de acceso.",
+        "invalidCode": "Ese código no es válido. Revisa que lo copiaste completo o pídeselo de nuevo a tu empresa.",
+        "licenseExpired": "Esta licencia ya venció. Pide un código nuevo a tu equipo de RRHH.",
+        "useCorporateEmail": "Usa tu correo personal, no el de la empresa. Esta cuenta es solo tuya.",
+        "codeAlreadyAssigned": "Este código ya está asignado a otra persona.",
+        "invalidInput": "Revisa los datos ingresados."
+      }
+    },
     "landing": {
       "enrollmentCodeLabel": "Tu código de acceso",
       "enrollmentCodePlaceholder": "Código de acceso",
@@ -53,6 +69,12 @@
     "trust": {
       "privacyGuarantee": "Tus respuestas son privadas. Tu empresa no verá tus respuestas individuales ni tu diagnóstico personal — solo información agregada y anónima."
     },
+    "installPrompt": {
+      "title": "Instala Caudall",
+      "body": "Agrégala a tu pantalla de inicio para entrar más rápido y recibir tus notificaciones.",
+      "install": "Instalar",
+      "dismiss": "Ahora no"
+    },
     "inicio": {
       "greeting": "Hola de nuevo",
       "scoreLabel": "Tu Índice de Salud Financiera",
@@ -92,6 +114,8 @@
         "save": "Guardar",
         "cancel": "Cancelar",
         "invalidEmail": "Ingresa un correo válido.",
+        "alreadySame": "Ese ya es tu correo actual.",
+        "taken": "Ese correo ya está en uso por otra cuenta.",
         "changeRequested": "Revisa {email} — te enviamos un link para confirmar el cambio.",
         "changeError": "No pudimos enviar el correo de confirmación. Intenta de nuevo."
       },
@@ -99,6 +123,7 @@
         "title": "Notificaciones",
         "subtitle": "Todas empiezan activadas — puedes apagar las que no te interesen.",
         "criteriaNote": "Cada tipo se apoya en un dato que el sistema ya calcula (fecha de compromiso, estado del diagnóstico, recálculo del CFHI, motor de próximo paso, vigencia de la licencia) — no se inventa ningún criterio nuevo.",
+        "errorInvalidType": "Tipo de notificación inválido.",
         "types": {
           "commitment": {
             "name": "Compromiso próximo",
@@ -299,7 +324,8 @@
       "ctaSendLink": "Enviarme un link para entrar",
       "sending": "Enviando...",
       "sentTitle": "Revisa tu correo",
-      "sentBody": "Si ese correo tiene una cuenta de administrador, te enviamos un link para entrar. Vence en 15 minutos y solo funciona una vez."
+      "sentBody": "Si ese correo tiene una cuenta de administrador, te enviamos un link para entrar. Vence en 15 minutos y solo funciona una vez.",
+      "errorInvalidEmail": "Ingresa un correo válido."
     },
     "settings": {
       "title": "Configuración",
@@ -521,6 +547,9 @@
       "send": "Enviar notificación de prueba",
       "sending": "Enviando...",
       "success": "Notificación enviada.",
+      "errorEmployeeNotFound": "No encontramos ningún empleado con ese correo.",
+      "errorNoSubscriptions": "Ese empleado no tiene notificaciones activadas todavía.",
+      "errorUnknown": "Error desconocido enviando la notificación.",
       "rules": {
         "sectionTitle": "Reglas de notificación",
         "sectionDescription": "Los recordatorios automáticos que reciben los empleados. Puedes editar el texto y los días de espera, activar o desactivar una regla, o crear una nueva a partir de una plantilla.",
@@ -560,6 +589,10 @@
     "backHome": "Volver",
     "ctaFinish": "Ver mi resultado",
     "errorSelectOption": "Selecciona una opción antes de continuar.",
+    "errors": {
+      "optionUnavailable": "Esa opción ya no está disponible. Recarga la página.",
+      "loadError": "Hubo un problema cargando la pregunta. Intenta de nuevo."
+    },
     "context": {
       "eyebrow": "Ya terminaste lo esencial",
       "title": "Unas últimas preguntas, opcionales",
@@ -1736,6 +1769,12 @@
       "dismiss": "Ahora no",
       "committedNotice": "Te comprometiste a este paso.",
       "committedWith": "Te comprometiste: {trigger} · {date}",
+      "errors": {
+        "noTrigger": "Elige con qué vas a cumplir este compromiso.",
+        "invalidDate": "Elige una fecha válida, hoy o más adelante.",
+        "notFound": "No encontramos esa recomendación.",
+        "invalidReason": "Motivo inválido."
+      },
       "commitStep": {
         "intro": "Los compromisos con fecha se cumplen más — dale forma al tuyo.",
         "triggerPrompt": "¿Con qué lo vas a lograr?",

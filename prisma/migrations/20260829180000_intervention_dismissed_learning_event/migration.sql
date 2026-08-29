@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "LearningEventType" ADD VALUE 'INTERVENTION_DISMISSED';

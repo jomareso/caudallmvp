@@ -16,12 +16,15 @@ import { buildFacts } from './diagnostic';
 // downstream como causa raíz automáticamente.
 //
 // Nota de datos: el banco define variables dedicadas de causa raíz por
-// dimensión (CTRL_DRIVER, RES_DRIVER, DEBT_DRIVER — rawType "ROOT_CAUSE"),
-// pero ninguna de las 94 preguntas cargadas hoy las responde directamente
-// (ver prisma/seed-data/README.md sobre las 220 preguntas pendientes). Sin
-// esas respuestas, la cadena causal solo puede construirse con las demás
-// reglas activas; si ninguna aplica, se usa un fallback explícito de baja
-// confianza (la dimensión con score más bajo) en vez de fallar o inventar.
+// dimensión (CTRL_DRIVER: CTRL-03/10/15, RES_DRIVER: RES-11/12,
+// DEBT_DRIVER: DEBT-10 — rawType "ROOT_CAUSE") y sí están activas hoy, pero
+// su ASK_IF es condicional (ej. RES-11 solo aplica con RES_COVERAGE bajo Y
+// RES_DRIVER todavía con poca confianza) — no todo empleado llega a
+// responderlas, sobre todo si el STOP ENGINE corta el diagnóstico antes.
+// Sin esa respuesta puntual, la cadena causal solo puede construirse con
+// las demás reglas activas; si ninguna aplica, se usa un fallback explícito
+// de baja confianza (la dimensión con score más bajo) en vez de fallar o
+// inventar.
 
 export type RootCauseResult = {
   method: 'CAUSAL_CHAIN' | 'LOWEST_SCORE_FALLBACK' | 'NONE';

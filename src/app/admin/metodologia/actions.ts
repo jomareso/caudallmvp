@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireAdm } from '@/lib/auth/admin-context';
 import { syncBancoMaestro, type SyncBancoMaestroSummary } from '@/lib/seed/sync-banco-maestro';
@@ -17,6 +18,7 @@ export async function syncBancoMaestroContent(): Promise<
   { ok: true; summary: SyncBancoMaestroSummary } | { ok: false; message: string }
 > {
   const admin = await requireAdm();
+  const t = await getTranslations('admin.metodologia');
 
   let summary: SyncBancoMaestroSummary;
   try {
@@ -27,7 +29,7 @@ export async function syncBancoMaestroContent(): Promise<
     summary = await syncBancoMaestro(prisma as unknown as import('@prisma/client').PrismaClient);
   } catch (error) {
     console.error('[syncBancoMaestroContent] fallo al sincronizar', error);
-    return { ok: false, message: 'No pudimos sincronizar el banco de preguntas. Intenta de nuevo.' };
+    return { ok: false, message: t('syncError') };
   }
 
   await prisma.auditLog.create({
