@@ -41,10 +41,14 @@ export default async function LandingPage() {
       ? { formTitle: formIntro.formTitle, formSubtitle: formIntro.formSubtitle, timeEstimate: formIntro.timeEstimate, privacyGuarantee: trust.privacyGuarantee }
       : null;
   // El titular de marca (BrandPanel) vive oculto bajo `lg` — en mobile
-  // nunca se veía ningún titular, solo el formulario, directo. Esta línea
-  // condensada reusa el mismo contenido de colaborador_hero en vez de
-  // pedir un texto nuevo en el CMS.
-  const mobileHook = hero ? `${hero.titleLine1}. ${hero.titleLine2}.` : null;
+  // nunca se veía ningún titular, solo el formulario, directo. Reusa el
+  // mismo contenido de colaborador_hero en vez de pedir un texto nuevo en
+  // el CMS. Dos líneas separadas (no un string concatenado) — cada
+  // componente de la promesa de valor debe quedar en su propia línea,
+  // igual que ya hace BrandPanel en escritorio; concatenarlas en un solo
+  // <p> las dejaba a merced de dónde el navegador decidiera cortar el
+  // texto envuelto.
+  const mobileHook = hero ? { line1: hero.titleLine1, line2: hero.titleLine2 } : null;
 
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-2">

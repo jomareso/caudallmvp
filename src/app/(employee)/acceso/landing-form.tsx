@@ -15,7 +15,7 @@ export function LandingForm({
   mobileHook
 }: {
   content: { formTitle: string; formSubtitle: string; timeEstimate: string; privacyGuarantee: string } | null;
-  mobileHook: string | null;
+  mobileHook: { line1: string; line2: string } | null;
 }) {
   const t = useTranslations('employee.landing');
   const router = useRouter();
@@ -51,8 +51,17 @@ export function LandingForm({
             título/subtítulo genérico de abajo en mobile (ver su
             `hidden lg:block` más abajo) — no se apila con él: con los dos a
             la vez, el mensaje salía casi repetido dos veces seguidas antes
-            del formulario. */}
-        {mobileHook ? <p className="text-sm text-nickel mb-4 lg:hidden">{mobileHook}</p> : null}
+            del formulario. Cada línea es su propio bloque (no un solo <p>
+            con las dos concatenadas) — así cada componente de la promesa
+            de valor queda en su propia línea, igual que BrandPanel en
+            escritorio; text-balance evita que una sola línea larga se
+            corte a media palabra en pantallas angostas. */}
+        {mobileHook ? (
+          <p className="text-sm text-nickel mb-4 lg:hidden text-balance">
+            <span className="block">{mobileHook.line1}</span>
+            <span className="block">{mobileHook.line2}</span>
+          </p>
+        ) : null}
         {content ? (
           <div className={mobileHook ? 'hidden lg:block' : undefined}>
             <p className="text-2xl font-semibold mb-2 leading-snug bg-gradient-to-r from-yale to-cola bg-clip-text text-transparent">

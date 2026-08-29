@@ -22,7 +22,11 @@ export async function BrandPanel() {
       <img src="/brand/caudall-logo-white.png" alt="Caudall" className="h-8 w-auto self-start mb-8" />
       {hero ? (
         <>
-          <h2 className="text-4xl font-medium leading-snug mb-4 max-w-md">
+          {/* text-2xl (no text-4xl): a 36px "Entiende tu salud financiera."
+              no cabe en una sola línea dentro de max-w-md — 24px es el
+              tamaño real del mockup (.brand-panel h3) y sí calza cada
+              línea completa sin partirse. */}
+          <h2 className="text-2xl font-medium leading-snug mb-4 max-w-md text-balance">
             <span className="block text-white">{hero.titleLine1}</span>
             <span className="block text-picton">{hero.titleLine2}</span>
           </h2>
