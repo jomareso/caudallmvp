@@ -47,15 +47,19 @@ export function LandingForm({
         {/* eslint-disable-next-line @next/next/no-img-element -- logo estático propio del bundle, no necesita el optimizador de next/image */}
         <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-8 mx-auto mb-6" />
         {/* Solo en mobile — en lg+ el mismo mensaje ya lo muestra BrandPanel
-            a la izquierda, repetirlo acá se vería duplicado. */}
+            a la izquierda, repetirlo acá se vería duplicado. Reemplaza al
+            título/subtítulo genérico de abajo en mobile (ver su
+            `hidden lg:block` más abajo) — no se apila con él: con los dos a
+            la vez, el mensaje salía casi repetido dos veces seguidas antes
+            del formulario. */}
         {mobileHook ? <p className="text-sm text-nickel mb-4 lg:hidden">{mobileHook}</p> : null}
         {content ? (
-          <>
+          <div className={mobileHook ? 'hidden lg:block' : undefined}>
             <p className="text-2xl font-semibold mb-2 leading-snug bg-gradient-to-r from-yale to-cola bg-clip-text text-transparent">
               {content.formTitle}
             </p>
             <p className="text-nickel text-base mb-10">{content.formSubtitle}</p>
-          </>
+          </div>
         ) : null}
 
         <form onSubmit={handleSubmit} className="bg-white border border-silver/60 rounded-xl p-6 text-left">
