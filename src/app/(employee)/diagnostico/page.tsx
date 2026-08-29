@@ -4,7 +4,7 @@ import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { getNextQuestion, countAnsweredAndTotal } from '@/lib/engines/diagnostic';
 import { finalizeDiagnostic } from '@/lib/engines/diagnostic-completion';
-import { DIMENSION_ICON, DEFAULT_DIMENSION_ICON } from '@/lib/engines/commitment-triggers';
+import { DIMENSION_ICON, DEFAULT_DIMENSION_ICON } from '@/lib/engines/dimension-icons';
 import { getPlatformSettings } from '@/lib/settings/platform-settings';
 import { QuestionForm } from './question-form';
 import { EmployeeTopBar } from '../employee-topbar';

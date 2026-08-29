@@ -4,14 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { commitToAction, dismissAction, reportOutcome } from './actions';
 import { PushOptIn } from './push-opt-in';
-import {
-  COMMITMENT_TRIGGERS,
-  COMMITMENT_TRIGGER_ICON,
-  DIMENSION_ICON,
-  DEFAULT_DIMENSION_ICON,
-  type CommitmentTrigger
-} from '@/lib/engines/commitment-triggers';
-import { OUTCOME_REASONS, type OutcomeReason } from '@/lib/engines/outcome-reasons';
+import { DIMENSION_ICON, DEFAULT_DIMENSION_ICON } from '@/lib/engines/dimension-icons';
 
 type Status = 'SUGGESTED' | 'COMMITTED' | 'IN_PROGRESS' | 'COMPLETED' | 'DISMISSED';
 
@@ -60,6 +53,8 @@ export function ActionCard({
   videoUrl,
   showVideo,
   committedWith,
+  triggers,
+  outcomeReasons,
   labels
 }: {
   employeeInterventionId: string;
@@ -76,6 +71,11 @@ export function ActionCard({
   // Ya formateado server-side (next-intl + Intl.DateTimeFormat) — ver
   // page.tsx. Null si todavía no hay compromiso registrado.
   committedWith: string | null;
+  // Opciones activas de CommitmentTriggerOption/OutcomeReasonOption (ver
+  // /admin/metodologia/conductual) — ya no son una lista fija en código,
+  // vienen resueltas server-side en page.tsx.
+  triggers: { code: string; icon: string; label: string }[];
+  outcomeReasons: { code: string; label: string }[];
   labels: {
     whyThisStep: string;
     commit: string;
@@ -86,14 +86,12 @@ export function ActionCard({
     commitStepDatePrompt: string;
     commitStepConfirm: string;
     commitStepCancel: string;
-    triggers: Record<CommitmentTrigger, string>;
     didYouDoIt: string;
     achieved: string;
     partial: string;
     notAchieved: string;
     outcomeReasonPrompt: string;
     outcomeReasonBack: string;
-    outcomeReasons: Record<OutcomeReason, string>;
     watchVideo: string;
     pushEnable: string;
     pushEnabled: string;
@@ -108,7 +106,7 @@ export function ActionCard({
   // PROCRASTINATION → Implementation intention — un compromiso con un
   // disparador y una fecha concretos se cumple más que uno genérico).
   const [committing, setCommitting] = useState(false);
-  const [selectedTrigger, setSelectedTrigger] = useState<CommitmentTrigger | null>(null);
+  const [selectedTrigger, setSelectedTrigger] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [commitError, setCommitError] = useState<string | null>(null);
   // "En parte" / "Todavía no" son las dos fricciones reales que vale la
@@ -138,7 +136,7 @@ export function ActionCard({
     });
   }
 
-  function handleOutcome(outcome: 'ACHIEVED' | 'PARTIAL' | 'NOT_ACHIEVED', reason?: OutcomeReason) {
+  function handleOutcome(outcome: 'ACHIEVED' | 'PARTIAL' | 'NOT_ACHIEVED', reason?: string) {
     startTransition(async () => {
       await reportOutcome(employeeInterventionId, outcome, reason);
       router.refresh();
@@ -232,20 +230,20 @@ export function ActionCard({
 
           <p className="text-xs font-medium text-quartz mb-2">{labels.commitStepTriggerPrompt}</p>
           <div className="flex flex-col gap-1.5 mb-4">
-            {COMMITMENT_TRIGGERS.map((trigger) => (
+            {triggers.map((trigger) => (
               <button
-                key={trigger}
+                key={trigger.code}
                 type="button"
-                onClick={() => setSelectedTrigger(trigger)}
-                aria-pressed={selectedTrigger === trigger}
+                onClick={() => setSelectedTrigger(trigger.code)}
+                aria-pressed={selectedTrigger === trigger.code}
                 className={`flex items-center gap-2 text-left text-xs rounded-lg border px-3 py-2 transition-colors ${
-                  selectedTrigger === trigger
+                  selectedTrigger === trigger.code
                     ? 'border-yale bg-yale/5 text-yale font-medium'
                     : 'border-silver/60 text-quartz'
                 }`}
               >
-                <span aria-hidden="true">{COMMITMENT_TRIGGER_ICON[trigger]}</span>
-                {labels.triggers[trigger]}
+                <span aria-hidden="true">{trigger.icon}</span>
+                {trigger.label}
               </button>
             ))}
           </div>
@@ -295,15 +293,15 @@ export function ActionCard({
             <div>
               <p className="text-sm text-quartz mb-2">{labels.outcomeReasonPrompt}</p>
               <div className="flex flex-col gap-1.5 mb-2">
-                {OUTCOME_REASONS.map((reason) => (
+                {outcomeReasons.map((reason) => (
                   <button
-                    key={reason}
+                    key={reason.code}
                     type="button"
-                    onClick={() => handleOutcome(pendingOutcome, reason)}
+                    onClick={() => handleOutcome(pendingOutcome, reason.code)}
                     disabled={isPending}
                     className="text-left text-xs rounded-lg border border-silver/60 text-quartz px-3 py-2 disabled:opacity-60"
                   >
-                    {labels.outcomeReasons[reason]}
+                    {reason.label}
                   </button>
                 ))}
               </div>

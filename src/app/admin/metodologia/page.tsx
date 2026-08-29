@@ -75,6 +75,9 @@ export default async function AdminMetodologiaPage() {
           <Link href="/admin/metodologia/parametros" className="block mt-1 text-xs text-yale underline">
             {t('viewParametersLink')}
           </Link>
+          <Link href="/admin/metodologia/conductual" className="block mt-1 text-xs text-yale underline">
+            {t('viewBehavioralLink')}
+          </Link>
         </div>
       </div>
     </main>

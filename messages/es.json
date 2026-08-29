@@ -231,6 +231,8 @@
       },
       "viewParametersLink": "Ver parámetros del motor de diagnóstico",
       "viewParametersDescription": "Umbrales del STOP ENGINE, valor mínimo de preguntas de alto valor, y cortes de nivel de progreso.",
+      "viewBehavioralLink": "Ver opciones conductuales",
+      "viewBehavioralDescription": "Disparadores de compromiso y motivos de no-logro que ve el empleado al comprometerse con una acción.",
       "parametros": {
         "title": "Parámetros del motor de diagnóstico",
         "description": "Controlan cuándo el diagnóstico deja de preguntar y cómo se calculan los niveles de progreso. Cambiarlos no requiere un deploy nuevo — afectan de inmediato a cualquier diagnóstico en curso.",
@@ -260,6 +262,34 @@
         "errorStopOrder": "El orden debe ser: mínimo ≤ máximo blando ≤ máximo duro.",
         "errorThresholdOrder": "El umbral estricto debe ser mayor o igual al umbral normal.",
         "errorTierOrder": "El puntaje mínimo de \"Capitán\" debe ser mayor al de \"Navegante\"."
+      },
+      "conductual": {
+        "title": "Opciones conductuales",
+        "description": "Las opciones que ve el empleado al comprometerse con una acción y al reportar cómo le fue. Puedes editar el texto, reordenarlas, desactivarlas, o crear una opción nueva. Por seguridad no se pueden borrar — un código que ya se usó en un compromiso guardado necesita poder seguir mostrando su texto.",
+        "triggersSectionTitle": "Disparadores de compromiso",
+        "triggersSectionDescription": "Con qué se compromete el empleado a cumplir una acción (ej. \"con mi próximo ingreso\").",
+        "reasonsSectionTitle": "Motivos de no-logro",
+        "reasonsSectionDescription": "Por qué un compromiso quedó en \"en parte\" o \"todavía no\" — alimenta el aprendizaje del sistema sobre qué funciona.",
+        "codeLabel": "Código",
+        "codeHelp": "Identificador estable, solo mayúsculas/números/guion bajo (ej. DESPUES_DE_ALMORZAR). No se puede cambiar después de creado.",
+        "iconLabel": "Ícono (un emoji)",
+        "labelLabel": "Texto que ve el empleado",
+        "sortOrderLabel": "Orden (menor número aparece primero)",
+        "createCta": "Crear opción",
+        "creating": "Creando...",
+        "createSuccess": "Opción creada.",
+        "editCta": "Editar",
+        "saveCta": "Guardar",
+        "saving": "Guardando...",
+        "cancelCta": "Cancelar",
+        "activateCta": "Activar",
+        "deactivateCta": "Desactivar",
+        "enabledBadge": "Activa",
+        "disabledBadge": "Desactivada",
+        "existingTitle": "Opciones existentes",
+        "errorGeneric": "Revisa los datos ingresados.",
+        "errorCodeFormat": "El código solo puede usar mayúsculas, números y guion bajo, empezando con una letra.",
+        "errorCodeExists": "Ya existe una opción con ese código."
       }
     },
     "login": {
@@ -1711,14 +1741,7 @@
         "triggerPrompt": "¿Con qué lo vas a lograr?",
         "datePrompt": "¿Para cuándo?",
         "confirm": "Confirmar compromiso",
-        "cancel": "Cancelar",
-        "triggers": {
-          "PROXIMO_INGRESO": "Con mi próximo ingreso",
-          "DIA_ESPECIFICO": "Un día que yo elija",
-          "DESPUES_GASTOS_FIJOS": "Después de pagar mis gastos fijos",
-          "PRIMERA_HORA_DIA": "A primera hora del día",
-          "FIN_DE_SEMANA": "Este fin de semana"
-        }
+        "cancel": "Cancelar"
       },
       "didYouDoIt": "¿Ya lo hiciste?",
       "achieved": "Sí, lo hice",
@@ -1726,12 +1749,7 @@
       "notAchieved": "No todavía",
       "outcomeReason": {
         "prompt": "¿Qué pasó?",
-        "back": "Atrás",
-        "reasons": {
-          "NO_TIME": "No tuve tiempo",
-          "TOO_HARD": "Fue más difícil de lo que pensé",
-          "CHANGED_MIND": "Cambié de opinión"
-        }
+        "back": "Atrás"
       },
       "none": "Vas bien — no hay ninguna acción pendiente que necesites atender ahora.",
       "pending": "Todavía no tenemos suficiente información para sugerirte un próximo paso. Vuelve a revisar tu diagnóstico más adelante — algunas respuestas nuevas pueden desbloquear una recomendación.",
