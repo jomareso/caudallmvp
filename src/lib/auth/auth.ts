@@ -95,7 +95,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             { kind: 'session-subject', sessionSubjectId: payload.adminUserId },
             async () => {
               const admin = await prisma.adminUser.findUnique({ where: { id: payload.adminUserId } });
-              if (!admin || admin.email !== payload.email) return null;
+              // Un link emitido antes de desactivar al admin sigue siendo un
+              // JWT válido dentro de su TTL (magicLinkTtlMinutes) — sin este
+              // chequeo, completaría el login igual (requireAdmin() lo
+              // bloquearía después en cada página, pero la sesión con
+              // role:'admin' no debería llegar a crearse).
+              if (!admin || admin.email !== payload.email || !admin.active) return null;
 
               await prisma.adminUser.update({
                 where: { id: admin.id },
