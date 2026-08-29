@@ -74,17 +74,31 @@ const BENCHMARK_AVG_SELECT = {
   overallScore: true,
   controlScore: true,
   savingScore: true,
-  debtScore: true,
   planningScore: true
 } as const;
 
+// El estudio de origen (2021-2024) le daba debtScore=100 a quien no tenía
+// deuda, en vez de excluir la pregunta (confirmado por Reynoso, quien
+// dirigió el estudio) — justo lo que la regla CORE #7 prohíbe ("Debt N/A
+// NO es score 100. Se excluye del denominador"). Promediar tal cual
+// infla el promedio de Deuda con gente que nunca tuvo una deuda que
+// evaluar. La fila de Deuda en Resultado solo se muestra cuando el
+// PROPIO empleado no está en N/A (ver resultado/page.tsx) — comparar a
+// alguien que sí tiene deuda contra un promedio contaminado por gente sin
+// deuda no es la comparación correcta. Se excluye debtScore=100 del
+// promedio de Deuda específicamente — nunca de los otros 4 campos, que no
+// tienen este problema.
+async function computeGroupAverages(where: Record<string, unknown>): Promise<{ n: number; avg: BenchmarkAverages }> {
+  const [mainAgg, debtAgg] = await Promise.all([
+    prisma.nationalBenchmarkRecord.aggregate({ where, _avg: BENCHMARK_AVG_SELECT, _count: true }),
+    prisma.nationalBenchmarkRecord.aggregate({ where: { ...where, debtScore: { not: 100 } }, _avg: { debtScore: true } })
+  ]);
+  return { n: mainAgg._count, avg: { ...mainAgg._avg, debtScore: debtAgg._avg.debtScore } };
+}
+
 async function fetchNationalFallback(version: string): Promise<NationalComparison> {
-  const nationalAgg = await prisma.nationalBenchmarkRecord.aggregate({
-    where: { version },
-    _avg: BENCHMARK_AVG_SELECT,
-    _count: true
-  });
-  return toComparison('NATIONAL', nationalAgg._count, nationalAgg._avg);
+  const { n, avg } = await computeGroupAverages({ version });
+  return toComparison('NATIONAL', n, avg);
 }
 
 export async function getNationalComparison(employeeId: string): Promise<NationalComparison | null> {
@@ -103,17 +117,13 @@ export async function getNationalComparison(employeeId: string): Promise<Nationa
     employmentStatus: facts.get('CTX_EMPLOYMENT_STATUS')?.state
   });
 
-  const [cohortAgg, settings] = await Promise.all([
-    prisma.nationalBenchmarkRecord.aggregate({
-      where: { version: latest.version, ...cohortWhere },
-      _avg: BENCHMARK_AVG_SELECT,
-      _count: true
-    }),
+  const [{ n, avg }, settings] = await Promise.all([
+    computeGroupAverages({ version: latest.version, ...cohortWhere }),
     getPlatformSettings()
   ]);
 
-  if (selectComparisonScope(cohortAgg._count, settings.minCohortSize) === 'COHORT') {
-    return toComparison('COHORT', cohortAgg._count, cohortAgg._avg);
+  if (selectComparisonScope(n, settings.minCohortSize) === 'COHORT') {
+    return toComparison('COHORT', n, avg);
   }
 
   return fetchNationalFallback(latest.version);
@@ -175,17 +185,13 @@ export async function getSegmentComparison(
     segmentWhere = { incomeRangeRaw: { in: rawRanges } };
   }
 
-  const [cohortAgg, settings] = await Promise.all([
-    prisma.nationalBenchmarkRecord.aggregate({
-      where: { version: latest.version, ...segmentWhere },
-      _avg: BENCHMARK_AVG_SELECT,
-      _count: true
-    }),
+  const [{ n, avg }, settings] = await Promise.all([
+    computeGroupAverages({ version: latest.version, ...segmentWhere }),
     getPlatformSettings()
   ]);
 
-  if (selectComparisonScope(cohortAgg._count, settings.minCohortSize) === 'COHORT') {
-    return toComparison('COHORT', cohortAgg._count, cohortAgg._avg);
+  if (selectComparisonScope(n, settings.minCohortSize) === 'COHORT') {
+    return toComparison('COHORT', n, avg);
   }
 
   return fetchNationalFallback(latest.version);
