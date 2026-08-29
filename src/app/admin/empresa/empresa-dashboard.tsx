@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { getTenantAggregates } from '@/lib/engines/tenant-aggregates';
 import { scoreToDimensionState, scoreToProgressTier } from '@/lib/engines/scoring';
+import { getPlatformSettings } from '@/lib/settings/platform-settings';
 
 const BAND_CLASS: Record<string, string> = {
   CRITICAL: 'bg-bad/10 text-bad',
@@ -51,9 +52,10 @@ export async function EmpresaDashboard({
     const tTier = await getTranslations('admin.empresa.tiers');
     const tViewAs = await getTranslations('admin.viewAs');
 
-    const [aggregates, licenseCounts] = await Promise.all([
+    const [aggregates, licenseCounts, settings] = await Promise.all([
       getTenantAggregates(tenant.id),
-      prisma.license.groupBy({ by: ['status'], where: { tenantId: tenant.id }, _count: true })
+      prisma.license.groupBy({ by: ['status'], where: { tenantId: tenant.id }, _count: true }),
+      getPlatformSettings()
     ]);
 
     const countByStatus = Object.fromEntries(licenseCounts.map((c) => [c.status, c._count])) as Record<
@@ -147,7 +149,10 @@ export async function EmpresaDashboard({
     }
 
     const cfhiRounded = Math.round(aggregates.averageCfhi);
-    const cfhiTier = scoreToProgressTier(cfhiRounded);
+    const cfhiTier = scoreToProgressTier(cfhiRounded, {
+      mid: settings.progressTierMidCutoff,
+      high: settings.progressTierHighCutoff
+    });
 
     return (
       <main className="flex-1 flex items-center justify-center p-6">

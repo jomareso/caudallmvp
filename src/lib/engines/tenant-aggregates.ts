@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db/prisma';
 import { scoreToProgressTier } from './scoring';
+import { getPlatformSettings } from '@/lib/settings/platform-settings';
 
 // spec (docs/data-model.md, Bloque 7) + Decisión 1: la empresa nunca ve
 // datos individuales de empleados, solo agregados anonimizados con un
@@ -74,9 +75,11 @@ export async function getTenantAggregates(tenantId: string): Promise<TenantAggre
   const averageCfhi = financialStates.reduce((sum, fs) => sum + fs.cfhiScore, 0) / employeeCount;
   const qualifyingEmployeeIds = financialStates.map((fs) => fs.employeeId);
 
+  const settings = await getPlatformSettings();
+  const tierCutoffs = { mid: settings.progressTierMidCutoff, high: settings.progressTierHighCutoff };
   const cfhiTierDistribution: CfhiTierDistribution = { LOW: 0, MID: 0, HIGH: 0 };
   for (const fs of financialStates) {
-    cfhiTierDistribution[scoreToProgressTier(fs.cfhiScore)] += 1;
+    cfhiTierDistribution[scoreToProgressTier(fs.cfhiScore, tierCutoffs)] += 1;
   }
 
   const committedEmployeeIds = await prisma.employeeIntervention.findMany({

@@ -12,7 +12,17 @@ export const PLATFORM_SETTINGS_DEFAULTS = {
   licenseDurationsMonths: [3, 6, 12] as number[],
   minCohortSize: 30,
   minSampleSize: 20,
-  magicLinkTtlMinutes: 15
+  magicLinkTtlMinutes: 15,
+  // Motor de diagnóstico (STOP ENGINE) y bandas de nivel — ver
+  // src/lib/engines/diagnostic.ts y src/lib/engines/scoring.ts.
+  stopFloor: 8,
+  stopSoftMax: 15,
+  stopHardMax: 18,
+  highValueThreshold: 0.9,
+  highValueThresholdSoft: 0.97,
+  progressTarget: 12,
+  progressTierMidCutoff: 41,
+  progressTierHighCutoff: 71
 };
 
 export type PlatformSettingsValues = typeof PLATFORM_SETTINGS_DEFAULTS;
@@ -36,6 +46,14 @@ export async function getPlatformSettings(): Promise<PlatformSettingsValues> {
         : PLATFORM_SETTINGS_DEFAULTS.licenseDurationsMonths,
     minCohortSize: settings.minCohortSize,
     minSampleSize: settings.minSampleSize,
-    magicLinkTtlMinutes: settings.magicLinkTtlMinutes
+    magicLinkTtlMinutes: settings.magicLinkTtlMinutes,
+    stopFloor: settings.stopFloor,
+    stopSoftMax: settings.stopSoftMax,
+    stopHardMax: settings.stopHardMax,
+    highValueThreshold: settings.highValueThreshold,
+    highValueThresholdSoft: settings.highValueThresholdSoft,
+    progressTarget: settings.progressTarget,
+    progressTierMidCutoff: settings.progressTierMidCutoff,
+    progressTierHighCutoff: settings.progressTierHighCutoff
   };
 }

@@ -70,12 +70,20 @@ describe('scoreToDimensionState', () => {
 });
 
 describe('scoreToProgressTier', () => {
-  it('mapea los cortes provisionales de nivel (0-40/41-70/71-100)', () => {
+  it('mapea los cortes provisionales de nivel por default (0-40/41-70/71-100)', () => {
     expect(scoreToProgressTier(100)).toBe('HIGH');
     expect(scoreToProgressTier(71)).toBe('HIGH');
     expect(scoreToProgressTier(70)).toBe('MID');
     expect(scoreToProgressTier(41)).toBe('MID');
     expect(scoreToProgressTier(40)).toBe('LOW');
     expect(scoreToProgressTier(0)).toBe('LOW');
+  });
+
+  it('respeta cortes configurables distintos (PlatformSettings)', () => {
+    const cutoffs = { mid: 30, high: 60 };
+    expect(scoreToProgressTier(60, cutoffs)).toBe('HIGH');
+    expect(scoreToProgressTier(59, cutoffs)).toBe('MID');
+    expect(scoreToProgressTier(30, cutoffs)).toBe('MID');
+    expect(scoreToProgressTier(29, cutoffs)).toBe('LOW');
   });
 });

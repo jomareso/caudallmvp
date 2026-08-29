@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { scoreToDimensionState, scoreToProgressTier } from '@/lib/engines/scoring';
+import { getPlatformSettings } from '@/lib/settings/platform-settings';
 import { countContextAnsweredAndTotal } from '@/lib/engines/diagnostic';
 import { getNationalComparison, getSegmentComparison, type NationalComparison } from '@/lib/engines/national-benchmark';
 import { EmployeeTopBar } from '../../employee-topbar';
@@ -16,7 +17,10 @@ export default async function ResultadoPage() {
   const employeeId = employee.id;
 
   return runWithTenantContext(employeeTenantContext(employee), async () => {
-    const financialState = await prisma.financialState.findUnique({ where: { employeeId } });
+    const [financialState, settings] = await Promise.all([
+      prisma.financialState.findUnique({ where: { employeeId } }),
+      getPlatformSettings()
+    ]);
     if (!financialState) {
       // Diagnóstico incompleto: manda de vuelta a responder.
       redirect('/diagnostico');
@@ -47,7 +51,10 @@ export default async function ResultadoPage() {
 
     const cfhiRounded = Math.round(financialState.cfhiScore);
     const cfhiBand = scoreToDimensionState(cfhiRounded);
-    const cfhiLevel = scoreToProgressTier(cfhiRounded);
+    const cfhiLevel = scoreToProgressTier(cfhiRounded, {
+      mid: settings.progressTierMidCutoff,
+      high: settings.progressTierHighCutoff
+    });
 
     // Resiliencia queda fuera a propósito (regla CORE #5 — ver
     // national-benchmark.ts): el estudio de origen no la mide aparte.

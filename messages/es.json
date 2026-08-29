@@ -228,6 +228,38 @@
           "CONTEXT": "Contexto",
           "FOLLOWUP": "Seguimiento"
         }
+      },
+      "viewParametersLink": "Ver parámetros del motor de diagnóstico",
+      "viewParametersDescription": "Umbrales del STOP ENGINE, valor mínimo de preguntas de alto valor, y cortes de nivel de progreso.",
+      "parametros": {
+        "title": "Parámetros del motor de diagnóstico",
+        "description": "Controlan cuándo el diagnóstico deja de preguntar y cómo se calculan los niveles de progreso. Cambiarlos no requiere un deploy nuevo — afectan de inmediato a cualquier diagnóstico en curso.",
+        "stopSectionTitle": "STOP ENGINE — cuándo dejar de preguntar",
+        "stopFloorLabel": "Mínimo de preguntas antes de poder parar",
+        "stopFloorHelp": "El diagnóstico nunca para antes de este número, aunque el resto de preguntas ya tenga poco valor.",
+        "stopSoftMaxLabel": "Máximo blando",
+        "stopSoftMaxHelp": "Pasado este número, solo se sigue preguntando lo que tenga un valor muy alto (ver umbral estricto más abajo).",
+        "stopHardMaxLabel": "Máximo duro",
+        "stopHardMaxHelp": "El diagnóstico siempre para acá, sin excepción, aunque falte confianza en el resultado.",
+        "progressTargetLabel": "Meta visual de la barra de progreso",
+        "progressTargetHelp": "Cuántas preguntas respondidas hacen que la barra de progreso en /diagnostico se vea casi completa. No cambia cuándo el diagnóstico realmente termina — solo qué tan rápido avanza la barra.",
+        "thresholdSectionTitle": "Valor mínimo para seguir preguntando",
+        "highValueThresholdLabel": "Umbral normal (0 a 1)",
+        "highValueThresholdHelp": "Antes del máximo blando, una pregunta se ofrece si su valor de información o de seguridad alcanza este umbral.",
+        "highValueThresholdSoftLabel": "Umbral estricto, pasado el máximo blando (0 a 1)",
+        "highValueThresholdSoftHelp": "Debe ser mayor o igual al umbral normal — pasado el máximo blando, solo lo verdaderamente importante justifica seguir preguntando.",
+        "tierSectionTitle": "Niveles de progreso (Explorador / Navegante / Capitán)",
+        "progressTierMidCutoffLabel": "Puntaje mínimo para \"Navegante\"",
+        "progressTierMidCutoffHelp": "Por debajo de este puntaje, el nivel mostrado es \"Explorador\".",
+        "progressTierHighCutoffLabel": "Puntaje mínimo para \"Capitán\"",
+        "progressTierHighCutoffHelp": "Debe ser mayor al puntaje mínimo de \"Navegante\".",
+        "saveCta": "Guardar parámetros",
+        "saving": "Guardando...",
+        "saveSuccess": "Parámetros actualizados.",
+        "errorGeneric": "Revisa los datos ingresados.",
+        "errorStopOrder": "El orden debe ser: mínimo ≤ máximo blando ≤ máximo duro.",
+        "errorThresholdOrder": "El umbral estricto debe ser mayor o igual al umbral normal.",
+        "errorTierOrder": "El puntaje mínimo de \"Capitán\" debe ser mayor al de \"Navegante\"."
       }
     },
     "login": {

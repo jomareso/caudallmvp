@@ -56,17 +56,24 @@ export function scoreToDimensionState(score: number): DimensionState {
 
 export type ProgressTier = 'LOW' | 'MID' | 'HIGH';
 
+export type ProgressTierCutoffs = { mid: number; high: number };
+
+// Cortes provisionales confirmados por Reynoso — el propio documento los
+// marca como provisionales hasta calibrarlos con evidencia real. Quedan
+// acá como default (y para tests sin DB); en producción se usa el valor
+// real de PlatformSettings.progressTierMidCutoff/HighCutoff, editable
+// desde /admin/metodologia/parametros.
+export const PROGRESS_TIER_DEFAULT_CUTOFFS: ProgressTierCutoffs = { mid: 41, high: 71 };
+
 // Metodología v1.5 §6: Explorador/Navegante/Capitán (empleado) y
 // Vulnerables/Sobreviviendo/Saludables (RRHH) son "una capa de
 // gamificación y progreso" — comparten la misma medición de fondo (CFHI y
 // puntuaciones por dimensión) pero NO son la misma banda de 4 estados que
 // devuelve scoreToDimensionState (esa es la "interpretación de la
 // condición"; el nivel es un elemento aparte que se muestra junto a ella,
-// no en su lugar). Cortes provisionales confirmados por Reynoso — el
-// propio documento los marca como provisionales hasta calibrarlos con
-// evidencia real.
-export function scoreToProgressTier(score: number): ProgressTier {
-  if (score >= 71) return 'HIGH';
-  if (score >= 41) return 'MID';
+// no en su lugar).
+export function scoreToProgressTier(score: number, cutoffs: ProgressTierCutoffs = PROGRESS_TIER_DEFAULT_CUTOFFS): ProgressTier {
+  if (score >= cutoffs.high) return 'HIGH';
+  if (score >= cutoffs.mid) return 'MID';
   return 'LOW';
 }
