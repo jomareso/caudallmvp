@@ -9,5 +9,12 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src')
     }
+  },
+  // e2e/ son specs de Playwright (test.describe de @playwright/test, no de
+  // Vitest) — sin excluirlas, Vitest las recoge igual por el patrón
+  // default *.spec.ts y falla porque test.describe() no puede llamarse
+  // fuera de una corrida de Playwright.
+  test: {
+    exclude: ['**/node_modules/**', 'e2e/**']
   }
 });
