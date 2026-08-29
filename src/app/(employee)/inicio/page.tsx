@@ -5,8 +5,10 @@ import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { scoreToProgressTier } from '@/lib/engines/scoring';
 import { getPlatformSettings } from '@/lib/settings/platform-settings';
+import { getNationalComparison } from '@/lib/engines/national-benchmark';
 import { getActionSuggestion } from '../diagnostico/accion/actions';
 import { EmployeeTopBar } from '../employee-topbar';
+import { ScoreGauge } from '../diagnostico/resultado/score-gauge';
 
 export default async function InicioPage() {
   const baseEmployee = await requireEmployee();
@@ -30,9 +32,18 @@ export default async function InicioPage() {
   }
 
   const actionResult = await getActionSuggestion();
+  // Mismo círculo + comparativo que /diagnostico/resultado (pedido
+  // explícito: "cuando esté en inicio debe tener la misma visual que
+  // resultado") — getNationalComparison necesita correr dentro del mismo
+  // contexto de tenant que financialState, no resuelve el suyo propio
+  // (a diferencia de getActionSuggestion).
+  const generalComparison = await runWithTenantContext(employeeTenantContext(baseEmployee), () =>
+    getNationalComparison(baseEmployee.id)
+  );
 
   const t = await getTranslations('employee.inicio');
   const tLevel = await getTranslations('diagnostic.result.levels');
+  const tResult = await getTranslations('diagnostic.result');
   const tAll = await getTranslations();
 
   const cfhiRounded = Math.round(financialState.cfhiScore);
@@ -63,14 +74,17 @@ export default async function InicioPage() {
             </div>
           ) : null}
 
-          <div className="bg-white border border-silver/60 rounded-xl p-6 mb-3.5 flex items-center gap-4">
-            <span className="text-3xl font-semibold text-yale leading-none">{cfhiRounded}</span>
-            <div>
-              <p className="text-xs font-semibold text-quartz">
-                {tLevel('prefix')}: {tLevel(cfhiLevel)}
-              </p>
-              <p className="text-[11px] text-nickel">{t('scoreLabel')}</p>
-            </div>
+          <div className="bg-white border border-silver/60 rounded-xl p-6 mb-3.5 text-center">
+            <p className="text-sm font-semibold text-yale mb-2">{t('scoreLabel')}</p>
+            <ScoreGauge
+              score={cfhiRounded}
+              vsAverage={generalComparison ? cfhiRounded - generalComparison.overall : null}
+              outOfLabel={tResult('outOf100')}
+              vsAverageLabel={tResult('comparison.vsAverage')}
+            />
+            <span className="inline-block text-[11px] px-2.5 py-1 rounded-lg bg-picton/10 text-yale mt-3">
+              {tLevel('prefix')}: {tLevel(cfhiLevel)}
+            </span>
           </div>
 
           {actionResult.kind === 'suggestion' ? (
