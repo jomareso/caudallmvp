@@ -40,6 +40,34 @@ import { computeEligibility, type EligibilityResult } from './eligibility';
 const FIN_READINESS_ORDER: Record<string, number> = { NOT_ELIGIBLE: 0, CONSTRAINED: 1, ELIGIBLE: 2, STRONG: 3 };
 const BEH_READINESS_ORDER: Record<string, number> = { LOW: 0, MODERATE: 1, HIGH: 2 };
 
+// BEH-05/06/07/08 (preguntas de refinamiento del banco) también apuntan a
+// BEH_FRICTION, pero devuelven variantes de intensidad
+// (PROCRASTINATION_MODERATE, HIGH_COMPLEXITY, etc.) que nunca calzan
+// exacto contra el behavioralTechniqueCode de ninguna intervención — el
+// match de abajo es por igualdad de texto. Se normalizan solo en este
+// punto de comparación, nunca en el VariableState guardado: ese mismo
+// string de estado es el que decide qué texto de opción se le muestra al
+// empleado vía i18n en la propia pregunta (ver diagnostico/page.tsx), así
+// que reescribirlo ahí haría que dos opciones distintas de una misma
+// pregunta mostraran el mismo texto.
+//
+// LOW_COMPLEXITY (BEH-07: "algo sencillo") queda deliberadamente sin
+// mapear — es la señal más débil de las cuatro preguntas de
+// refinamiento, y forzar la intervención de complejidad con una señal así
+// de débil no está justificado (regla CORE #13). Sin match, cae al
+// fallback normal de la dimensión, que sigue siendo una intervención
+// elegible real.
+const FRICTION_NORMALIZATION: Record<string, string> = {
+  PROCRASTINATION_MODERATE: 'PROCRASTINATION',
+  FORGETTING_MODERATE: 'FORGETTING',
+  HIGH_COMPLEXITY: 'COMPLEXITY',
+  CHOICE_OVERLOAD_MODERATE: 'TOO_MANY_CHOICES'
+};
+
+export function normalizeFriction(state: string): string {
+  return FRICTION_NORMALIZATION[state] ?? state;
+}
+
 export type NextBestActionResult = {
   intervention: Intervention | null;
   method: 'FRICTION_MATCH' | 'FALLBACK' | 'MAINTENANCE' | 'NONE';
@@ -217,14 +245,15 @@ export async function computeNextBestAction(employeeId: string): Promise<NextBes
     ? ` (${priority.dimensionCode} no tenía nada accionable hoy; se usó ${dimensionCode} por severidad)`
     : '';
 
-  const friction = facts.get('BEH_FRICTION')?.state;
+  const rawFriction = facts.get('BEH_FRICTION')?.state;
+  const friction = rawFriction ? normalizeFriction(rawFriction) : undefined;
   if (friction) {
     const match = eligibleCandidates.find((c) => c.behavioralTechniqueCode === friction);
     if (match) {
       return {
         intervention: match,
         method: 'FRICTION_MATCH',
-        explanation: `BEH_FRICTION=${friction} coincide con la técnica de la intervención ${match.behavioralTechniqueCode}.${actionabilityNote}`
+        explanation: `BEH_FRICTION=${rawFriction} coincide con la técnica de la intervención ${match.behavioralTechniqueCode}.${actionabilityNote}`
       };
     }
   }
@@ -233,8 +262,8 @@ export async function computeNextBestAction(employeeId: string): Promise<NextBes
   return {
     intervention: fallback,
     method: 'FALLBACK',
-    explanation: (friction
-      ? `BEH_FRICTION=${friction} no tiene intervención cargada todavía en ${dimensionCode}; se usó la primera elegible.`
+    explanation: (rawFriction
+      ? `BEH_FRICTION=${rawFriction} no tiene intervención cargada todavía en ${dimensionCode}; se usó la primera elegible.`
       : `Fricción conductual todavía desconocida; se usó la primera intervención elegible en ${dimensionCode}.`) + actionabilityNote
   };
 }
