@@ -1,8 +1,10 @@
 import type { ReactNode, CSSProperties } from 'react';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth/auth';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { hexToTailwindRgbTriplet } from '@/lib/theme/tenant-color';
+import { InstallPrompt } from './install-prompt';
 
 // Decisión 6 (actualizada): una licencia vencida le quita el acceso al
 // empleado (confirmado por Reynoso). El chequeo vive acá, no en cada
@@ -61,9 +63,27 @@ export default async function EmployeeLayout({ children }: { children: ReactNode
     });
   }
 
-  if (tenantPrimaryRgb) {
-    return <div style={{ '--tenant-primary-rgb': tenantPrimaryRgb } as CSSProperties}>{children}</div>;
+  // Solo se ofrece instalar una vez que hay sesión — antes de eso (landing,
+  // registro) todavía no hay nada que valga la pena instalar.
+  let installPrompt: ReactNode = null;
+  if (sessionUser?.role === 'employee') {
+    const t = await getTranslations('employee.installPrompt');
+    installPrompt = <InstallPrompt labels={{ title: t('title'), body: t('body'), install: t('install'), dismiss: t('dismiss') }} />;
   }
 
-  return <>{children}</>;
+  if (tenantPrimaryRgb) {
+    return (
+      <div style={{ '--tenant-primary-rgb': tenantPrimaryRgb } as CSSProperties}>
+        {children}
+        {installPrompt}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {children}
+      {installPrompt}
+    </>
+  );
 }

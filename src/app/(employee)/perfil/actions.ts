@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { signOut } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
 import { requireEmployeeWithContext } from '@/lib/auth/employee-context';
@@ -30,7 +31,10 @@ export async function getOrCreateNotificationPreference(employeeId: string) {
 }
 
 export async function toggleNotificationPreference(key: NotificationKey): Promise<ActionResult> {
-  if (!isNotificationKey(key)) return { ok: false, message: 'Tipo de notificación inválido.' };
+  if (!isNotificationKey(key)) {
+    const t = await getTranslations('employee.profile.notifications');
+    return { ok: false, message: t('errorInvalidType') };
+  }
 
   return requireEmployeeWithContext(async (employee) => {
     const current = await getOrCreateNotificationPreference(employee.id);
@@ -58,20 +62,21 @@ export async function toggleEmailChannel(): Promise<ActionResult> {
 const emailSchema = z.string().trim().toLowerCase().email();
 
 export async function requestEmailChange(rawEmail: string): Promise<ActionResult> {
+  const t = await getTranslations('employee.profile.email');
   const parsed = emailSchema.safeParse(rawEmail);
-  if (!parsed.success) return { ok: false, message: 'Ingresa un correo válido.' };
+  if (!parsed.success) return { ok: false, message: t('invalidEmail') };
   const newEmail = parsed.data;
 
   return requireEmployeeWithContext(async (employee) => {
     if (newEmail === employee.personalEmail) {
-      return { ok: false, message: 'Ese ya es tu correo actual.' };
+      return { ok: false, message: t('alreadySame') };
     }
 
     const taken = await prisma.employee.findUnique({
       where: { tenantId_personalEmail: { tenantId: employee.tenantId, personalEmail: newEmail } }
     });
     if (taken) {
-      return { ok: false, message: 'Ese correo ya está en uso por otra cuenta.' };
+      return { ok: false, message: t('taken') };
     }
 
     const token = await createMagicLinkToken({
@@ -86,7 +91,7 @@ export async function requestEmailChange(rawEmail: string): Promise<ActionResult
       await sendEmailChangeConfirmation({ to: newEmail, verifyUrl });
     } catch (error) {
       console.error('[requestEmailChange] fallo al enviar correo', error);
-      return { ok: false, message: 'No pudimos enviar el correo ahora mismo. Intenta de nuevo en un momento.' };
+      return { ok: false, message: t('changeError') };
     }
 
     return { ok: true };

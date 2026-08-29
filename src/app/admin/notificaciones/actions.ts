@@ -8,9 +8,9 @@ import { sendPushToEmployee } from '@/lib/push/send';
 import type { NotificationType } from '@prisma/client';
 
 const schema = z.object({
-  email: z.string().trim().toLowerCase().email('Ingresa un correo válido.'),
-  title: z.string().trim().min(1, 'Falta el título.'),
-  body: z.string().trim().min(1, 'Falta el mensaje.')
+  email: z.string().trim().toLowerCase().email(),
+  title: z.string().trim().min(1),
+  body: z.string().trim().min(1)
 });
 
 // Solo ADM: herramienta de verificación de la infraestructura de push
@@ -24,6 +24,7 @@ export async function sendTestPushNotification(
   formData: FormData
 ): Promise<{ ok: true; sent: number; expired: number } | { ok: false; message: string }> {
   await requireAdm();
+  const t = await getTranslations('admin.notifications');
 
   const parsed = schema.safeParse({
     email: formData.get('email'),
@@ -31,25 +32,25 @@ export async function sendTestPushNotification(
     body: formData.get('body')
   });
   if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message ?? 'Revisa los datos ingresados.' };
+    return { ok: false, message: t('rules.errorGeneric') };
   }
 
   return runWithTenantContext({ kind: 'platform-admin' }, async () => {
     const employee = await prisma.employee.findFirst({ where: { personalEmail: parsed.data.email } });
     if (!employee) {
-      return { ok: false, message: 'No encontramos ningún empleado con ese correo.' };
+      return { ok: false, message: t('errorEmployeeNotFound') };
     }
 
     const subscriptionCount = await prisma.pushSubscription.count({ where: { employeeId: employee.id } });
     if (subscriptionCount === 0) {
-      return { ok: false, message: 'Ese empleado no tiene notificaciones activadas todavía.' };
+      return { ok: false, message: t('errorNoSubscriptions') };
     }
 
     try {
       const result = await sendPushToEmployee(employee.id, { title: parsed.data.title, body: parsed.data.body });
       return { ok: true, sent: result.sent, expired: result.expired };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error desconocido enviando la notificación.';
+      const message = error instanceof Error ? error.message : t('errorUnknown');
       return { ok: false, message };
     }
   });

@@ -1,5 +1,6 @@
 'use server';
 
+import { getTranslations } from 'next-intl/server';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { recomputeCfhi, recomputeConstructScore, recomputeDimensionScore, type EvidencePayload } from '@/lib/engines/cfhi';
@@ -14,6 +15,7 @@ export async function submitDiagnosticAnswer(input: {
 }): Promise<{ ok: true; done: boolean } | { ok: false; message: string }> {
   const baseEmployee = await requireEmployee();
   const employeeId = baseEmployee.id;
+  const t = await getTranslations('diagnostic.errors');
 
   return runWithTenantContext(employeeTenantContext(baseEmployee), async () => {
     const answerOption = await prisma.answerOption.findUnique({
@@ -21,7 +23,7 @@ export async function submitDiagnosticAnswer(input: {
     });
 
     if (!answerOption || answerOption.questionId !== input.questionId) {
-      return { ok: false, message: 'Esa opción ya no está disponible. Recarga la página.' };
+      return { ok: false, message: t('optionUnavailable') };
     }
 
     // diagnosticStartedAt se fija una sola vez, en la primerísima
@@ -48,7 +50,7 @@ export async function submitDiagnosticAnswer(input: {
     ]);
 
     if (!variable || !employee || !activeMethodology) {
-      return { ok: false, message: 'Hubo un problema cargando la pregunta. Intenta de nuevo.' };
+      return { ok: false, message: t('loadError') };
     }
 
     await prisma.evidence.create({

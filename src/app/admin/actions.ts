@@ -2,20 +2,21 @@
 
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { getTranslations } from 'next-intl/server';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { signOut } from '@/lib/auth/auth';
 import { createMagicLinkToken } from '@/lib/auth/magic-link';
 import { sendAdminMagicLinkEmail } from '@/lib/email/send-magic-link';
 import { getRequestOrigin } from '@/lib/http/request-origin';
 
-const emailSchema = z.string().trim().toLowerCase().email('Ingresa un correo válido.');
-
 export async function requestAdminMagicLink(
   rawEmail: string
 ): Promise<{ ok: true } | { ok: false; message: string }> {
+  const [t, tCommon] = await Promise.all([getTranslations('admin.login'), getTranslations('common.errors')]);
+  const emailSchema = z.string().trim().toLowerCase().email(t('errorInvalidEmail'));
   const parsed = emailSchema.safeParse(rawEmail);
   if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message ?? 'Ingresa un correo válido.' };
+    return { ok: false, message: parsed.error.issues[0]?.message ?? t('errorInvalidEmail') };
   }
   const email = parsed.data;
 
@@ -47,7 +48,7 @@ export async function requestAdminMagicLink(
     await sendAdminMagicLinkEmail({ to: admin.email, verifyUrl });
   } catch (error) {
     console.error('[requestAdminMagicLink] fallo al enviar correo', error);
-    return { ok: false, message: 'No pudimos enviar el correo ahora mismo. Intenta de nuevo en un momento.' };
+    return { ok: false, message: tCommon('emailSendFailed') };
   }
 
   return { ok: true };
