@@ -61,7 +61,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b border-silver/60 shrink-0">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+        {/* max-w-5xl (no 3xl): con 7 links + "Cerrar sesión" para ADM, un
+            contenedor de 768px hacía que el nav se encimara con el logo en
+            vez de tener espacio — encontrado probando /admin/empleados,
+            el link que lo hizo desbordar. flex-wrap como red de seguridad
+            si en el futuro se agrega otro link más. */}
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-y-2">
           <Link
             href={
               admin.profileType === 'ADM'
@@ -101,6 +106,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                 </Link>
                 <Link href="/admin/administradores" className="hover:text-yale">
                   {t('admins')}
+                </Link>
+                <Link href="/admin/empleados" className="hover:text-yale">
+                  {t('employees')}
                 </Link>
                 <Link href="/admin/notificaciones" className="hover:text-yale">
                   {t('notifications')}

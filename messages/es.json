@@ -179,6 +179,7 @@
       "admins": "Administradores",
       "methodology": "Metodología",
       "companies": "Empresas",
+      "employees": "Empleados",
       "logout": "Cerrar sesión",
       "notifications": "Notificaciones"
     },
@@ -479,6 +480,24 @@
       "suspendedNotice": "Esta empresa está suspendida — sus empleados y administradores no pueden entrar.",
       "viewDashboardCta": "Ver dashboard de RRHH",
       "suspendedBadge": "Suspendida"
+    },
+    "empleados": {
+      "title": "Empleados (soporte)",
+      "subtitle": "Busca un empleado por su correo personal. \"Reiniciar\" borra por completo su cuenta y todo su diagnóstico, y libera su licencia para volver a usarse — es para pruebas, no se puede deshacer.",
+      "emailLabel": "Correo personal",
+      "emailPlaceholder": "correo@ejemplo.com",
+      "searchCta": "Buscar",
+      "searching": "Buscando...",
+      "noResults": "Sin resultados para ese correo.",
+      "tenantLabel": "Empresa",
+      "createdAtLabel": "Registrado",
+      "licenseLabel": "Licencia",
+      "noLicense": "Sin licencia (código compartido de tenant viejo)",
+      "resetCta": "Reiniciar",
+      "resetting": "Reiniciando...",
+      "resetConfirm": "¿Borrar por completo esta cuenta y todo su diagnóstico? Esta acción no se puede deshacer. La licencia queda libre para usarse de nuevo.",
+      "resetSuccess": "Cuenta reiniciada. La licencia ya está libre para usarse de nuevo.",
+      "errorNotFound": "No encontramos ese empleado — puede que ya se haya reiniciado."
     },
     "administradores": {
       "title": "Administradores",
