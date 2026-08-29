@@ -29,11 +29,15 @@ export default async function AdminConfiguracionPage() {
         <p className="text-xs text-nickel mb-4">{t('logoDescription')}</p>
 
         {hasLogo ? (
+          // max-h-24 (no h-14 como en login-form.tsx/layout.tsx): acá es a
+          // propósito más grande — es una vista previa de lo que se subió,
+          // no el logo puesto en su lugar real de uso. max-w-full evita que
+          // un archivo subido muy ancho se salga del contenedor.
           // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
           <img
             src="/api/branding/logo"
             alt={t('logoCurrentAlt')}
-            className="max-h-24 mb-6 mix-blend-multiply"
+            className="max-h-24 max-w-full mb-6 mix-blend-multiply"
           />
         ) : (
           <p className="text-xs text-nickel mb-6">{t('logoNone')}</p>
