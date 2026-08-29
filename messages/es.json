@@ -446,6 +446,7 @@
   },
   "diagnostic": {
     "ctaContinue": "Continuar",
+    "backHome": "Volver",
     "ctaFinish": "Ver mi resultado",
     "errorSelectOption": "Selecciona una opción antes de continuar.",
     "context": {
