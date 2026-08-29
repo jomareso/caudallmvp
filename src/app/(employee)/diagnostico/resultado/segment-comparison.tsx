@@ -49,7 +49,7 @@ export function SegmentComparison({
         className="w-full flex items-center justify-between gap-3 p-4 text-left"
       >
         <span>
-          <span className="block text-sm font-medium text-quartz">{labels.title}</span>
+          <span className="block text-sm font-semibold text-yale">{labels.title}</span>
           <span className="block text-[11px] text-nickel mt-0.5">{active.subtitle}</span>
         </span>
         <span className={`text-nickel text-xs transition-transform shrink-0 ${open ? 'rotate-180' : ''}`} aria-hidden="true">
