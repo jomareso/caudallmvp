@@ -1615,7 +1615,7 @@
         }
       },
       "CTX-02": {
-        "text": "Además de ti, ¿cuántas personas dependen total o parcialmente de tus ingresos?",
+        "text": "Además de ti, ¿cuántas **personas dependen** total o parcialmente de **tus ingresos**?",
         "whyAsk": "Aproxima la carga económica del hogar y mejora la comparabilidad entre personas con responsabilidades financieras similares. No afecta el CFHI.",
         "options": {
           "DEP_0": "Ninguna",

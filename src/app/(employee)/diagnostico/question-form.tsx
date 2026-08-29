@@ -3,6 +3,26 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { submitDiagnosticAnswer } from './actions';
+import { splitHighlightMarkup } from '@/lib/landing/blocks';
+
+// Mismo marcado **palabra clave** que ya usa el contenido de las landings
+// (ver splitHighlightMarkup, BrandPanel) — el banco de preguntas vive en
+// messages/es.json como texto plano (Decisión 5), así que reutilizar la
+// misma sintaxis no requiere schema nuevo: quien edite una pregunta solo
+// envuelve la frase que quiere resaltar entre **asteriscos dobles**, igual
+// que en el mockup ("...cuántas **personas dependen** ... de **tus
+// ingresos**?"). Sin marcado, el texto se ve exactamente igual que antes.
+function renderQuestionText(text: string) {
+  return splitHighlightMarkup(text).map((part, index) =>
+    part.highlighted ? (
+      <span key={index} className="text-yale font-semibold">
+        {part.text}
+      </span>
+    ) : (
+      <span key={index}>{part.text}</span>
+    )
+  );
+}
 
 export function QuestionForm({
   questionId,
@@ -56,7 +76,7 @@ export function QuestionForm({
 
   return (
     <div className="bg-white border border-silver/60 rounded-xl p-6">
-      <p className="text-base font-medium text-quartz mb-4">{questionText}</p>
+      <p className="text-lg font-medium text-quartz mb-4 leading-snug">{renderQuestionText(questionText)}</p>
 
       <div className="space-y-2 mb-4">
         {options.map((option) => (

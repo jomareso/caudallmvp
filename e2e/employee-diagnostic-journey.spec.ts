@@ -12,7 +12,7 @@ import { createTestEmployee, loginAsEmployee } from './helpers/auth';
 // Cada test crea su propio empleado nuevo (tenant demo ACME2026, sembrado
 // por prisma/seed.ts) — no comparten estado entre sí.
 
-const QUESTION_TEXT = 'p.text-base.font-medium.text-quartz.mb-4';
+const QUESTION_TEXT = 'p.text-lg.font-medium.text-quartz.mb-4.leading-snug';
 
 // locator.textContent() espera (hasta su timeout por defecto) a que el
 // elemento exista antes de resolver — no sirve para "dime el texto si
