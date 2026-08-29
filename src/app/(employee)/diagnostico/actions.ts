@@ -5,8 +5,9 @@ import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
 import { recomputeCfhi, recomputeConstructScore, recomputeDimensionScore, type EvidencePayload } from '@/lib/engines/cfhi';
 import { recomputeBehavioralBiasState } from '@/lib/engines/behavioral-state';
-import { getNextQuestion } from '@/lib/engines/diagnostic';
+import { getNextQuestion, buildFacts } from '@/lib/engines/diagnostic';
 import { evaluateSafety } from '@/lib/engines/safety';
+import { materializeInferences } from '@/lib/engines/inference-substitution';
 import { finalizeDiagnostic } from '@/lib/engines/diagnostic-completion';
 
 export async function submitDiagnosticAnswer(input: {
@@ -105,6 +106,31 @@ export async function submitDiagnosticAnswer(input: {
 
     await recomputeCfhi(employeeId);
     await evaluateSafety(employeeId);
+
+    // Las preguntas de contexto (CTX_*) reusan este mismo Server Action
+    // (ver question-form.tsx mode='context') pero el cliente ignora
+    // `done` en ese modo — su propio comentario ahí lo dice: "el campo
+    // done refleja la parte financiera (ya terminada en este punto), así
+    // que no sirve para decidir acá". Bug real de rendimiento encontrado
+    // armando el e2e: sin este corte, cada respuesta de contexto volvía a
+    // llamar getNextQuestion() (agota financieras -> null) y por lo tanto
+    // finalizeDiagnostic() — que recalcula causa raíz, prioridad Y
+    // eligibility desde cero — una vez por cada una de las ~15-20
+    // preguntas de contexto, en vez de una sola vez al terminar lo
+    // financiero. Nunca cambiaba el resultado (el cliente lo descarta) y
+    // ralentizaba notablemente el bloque de contexto para nada.
+    if (variable.code.startsWith('CTX_')) {
+      return { ok: true, done: false };
+    }
+
+    // Regla CORE #15: una inferencia fuerte puede sustituir una pregunta.
+    // Corre después de guardar la respuesta directa (para ver los hechos
+    // más recientes) y antes de pedir la siguiente pregunta (para que
+    // isApplicable() ya vea cualquier variable recién inferida y salte la
+    // pregunta correspondiente en esta misma vuelta, no en la próxima).
+    const facts = await buildFacts(employeeId);
+    await materializeInferences(employeeId, facts);
+    await recomputeCfhi(employeeId);
 
     const nextQuestion = await getNextQuestion(employeeId);
     const done = !nextQuestion;

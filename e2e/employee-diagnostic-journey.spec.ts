@@ -120,7 +120,20 @@ async function completeContextIfAny(page: Page): Promise<void> {
       await (alreadySeen ? optionButtons.last() : optionButtons.first()).click();
     }
     if (previousText) seenQuestionTexts.add(previousText);
-    await page.getByRole('button', { name: 'Continuar', exact: true }).click();
+
+    // Bug real de Playwright encontrado armando este test (confirmado con
+    // trace de una corrida colgada: el frame ya estaba en
+    // /diagnostico/resultado, sin ningún botón "Continuar", en el momento
+    // exacto de este click): page.url() es una carrera con la navegación
+    // real del browser — la vuelta anterior del loop pudo haber respondido
+    // la ÚLTIMA pregunta de contexto, que navega directo a /resultado, y el
+    // chequeo de arriba (if (!page.url().includes('/contexto')) return;)
+    // alcanzó a leer la URL vieja antes de que el navegador terminara de
+    // actualizarla. Sin este chequeo contra el DOM real, el test se queda
+    // esperando para siempre un botón que ya no existe en ninguna parte.
+    const continueButton = page.getByRole('button', { name: 'Continuar', exact: true });
+    if ((await continueButton.count()) === 0) return;
+    await continueButton.click();
     await expect(async () => {
       const count = await questionLocator.count();
       if (count === 0) return;
