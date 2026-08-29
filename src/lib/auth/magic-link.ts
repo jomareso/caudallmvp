@@ -1,7 +1,5 @@
 import { SignJWT, jwtVerify } from 'jose';
-
-// Vida corta del link: si alguien lo intercepta, expira rápido.
-const MAGIC_LINK_TTL_SECONDS = 15 * 60;
+import { getPlatformSettings } from '@/lib/settings/platform-settings';
 
 function getSecretKey() {
   const secret = process.env.AUTH_SECRET;
@@ -21,10 +19,14 @@ export type MagicLinkPayload =
   | { type: 'email-change'; tenantId: string; employeeId: string; newEmail: string };
 
 export async function createMagicLinkToken(payload: MagicLinkPayload): Promise<string> {
+  // Vida corta del link: si alguien lo intercepta, expira rápido. Editable
+  // desde /admin/configuracion (PlatformSettings.magicLinkTtlMinutes).
+  const { magicLinkTtlMinutes } = await getPlatformSettings();
+
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime(`${MAGIC_LINK_TTL_SECONDS}s`)
+    .setExpirationTime(`${magicLinkTtlMinutes * 60}s`)
     .sign(getSecretKey());
 }
 

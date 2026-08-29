@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { getPlatformSettings } from '@/lib/settings/platform-settings';
 import { getActionSuggestion } from './actions';
 import { ActionCard } from './action-card';
 import { EmployeeTopBar } from '../../employee-topbar';
@@ -9,6 +10,7 @@ export default async function AccionPage() {
   // getActionSuggestion() (en ./actions, un Server Action) ya resuelve su
   // propia sesión/contexto de RLS — no hace falta duplicarlo acá.
   const result = await getActionSuggestion();
+  const { showInterventionVideos } = await getPlatformSettings();
   const t = await getTranslations();
   const tAction = await getTranslations('diagnostic.action');
 
@@ -40,6 +42,7 @@ export default async function AccionPage() {
               actionText={result.suggestion.actionTextI18nKey ? t(result.suggestion.actionTextI18nKey) : ''}
               whyThisStep={result.suggestion.whyThisStepI18nKey ? t(result.suggestion.whyThisStepI18nKey) : null}
               videoUrl={result.suggestion.videoUrl}
+              showVideo={showInterventionVideos}
               committedWith={committedWith}
               labels={{
                 whyThisStep: tAction('whyThisStep'),

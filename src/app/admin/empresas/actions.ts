@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireAdm } from '@/lib/auth/admin-context';
 import { generateUniqueLicenseCodes, isLicenseDurationMonths } from '@/lib/licenses';
+import { getPlatformSettings } from '@/lib/settings/platform-settings';
 import { sendAdminWelcomeEmail } from '@/lib/email/send-magic-link';
 import { getRequestOrigin } from '@/lib/http/request-origin';
 
@@ -42,7 +43,8 @@ export async function createTenant(
     return { ok: false, message: t('errorGeneric') };
   }
   const { name, licenseCount, durationMonths, adminEmails } = parsed.data;
-  if (!isLicenseDurationMonths(durationMonths)) {
+  const settings = await getPlatformSettings();
+  if (!isLicenseDurationMonths(durationMonths, settings.licenseDurationsMonths)) {
     return { ok: false, message: t('errorGeneric') };
   }
 
@@ -119,7 +121,8 @@ export async function generateLicenses(
     return { ok: false, message: t('errorGeneric') };
   }
   const { tenantId, licenseCount, durationMonths } = parsed.data;
-  if (!isLicenseDurationMonths(durationMonths)) {
+  const settings = await getPlatformSettings();
+  if (!isLicenseDurationMonths(durationMonths, settings.licenseDurationsMonths)) {
     return { ok: false, message: t('errorGeneric') };
   }
 

@@ -6,14 +6,19 @@ import { generateLicenses } from '../actions';
 
 export function GenerateLicensesForm({
   tenantId,
+  durationOptions,
   labels
 }: {
   tenantId: string;
+  durationOptions: { value: number; label: string }[];
   labels: Record<string, string>;
 }) {
   const router = useRouter();
   const [licenseCount, setLicenseCount] = useState('10');
-  const [durationMonths, setDurationMonths] = useState('12');
+  // Mismo default de siempre (la duración más larga): ver create-tenant-form.tsx.
+  const [durationMonths, setDurationMonths] = useState(
+    String(durationOptions[durationOptions.length - 1]?.value ?? '')
+  );
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -60,9 +65,11 @@ export function GenerateLicensesForm({
         onChange={(event) => setDurationMonths(event.target.value)}
         className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-3 focus:outline-none focus:border-cola"
       >
-        <option value="3">{labels.duration3}</option>
-        <option value="6">{labels.duration6}</option>
-        <option value="12">{labels.duration12}</option>
+        {durationOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
       </select>
 
       {error ? <p className="text-xs text-bad mb-3">{error}</p> : null}

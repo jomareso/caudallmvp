@@ -2,12 +2,18 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireAdm } from '@/lib/auth/admin-context';
+import { getPlatformSettings } from '@/lib/settings/platform-settings';
 import { CreateTenantForm } from './create-tenant-form';
 
 export default async function EmpresasPage() {
   await requireAdm();
 
   const t = await getTranslations('admin.empresas');
+  const settings = await getPlatformSettings();
+  const durationOptions = settings.licenseDurationsMonths.map((months) => ({
+    value: months,
+    label: t('durationValue', { months })
+  }));
 
   // ADM ve licencias de TODOS los tenants a propósito (control total de la
   // plataforma), de ahí platform-admin.
@@ -25,14 +31,12 @@ export default async function EmpresasPage() {
         <h1 className="text-lg font-medium text-quartz mb-6">{t('title')}</h1>
 
         <CreateTenantForm
+          durationOptions={durationOptions}
           labels={{
             nameLabel: t('nameLabel'),
             namePlaceholder: t('namePlaceholder'),
             licenseCountLabel: t('licenseCountLabel'),
             durationLabel: t('durationLabel'),
-            duration3: t('duration3'),
-            duration6: t('duration6'),
-            duration12: t('duration12'),
             cta: t('createCta'),
             creating: t('creating'),
             errorGeneric: t('errorGeneric'),

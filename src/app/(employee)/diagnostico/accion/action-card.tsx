@@ -15,9 +15,6 @@ import { OUTCOME_REASONS, type OutcomeReason } from '@/lib/engines/outcome-reaso
 
 type Status = 'SUGGESTED' | 'COMMITTED' | 'IN_PROGRESS' | 'COMPLETED' | 'DISMISSED';
 
-// Ver comentario en el bloque de video más abajo.
-const SHOW_INTERVENTION_VIDEOS = false;
-
 // El contenido debe sentirse parte de Caudall, no un salto a YouTube: se
 // incrusta con youtube-nocookie.com (sin cookies de seguimiento) en vez de
 // abrir el link en una pestaña nueva. Si la URL no es de YouTube, no hay
@@ -61,6 +58,7 @@ export function ActionCard({
   actionText,
   whyThisStep,
   videoUrl,
+  showVideo,
   committedWith,
   labels
 }: {
@@ -72,6 +70,9 @@ export function ActionCard({
   actionText: string;
   whyThisStep: string | null;
   videoUrl: string | null;
+  // PlatformSettings.showInterventionVideos (editable desde
+  // /admin/configuracion) — ver comentario en el bloque de video más abajo.
+  showVideo: boolean;
   // Ya formateado server-side (next-intl + Intl.DateTimeFormat) — ver
   // page.tsx. Null si todavía no hay compromiso registrado.
   committedWith: string | null;
@@ -166,13 +167,13 @@ export function ActionCard({
         <p className="text-sm text-quartz">{actionText}</p>
       </div>
 
-      {/* SHOW_INTERVENTION_VIDEOS en false (decisión de Reynoso, 28 ago):
-          los videoUrl cargados en el catálogo de intervenciones son
+      {/* showVideo en false por default (decisión de Reynoso, 28 ago): los
+          videoUrl cargados en el catálogo de intervenciones son
           placeholders de terceros (ej. un webinar externo), no contenido
           de marca propio — se oculta el video hasta que existan videos
-          reales, sin tocar los datos guardados. Para reactivarlo, cambiar
-          esta constante a true. */}
-      {SHOW_INTERVENTION_VIDEOS && embedUrl ? (
+          reales, sin tocar los datos guardados. Se reactiva desde
+          /admin/configuracion, sin deploy. */}
+      {showVideo && embedUrl ? (
         <div className="mb-3 aspect-video rounded-lg overflow-hidden">
           <iframe
             src={embedUrl}
@@ -182,7 +183,7 @@ export function ActionCard({
             allowFullScreen
           />
         </div>
-      ) : SHOW_INTERVENTION_VIDEOS && videoUrl ? (
+      ) : showVideo && videoUrl ? (
         <a
           href={videoUrl}
           target="_blank"

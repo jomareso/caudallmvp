@@ -251,7 +251,27 @@
       "uploadSuccess": "Logo actualizado.",
       "uploadErrorType": "El archivo debe ser una imagen (PNG, JPG, WEBP o SVG).",
       "uploadErrorSize": "El archivo es muy grande — el máximo es 2 MB.",
-      "uploadErrorGeneric": "No pudimos guardar el logo. Intenta de nuevo."
+      "uploadErrorGeneric": "No pudimos guardar el logo. Intenta de nuevo.",
+      "parameters": {
+        "title": "Parámetros de plataforma",
+        "description": "Valores que hoy afectan el comportamiento del producto para todos los tenants. Cambiarlos no requiere un deploy nuevo.",
+        "followupInviteAfterDaysLabel": "Días antes de invitar a repetir el diagnóstico",
+        "followupInviteAfterDaysHelp": "En Inicio, cuántos días desde el último diagnóstico completado antes de mostrar la invitación a actualizarlo.",
+        "licenseDurationsMonthsLabel": "Duraciones de licencia disponibles (meses, separadas por coma)",
+        "licenseDurationsMonthsHelp": "Opciones que verá el ADM al generar licencias nuevas para una empresa. Ej.: 3, 6, 12.",
+        "minCohortSizeLabel": "Tamaño mínimo de cohorte para el comparativo nacional",
+        "minCohortSizeHelp": "Si menos empleados comparten sexo × edad × situación laboral que este número, el comparativo cae al promedio nacional completo.",
+        "minSampleSizeLabel": "Mínimo de diagnósticos para mostrar el promedio en Bienvenida",
+        "minSampleSizeHelp": "Por debajo de este número de diagnósticos completados en toda la plataforma, se muestra el texto genérico en vez de un promedio real.",
+        "magicLinkTtlMinutesLabel": "Vigencia del link de acceso (minutos)",
+        "magicLinkTtlMinutesHelp": "Cuánto tiempo es válido el link que se envía por correo antes de vencer.",
+        "showInterventionVideosLabel": "Mostrar los videos del catálogo de intervenciones",
+        "saveCta": "Guardar parámetros",
+        "saving": "Guardando...",
+        "saveSuccess": "Parámetros actualizados.",
+        "errorGeneric": "Revisa los datos ingresados.",
+        "errorDurationsInvalid": "Las duraciones deben ser números enteros entre 1 y 120, separados por coma."
+      }
     },
     "content": {
       "title": "Contenido de landings",
@@ -334,9 +354,6 @@
       "namePlaceholder": "Ej. Empresa Acme",
       "licenseCountLabel": "Cantidad de licencias",
       "durationLabel": "Vigencia de cada licencia",
-      "duration3": "3 meses",
-      "duration6": "6 meses",
-      "duration12": "12 meses",
       "createCta": "Crear empresa",
       "creating": "Creando...",
       "errorGeneric": "No pudimos completar la acción. Revisa los datos e intenta de nuevo.",

@@ -7,8 +7,13 @@
 // explícita del banco — "¿Quieres comparar tus resultados...?" — que no
 // afecta el score. Sin un YES explícito, no se calcula ni se muestra nada.
 import { prisma } from '@/lib/db/prisma';
+import { getPlatformSettings } from '@/lib/settings/platform-settings';
 import { buildFacts } from './diagnostic';
 
+// Default de la función pura de abajo (útil para tests sin DB) — en
+// producción, getNationalComparison/getSegmentComparison pasan el valor
+// real de PlatformSettings.minCohortSize (editable desde
+// /admin/configuracion) en vez de depender de este default.
 export const MIN_COHORT_SIZE = 30;
 
 export type ComparisonScope = 'COHORT' | 'NATIONAL';
@@ -98,13 +103,16 @@ export async function getNationalComparison(employeeId: string): Promise<Nationa
     employmentStatus: facts.get('CTX_EMPLOYMENT_STATUS')?.state
   });
 
-  const cohortAgg = await prisma.nationalBenchmarkRecord.aggregate({
-    where: { version: latest.version, ...cohortWhere },
-    _avg: BENCHMARK_AVG_SELECT,
-    _count: true
-  });
+  const [cohortAgg, settings] = await Promise.all([
+    prisma.nationalBenchmarkRecord.aggregate({
+      where: { version: latest.version, ...cohortWhere },
+      _avg: BENCHMARK_AVG_SELECT,
+      _count: true
+    }),
+    getPlatformSettings()
+  ]);
 
-  if (selectComparisonScope(cohortAgg._count) === 'COHORT') {
+  if (selectComparisonScope(cohortAgg._count, settings.minCohortSize) === 'COHORT') {
     return toComparison('COHORT', cohortAgg._count, cohortAgg._avg);
   }
 
@@ -167,13 +175,16 @@ export async function getSegmentComparison(
     segmentWhere = { incomeRangeRaw: { in: rawRanges } };
   }
 
-  const cohortAgg = await prisma.nationalBenchmarkRecord.aggregate({
-    where: { version: latest.version, ...segmentWhere },
-    _avg: BENCHMARK_AVG_SELECT,
-    _count: true
-  });
+  const [cohortAgg, settings] = await Promise.all([
+    prisma.nationalBenchmarkRecord.aggregate({
+      where: { version: latest.version, ...segmentWhere },
+      _avg: BENCHMARK_AVG_SELECT,
+      _count: true
+    }),
+    getPlatformSettings()
+  ]);
 
-  if (selectComparisonScope(cohortAgg._count) === 'COHORT') {
+  if (selectComparisonScope(cohortAgg._count, settings.minCohortSize) === 'COHORT') {
     return toComparison('COHORT', cohortAgg._count, cohortAgg._avg);
   }
 
