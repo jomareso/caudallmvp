@@ -13,6 +13,7 @@ export function CreateTenantForm({
 }) {
   const router = useRouter();
   const [name, setName] = useState('');
+  const [employeeCount, setEmployeeCount] = useState('');
   const [licenseCount, setLicenseCount] = useState('20');
   // Preselecciona la duración más larga (mismo default de siempre: con
   // [3, 6, 12] cae en 12) — ver durationOptions, viene ordenado desde
@@ -31,7 +32,7 @@ export function CreateTenantForm({
     setError(null);
 
     startTransition(async () => {
-      const result = await createTenant({ name, licenseCount, durationMonths, adminEmails });
+      const result = await createTenant({ name, employeeCount, licenseCount, durationMonths, adminEmails });
       if (!result.ok) {
         setError(result.message);
         return;
@@ -88,6 +89,21 @@ export function CreateTenantForm({
         placeholder={labels.namePlaceholder}
         className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-3 focus:outline-none focus:border-cola"
       />
+
+      <label htmlFor="employeeCount" className="block text-xs text-nickel mb-1">
+        {labels.employeeCountLabel}
+      </label>
+      <input
+        id="employeeCount"
+        type="number"
+        min={1}
+        max={1000000}
+        value={employeeCount}
+        onChange={(event) => setEmployeeCount(event.target.value)}
+        placeholder={labels.employeeCountPlaceholder}
+        className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-1 focus:outline-none focus:border-cola"
+      />
+      <p className="text-[11px] text-nickel mb-3">{labels.employeeCountHelp}</p>
 
       <label htmlFor="licenseCount" className="block text-xs text-nickel mb-1">
         {labels.licenseCountLabel}

@@ -49,7 +49,9 @@ const platformParametersSchema = z.object({
   licenseDurationsMonths: z.string().trim().min(1),
   minCohortSize: z.coerce.number().int().min(1).max(10000),
   minSampleSize: z.coerce.number().int().min(1).max(10000),
-  magicLinkTtlMinutes: z.coerce.number().int().min(1).max(1440)
+  magicLinkTtlMinutes: z.coerce.number().int().min(1).max(1440),
+  sampleConfidenceLevel: z.coerce.number().min(0.5).max(0.999),
+  sampleMarginOfError: z.coerce.number().min(0.001).max(0.5)
 });
 
 function parseLicenseDurations(raw: string): number[] | null {
@@ -81,8 +83,15 @@ export async function updatePlatformParameters(
     return { ok: false, message: t('errorDurationsInvalid') };
   }
 
-  const { followupInviteAfterDays, showInterventionVideos, minCohortSize, minSampleSize, magicLinkTtlMinutes } =
-    parsed.data;
+  const {
+    followupInviteAfterDays,
+    showInterventionVideos,
+    minCohortSize,
+    minSampleSize,
+    magicLinkTtlMinutes,
+    sampleConfidenceLevel,
+    sampleMarginOfError
+  } = parsed.data;
 
   const previous = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } });
 
@@ -92,7 +101,9 @@ export async function updatePlatformParameters(
     licenseDurationsMonths,
     minCohortSize,
     minSampleSize,
-    magicLinkTtlMinutes
+    magicLinkTtlMinutes,
+    sampleConfidenceLevel,
+    sampleMarginOfError
   };
 
   await prisma.platformSettings.upsert({
@@ -115,7 +126,9 @@ export async function updatePlatformParameters(
             licenseDurationsMonths: previous.licenseDurationsMonths,
             minCohortSize: previous.minCohortSize,
             minSampleSize: previous.minSampleSize,
-            magicLinkTtlMinutes: previous.magicLinkTtlMinutes
+            magicLinkTtlMinutes: previous.magicLinkTtlMinutes,
+            sampleConfidenceLevel: previous.sampleConfidenceLevel,
+            sampleMarginOfError: previous.sampleMarginOfError
           }
         : undefined,
       newValue

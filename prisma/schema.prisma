@@ -26,6 +26,13 @@ model Tenant {
   defaultLanguage              String       @default("es")
   status                       TenantStatus @default(PILOT)
   corporateEmailDomain         String?
+  // Cantidad total de empleados de la empresa (no la cantidad de licencias
+  // compradas — Tenant ya tiene esa vía License, que puede ser menor que el
+  // headcount total). Nullable: una empresa recién creada puede no saberlo
+  // todavía. Alimenta el cálculo de tamaño de muestra estadísticamente
+  // representativo (ver src/lib/engines/sample-size.ts) — puramente
+  // informativo, no cambia cuántas licencias se pueden generar.
+  employeeCount                Int?
   methodologyVersionId         String?
   questionBankVersionId        String?
   scoringVersionId             String?
@@ -316,6 +323,14 @@ model PlatformSettings {
   minCohortSize           Int     @default(30)
   minSampleSize           Int     @default(20)
   magicLinkTtlMinutes     Int     @default(15)
+
+  // Nivel de confianza y margen de error para el tamaño de muestra
+  // estadísticamente representativo que se calcula por empresa a partir de
+  // Tenant.employeeCount (ver src/lib/engines/sample-size.ts). Fracciones
+  // 0–1, mismo criterio que highValueThreshold/highValueThresholdSoft más
+  // abajo — el admin escribe 0.95, no 95.
+  sampleConfidenceLevel   Float   @default(0.95)
+  sampleMarginOfError     Float   @default(0.05)
 
   // Parámetros del motor de diagnóstico (STOP ENGINE) y de las bandas de
   // nivel — editables desde /admin/metodologia/parametros. Mismo criterio

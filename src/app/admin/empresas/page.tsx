@@ -35,6 +35,9 @@ export default async function EmpresasPage() {
           labels={{
             nameLabel: t('nameLabel'),
             namePlaceholder: t('namePlaceholder'),
+            employeeCountLabel: t('employeeCountLabel'),
+            employeeCountPlaceholder: t('employeeCountPlaceholder'),
+            employeeCountHelp: t('employeeCountHelp'),
             licenseCountLabel: t('licenseCountLabel'),
             durationLabel: t('durationLabel'),
             cta: t('createCta'),

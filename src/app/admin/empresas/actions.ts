@@ -15,7 +15,12 @@ const createTenantSchema = z.object({
   name: z.string().trim().min(1),
   licenseCount: z.coerce.number().int().min(1).max(500),
   durationMonths: z.coerce.number().int(),
-  adminEmails: z.string().optional()
+  adminEmails: z.string().optional(),
+  // Opcional a propósito: al crear una empresa nueva puede que todavía no
+  // se sepa el headcount exacto. Puramente informativo (alimenta el
+  // cálculo de tamaño de muestra, ver sample-size.ts) — no afecta cuántas
+  // licencias se pueden generar.
+  employeeCount: z.union([z.coerce.number().int().min(1).max(1_000_000), z.literal('')]).optional()
 });
 
 export type AdminEmailOutcome = {
@@ -43,6 +48,7 @@ export async function createTenant(
     return { ok: false, message: t('errorGeneric') };
   }
   const { name, licenseCount, durationMonths, adminEmails } = parsed.data;
+  const employeeCount = parsed.data.employeeCount === '' || parsed.data.employeeCount === undefined ? null : parsed.data.employeeCount;
   const settings = await getPlatformSettings();
   if (!isLicenseDurationMonths(durationMonths, settings.licenseDurationsMonths)) {
     return { ok: false, message: t('errorGeneric') };
@@ -58,6 +64,7 @@ export async function createTenant(
     const tenant = await prisma.tenant.create({
       data: {
         name,
+        employeeCount,
         // Tenant.enrollmentCode ya no se usa para registrarse (eso ahora lo
         // hace cada License.code) — se conserva único solo porque el schema
         // todavía lo exige, no tiene otro propósito.
@@ -144,7 +151,11 @@ export async function generateLicenses(
 
 const updateTenantSchema = z.object({
   tenantId: z.string().trim().min(1),
-  name: z.string().trim().min(1)
+  name: z.string().trim().min(1),
+  // Igual que en createTenant: opcional, puramente informativo, no
+  // condiciona licencias. z.literal('') = "vaciar el campo" (empresa que
+  // ya no quiere reportar su headcount), distinto de no enviarlo.
+  employeeCount: z.union([z.coerce.number().int().min(1).max(1_000_000), z.literal('')])
 });
 
 export async function updateTenant(input: unknown): Promise<{ ok: true } | { ok: false; message: string }> {
@@ -156,17 +167,18 @@ export async function updateTenant(input: unknown): Promise<{ ok: true } | { ok:
     return { ok: false, message: t('errorGeneric') };
   }
   const { tenantId, name } = parsed.data;
+  const employeeCount = parsed.data.employeeCount === '' ? null : parsed.data.employeeCount;
 
   return runWithTenantContext({ kind: 'platform-admin' }, async () => {
     const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
     if (!tenant) {
       return { ok: false, message: t('errorGeneric') };
     }
-    if (tenant.name === name) {
+    if (tenant.name === name && tenant.employeeCount === employeeCount) {
       return { ok: true };
     }
 
-    await prisma.tenant.update({ where: { id: tenantId }, data: { name } });
+    await prisma.tenant.update({ where: { id: tenantId }, data: { name, employeeCount } });
 
     await prisma.auditLog.create({
       data: {
@@ -175,8 +187,8 @@ export async function updateTenant(input: unknown): Promise<{ ok: true } | { ok:
         what: 'UPDATE_TENANT',
         entityType: 'Tenant',
         entityId: tenantId,
-        previousValue: { name: tenant.name },
-        newValue: { name }
+        previousValue: { name: tenant.name, employeeCount: tenant.employeeCount },
+        newValue: { name, employeeCount }
       }
     });
 

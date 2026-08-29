@@ -13,6 +13,8 @@ export const PLATFORM_SETTINGS_DEFAULTS = {
   minCohortSize: 30,
   minSampleSize: 20,
   magicLinkTtlMinutes: 15,
+  sampleConfidenceLevel: 0.95,
+  sampleMarginOfError: 0.05,
   // Motor de diagnóstico (STOP ENGINE) y bandas de nivel — ver
   // src/lib/engines/diagnostic.ts y src/lib/engines/scoring.ts.
   stopFloor: 8,
@@ -47,6 +49,8 @@ export async function getPlatformSettings(): Promise<PlatformSettingsValues> {
     minCohortSize: settings.minCohortSize,
     minSampleSize: settings.minSampleSize,
     magicLinkTtlMinutes: settings.magicLinkTtlMinutes,
+    sampleConfidenceLevel: settings.sampleConfidenceLevel,
+    sampleMarginOfError: settings.sampleMarginOfError,
     stopFloor: settings.stopFloor,
     stopSoftMax: settings.stopSoftMax,
     stopHardMax: settings.stopHardMax,
