@@ -17,8 +17,8 @@ import { LANDING_BLOCK_TYPES_BY_SLUG, parseLandingBlockContent, type LandingBloc
 // posterior.
 const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
   colaborador_hero: {
-    titleLine1: 'Entiende tu salud financiera',
-    titleLine2: 'Sabe qué hacer después',
+    titleLine1: 'Entiende tu salud financiera.',
+    titleLine2: 'Descubre qué hacer después.',
     subtitle: 'Conoce mejor tu situación financiera y recibe **una orientación clara** sobre cuál podría ser tu próximo paso.'
   },
   colaborador_form_intro: {
