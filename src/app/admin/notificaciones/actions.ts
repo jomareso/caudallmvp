@@ -12,11 +12,12 @@ const schema = z.object({
 });
 
 // Solo ADM: herramienta de verificación de la infraestructura de push
-// (spec/Decisión 9), no una función de producto — enviar recordatorios de
-// verdad (ej. diagnóstico incompleto, compromiso pendiente) necesita un
-// programador de tareas que hoy no existe, y sobre todo, una decisión de
-// PRODUCTO sobre cuándo interrumpir al empleado (regla CORE #19: la
-// fricción real primero, la técnica después) — no se inventa acá.
+// (spec/Decisión 9), no una función de producto — los recordatorios de
+// verdad (diagnóstico incompleto, compromiso pendiente, etc.) ya corren
+// solos vía notification-engine.ts (netlify/functions/notifications-cron),
+// configurables como NotificationRule desde este mismo panel. Esto es solo
+// un envío suelto para confirmar que las suscripciones push de un empleado
+// puntual funcionan.
 export async function sendTestPushNotification(
   formData: FormData
 ): Promise<{ ok: true; sent: number; expired: number } | { ok: false; message: string }> {

@@ -1,35 +1,45 @@
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { sendPushToEmployee, type PushPayload } from '@/lib/push/send';
 import { computeNextBestAction } from '@/lib/engines/next-best-action';
+import type { NotificationRule, NotificationType } from '@prisma/client';
 
-// Ítem 7 de la auditoría UX del flujo colaborador (28 ago): el motor que
-// decide CUÁNDO enviar cada uno de los 5 tipos de notificación ya
-// definidos en NotificationPreference (ver ese modelo en schema.prisma).
-// Corre una vez al día — ver netlify/functions/notifications-cron.mts —
-// bajo contexto platform-admin porque necesita recorrer empleados de
-// TODOS los tenants, igual que el sync del banco maestro.
+// Ítem 7 de la auditoría UX del flujo colaborador (28 ago) + feature de
+// reglas configurables desde /admin/notificaciones (29 ago): el motor que
+// decide CUÁNDO enviar cada notificación. Corre una vez al día — ver
+// netlify/functions/notifications-cron.mts — bajo contexto platform-admin
+// porque necesita recorrer empleados de TODOS los tenants, igual que el
+// sync del banco maestro.
 //
-// Cada tipo usa el motor que YA calcula esa señal (regla CORE #19:
-// FRICTION -> TECHNIQUE, la fricción tiene que ser real, no inventada
-// para la ocasión):
+// El QUÉ (título/cuerpo/días/activo) vive en NotificationRule, editable
+// desde el admin. El CUÁNDO sigue siendo código: cada plantilla usa el
+// motor que YA calcula esa señal (regla CORE #19: FRICTION -> TECHNIQUE,
+// la fricción tiene que ser real, no inventada para la ocasión):
 //   COMMITMENT       -> EmployeeIntervention.commitmentData.targetDate
-//   INCOMPLETE       -> FinancialState.diagnosticStartedAt sin completar
+//   INCOMPLETE       -> FinancialState.diagnosticStartedAt sin completar,
+//                       más de rule.days días (por eso INCOMPLETE y
+//                       LICENSE_EXPIRING son las únicas plantillas con
+//                       parámetro de días editable)
 //   RESULT_UPDATED   -> FinancialState.lastDiagnosticCompletedAt (en un
 //                       empleado que YA tenía un resultado previo)
 //   NEW_STEP         -> computeNextBestAction (motor de Next Best Action)
-//   LICENSE_EXPIRING -> License.expiresAt
+//   LICENSE_EXPIRING -> License.expiresAt, dentro de rule.days días
 //
-// Los textos van hardcodeados en español, igual que los templates de
-// correo en src/lib/email/send-magic-link.ts — no hay componente React
-// de por medio para pasar por useTranslations(), y el MVP es solo
-// español (Decisión 5).
+// Puede haber más de una NotificationRule activa por plantilla (ej. dos
+// avisos de "incompleto" a distintos días) — por eso el loop de cada
+// plantilla corre una vez POR REGLA, y el dedup en NotificationLog es por
+// ruleId, no por tipo.
+//
+// Los textos de cada regla van en español plano, igual que los templates de
+// correo en src/lib/email/send-magic-link.ts — no hay componente React de
+// por medio para pasar por useTranslations(), y el MVP es solo español
+// (Decisión 5).
 //
 // NotificationPreference.emailChannelEnabled todavía no tiene una
-// contraparte por correo para estos 5 tipos — ver nota en el PR. Este
-// motor solo cubre el canal push.
+// contraparte por correo para estas plantillas — ver nota en el PR. Este
+// motor solo cubre el canal push. La preferencia de apagar/prender sigue
+// siendo por PLANTILLA (NotificationPreference), no por instancia de
+// regla — el empleado no ve las reglas del admin, solo los 5 tipos.
 
-const INCOMPLETE_AFTER_DAYS = 3;
-const LICENSE_EXPIRING_WITHIN_DAYS = 7;
 const ACTIVE_INTERVENTION_STATUSES = ['SUGGESTED', 'COMMITTED', 'IN_PROGRESS'] as const;
 
 type NotificationTypeKey = 'commitment' | 'incomplete' | 'resultUpdated' | 'newStep' | 'licenseExpiring';
@@ -42,7 +52,7 @@ const PREFERENCE_FIELD: Record<NotificationTypeKey, 'commitment' | 'incomplete' 
   licenseExpiring: 'licenseExpiring'
 };
 
-const NOTIFICATION_TYPE: Record<NotificationTypeKey, 'COMMITMENT' | 'INCOMPLETE' | 'RESULT_UPDATED' | 'NEW_STEP' | 'LICENSE_EXPIRING'> = {
+const TEMPLATE_TYPE: Record<NotificationTypeKey, NotificationType> = {
   commitment: 'COMMITMENT',
   incomplete: 'INCOMPLETE',
   resultUpdated: 'RESULT_UPDATED',
@@ -62,6 +72,12 @@ function emptySummary(): NotificationEngineSummary {
   };
 }
 
+async function getEnabledRules(key: NotificationTypeKey): Promise<NotificationRule[]> {
+  return prisma.notificationRule.findMany({
+    where: { templateType: TEMPLATE_TYPE[key], enabled: true }
+  });
+}
+
 async function isEnabled(employeeId: string, key: NotificationTypeKey): Promise<boolean> {
   const preference = await prisma.notificationPreference.findUnique({ where: { employeeId } });
   // Sin fila = nunca abrió Configuración -> los 5 tipos siguen en su
@@ -76,20 +92,22 @@ async function isEnabled(employeeId: string, key: NotificationTypeKey): Promise<
 // intenta de nuevo con la misma causa.
 async function sendAndLog(
   employeeId: string,
-  key: NotificationTypeKey,
+  ruleId: string,
   refId: string | null,
   payload: PushPayload
 ): Promise<{ sent: number; expired: number }> {
   const result = await sendPushToEmployee(employeeId, payload);
   if (result.sent > 0) {
-    await prisma.notificationLog.create({ data: { employeeId, type: NOTIFICATION_TYPE[key], refId } });
+    await prisma.notificationLog.create({ data: { employeeId, ruleId, refId } });
   }
   return result;
 }
 
 async function runCommitmentReminders(summary: NotificationEngineSummary): Promise<void> {
-  const todayISO = new Date().toISOString().slice(0, 10);
+  const rules = await getEnabledRules('commitment');
+  if (rules.length === 0) return;
 
+  const todayISO = new Date().toISOString().slice(0, 10);
   const candidates = await prisma.employeeIntervention.findMany({
     where: { status: { in: [...ACTIVE_INTERVENTION_STATUSES] } }
   });
@@ -103,51 +121,62 @@ async function runCommitmentReminders(summary: NotificationEngineSummary): Promi
       continue;
     }
 
-    const alreadySent = await prisma.notificationLog.findFirst({
-      where: { employeeId: ei.employeeId, type: 'COMMITMENT', refId: ei.id }
-    });
-    if (alreadySent) continue;
+    for (const rule of rules) {
+      const alreadySent = await prisma.notificationLog.findFirst({
+        where: { employeeId: ei.employeeId, ruleId: rule.id, refId: ei.id }
+      });
+      if (alreadySent) continue;
 
-    const result = await sendAndLog(ei.employeeId, 'commitment', ei.id, {
-      title: '¿Ya lo hiciste?',
-      body: 'Hoy es el día que elegiste para tu compromiso. Cuéntanos cómo te fue.',
-      url: '/diagnostico/accion'
-    });
-    summary.commitment.sent += result.sent;
-    summary.commitment.expired += result.expired;
+      const result = await sendAndLog(ei.employeeId, rule.id, ei.id, {
+        title: rule.title,
+        body: rule.body,
+        url: '/diagnostico/accion'
+      });
+      summary.commitment.sent += result.sent;
+      summary.commitment.expired += result.expired;
+    }
   }
 }
 
 async function runIncompleteReminders(summary: NotificationEngineSummary): Promise<void> {
-  const threshold = new Date();
-  threshold.setDate(threshold.getDate() - INCOMPLETE_AFTER_DAYS);
+  const rules = await getEnabledRules('incomplete');
+  if (rules.length === 0) return;
 
-  const candidates = await prisma.financialState.findMany({
-    where: { lastDiagnosticCompletedAt: null, diagnosticStartedAt: { lte: threshold } }
-  });
+  for (const rule of rules) {
+    const days = rule.days ?? 3;
+    const threshold = new Date();
+    threshold.setDate(threshold.getDate() - days);
 
-  for (const state of candidates) {
-    if (!(await isEnabled(state.employeeId, 'incomplete'))) {
-      summary.incomplete.skipped += 1;
-      continue;
+    const candidates = await prisma.financialState.findMany({
+      where: { lastDiagnosticCompletedAt: null, diagnosticStartedAt: { lte: threshold } }
+    });
+
+    for (const state of candidates) {
+      if (!(await isEnabled(state.employeeId, 'incomplete'))) {
+        summary.incomplete.skipped += 1;
+        continue;
+      }
+
+      const alreadySent = await prisma.notificationLog.findFirst({
+        where: { employeeId: state.employeeId, ruleId: rule.id }
+      });
+      if (alreadySent) continue;
+
+      const result = await sendAndLog(state.employeeId, rule.id, null, {
+        title: rule.title,
+        body: rule.body,
+        url: '/diagnostico'
+      });
+      summary.incomplete.sent += result.sent;
+      summary.incomplete.expired += result.expired;
     }
-
-    const alreadySent = await prisma.notificationLog.findFirst({
-      where: { employeeId: state.employeeId, type: 'INCOMPLETE' }
-    });
-    if (alreadySent) continue;
-
-    const result = await sendAndLog(state.employeeId, 'incomplete', null, {
-      title: 'Tu diagnóstico quedó a la mitad',
-      body: 'Termínalo en unos minutos y descubre tu salud financiera.',
-      url: '/diagnostico'
-    });
-    summary.incomplete.sent += result.sent;
-    summary.incomplete.expired += result.expired;
   }
 }
 
 async function runResultUpdatedNotifications(summary: NotificationEngineSummary): Promise<void> {
+  const rules = await getEnabledRules('resultUpdated');
+  if (rules.length === 0) return;
+
   const candidates = await prisma.financialState.findMany({
     where: { lastDiagnosticCompletedAt: { not: null } }
   });
@@ -155,11 +184,6 @@ async function runResultUpdatedNotifications(summary: NotificationEngineSummary)
   for (const state of candidates) {
     const completedAt = state.lastDiagnosticCompletedAt!;
     const refId = completedAt.toISOString();
-
-    const alreadySentForThisCompletion = await prisma.notificationLog.findFirst({
-      where: { employeeId: state.employeeId, type: 'RESULT_UPDATED', refId }
-    });
-    if (alreadySentForThisCompletion) continue;
 
     // "Actualizado" implica que ya existía un resultado antes — se detecta
     // con una intervención asignada ANTES de esta finalización, que solo
@@ -174,17 +198,27 @@ async function runResultUpdatedNotifications(summary: NotificationEngineSummary)
       continue;
     }
 
-    const result = await sendAndLog(state.employeeId, 'resultUpdated', refId, {
-      title: 'Tu resultado se actualizó',
-      body: 'Revisa cómo cambió tu salud financiera con tu diagnóstico más reciente.',
-      url: '/diagnostico/resultado'
-    });
-    summary.resultUpdated.sent += result.sent;
-    summary.resultUpdated.expired += result.expired;
+    for (const rule of rules) {
+      const alreadySentForThisCompletion = await prisma.notificationLog.findFirst({
+        where: { employeeId: state.employeeId, ruleId: rule.id, refId }
+      });
+      if (alreadySentForThisCompletion) continue;
+
+      const result = await sendAndLog(state.employeeId, rule.id, refId, {
+        title: rule.title,
+        body: rule.body,
+        url: '/diagnostico/resultado'
+      });
+      summary.resultUpdated.sent += result.sent;
+      summary.resultUpdated.expired += result.expired;
+    }
   }
 }
 
 async function runNewStepNotifications(summary: NotificationEngineSummary): Promise<void> {
+  const rules = await getEnabledRules('newStep');
+  if (rules.length === 0) return;
+
   const idleEmployees = await prisma.financialState.findMany({
     where: {
       lastDiagnosticCompletedAt: { not: null },
@@ -198,57 +232,66 @@ async function runNewStepNotifications(summary: NotificationEngineSummary): Prom
     if (!nba.intervention) continue;
 
     const refId = nba.intervention.id;
-    const alreadySent = await prisma.notificationLog.findFirst({
-      where: { employeeId, type: 'NEW_STEP', refId }
-    });
-    if (alreadySent) continue;
 
     if (!(await isEnabled(employeeId, 'newStep'))) {
       summary.newStep.skipped += 1;
       continue;
     }
 
-    const result = await sendAndLog(employeeId, 'newStep', refId, {
-      title: 'Tienes un nuevo paso sugerido',
-      body: 'Encontramos una recomendación para ti — toma un minuto verla.',
-      url: '/diagnostico/accion'
-    });
-    summary.newStep.sent += result.sent;
-    summary.newStep.expired += result.expired;
+    for (const rule of rules) {
+      const alreadySent = await prisma.notificationLog.findFirst({
+        where: { employeeId, ruleId: rule.id, refId }
+      });
+      if (alreadySent) continue;
+
+      const result = await sendAndLog(employeeId, rule.id, refId, {
+        title: rule.title,
+        body: rule.body,
+        url: '/diagnostico/accion'
+      });
+      summary.newStep.sent += result.sent;
+      summary.newStep.expired += result.expired;
+    }
   }
 }
 
 async function runLicenseExpiringNotifications(summary: NotificationEngineSummary): Promise<void> {
-  const now = new Date();
-  const window = new Date();
-  window.setDate(window.getDate() + LICENSE_EXPIRING_WITHIN_DAYS);
+  const rules = await getEnabledRules('licenseExpiring');
+  if (rules.length === 0) return;
 
-  const candidates = await prisma.license.findMany({
-    where: { status: 'ACTIVE', expiresAt: { gt: now, lte: window } },
-    include: { employee: true }
-  });
+  for (const rule of rules) {
+    const days = rule.days ?? 7;
+    const now = new Date();
+    const window = new Date();
+    window.setDate(window.getDate() + days);
 
-  for (const license of candidates) {
-    if (!license.employee) continue;
-    const employeeId = license.employee.id;
+    const candidates = await prisma.license.findMany({
+      where: { status: 'ACTIVE', expiresAt: { gt: now, lte: window } },
+      include: { employee: true }
+    });
 
-    if (!(await isEnabled(employeeId, 'licenseExpiring'))) {
-      summary.licenseExpiring.skipped += 1;
-      continue;
+    for (const license of candidates) {
+      if (!license.employee) continue;
+      const employeeId = license.employee.id;
+
+      if (!(await isEnabled(employeeId, 'licenseExpiring'))) {
+        summary.licenseExpiring.skipped += 1;
+        continue;
+      }
+
+      const alreadySent = await prisma.notificationLog.findFirst({
+        where: { employeeId, ruleId: rule.id, refId: license.id }
+      });
+      if (alreadySent) continue;
+
+      const result = await sendAndLog(employeeId, rule.id, license.id, {
+        title: rule.title,
+        body: rule.body,
+        url: '/perfil'
+      });
+      summary.licenseExpiring.sent += result.sent;
+      summary.licenseExpiring.expired += result.expired;
     }
-
-    const alreadySent = await prisma.notificationLog.findFirst({
-      where: { employeeId, type: 'LICENSE_EXPIRING', refId: license.id }
-    });
-    if (alreadySent) continue;
-
-    const result = await sendAndLog(employeeId, 'licenseExpiring', license.id, {
-      title: 'Tu acceso a Caudall está por vencer',
-      body: 'Te quedan pocos días. Si quieres seguir usándolo, habla con tu equipo de RRHH.',
-      url: '/perfil'
-    });
-    summary.licenseExpiring.sent += result.sent;
-    summary.licenseExpiring.expired += result.expired;
   }
 }
 
