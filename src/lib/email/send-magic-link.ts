@@ -13,28 +13,58 @@ function getResendClient(): Resend {
   return resendClient;
 }
 
-// Un <div style="max-width:420px;margin:0 auto"> suelto no se centra de forma
-// confiable en clientes de correo reales — sin un <table> envolvente que
-// ocupe el 100% del ancho disponible, Gmail/Outlook lo renderizan pegado a
-// la izquierda del panel de lectura en vez de centrado (encontrado con una
-// captura real: mucho espacio en blanco a la derecha, nada a la izquierda).
-// Este es el patrón "bulletproof" estándar de HTML email: tabla exterior al
-// 100% con align="center", tabla interior con el ancho fijo real.
-function wrapEmailBody(innerHtml: string): string {
+// Encuentro real (auditoría visual, 29 ago): el correo mostraba el nombre
+// "caudall" como texto — nunca el logo real — y un <div style="max-width:
+// 420px;margin:0 auto"> suelto no se centra de forma confiable en clientes
+// de correo reales (Gmail lo pegaba a la izquierda del panel de lectura,
+// dejando todo el resto en blanco). Este shell resuelve ambas cosas con el
+// patrón "bulletproof" estándar de HTML email:
+//   - tabla exterior al 100% de ancho + align="center" → centra de forma
+//     confiable entre clientes, con el fondo ocupando todo el panel.
+//   - una "tarjeta" blanca con borde/radio, igual al lenguaje visual del
+//     resto de la app (.card), en vez de texto plano flotando.
+//   - <style> con @media para reducir el padding de la tarjeta y hacer el
+//     botón ancho completo en pantallas chicas — Gmail/Apple Mail lo
+//     aplican; en clientes que lo ignoran (Outlook desktop viejo), la
+//     tarjeta fluida ya se ve razonable sin el ajuste.
+// El logo necesita una URL absoluta (los clientes de correo no resuelven
+// rutas relativas) — se deriva del origin de la URL que cada función ya
+// recibe (verifyUrl/panelUrl), que ya es request-aware (ver
+// src/lib/http/request-origin.ts) y por lo tanto correcta también en
+// Deploy Previews, no solo en producción.
+function renderEmailShell(origin: string, innerHtml: string): string {
+  const logoUrl = `${origin}/brand/caudall-logo-color.png`;
+
   return `
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F5F7">
-      <tr>
-        <td align="center" style="padding:40px 16px">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:420px">
-            <tr>
-              <td style="font-family:Helvetica,Arial,sans-serif;color:#4B4C4C">
-                ${innerHtml}
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <style>
+          @media only screen and (max-width: 480px) {
+            .cd-card { padding: 24px 20px !important; }
+            .cd-btn { display: block !important; width: 100% !important; text-align: center !important; box-sizing: border-box; }
+          }
+        </style>
+      </head>
+      <body style="margin:0;background:#F4F5F7">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F5F7">
+          <tr>
+            <td align="center" style="padding:40px 16px">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px">
+                <tr>
+                  <td class="cd-card" style="background:#ffffff;border:1px solid #E1E3E7;border-radius:12px;padding:36px 32px;font-family:Helvetica,Arial,sans-serif;color:#4B4C4C">
+                    <img src="${logoUrl}" alt="Caudall" width="112" style="height:26px;width:auto;display:block;margin:0 0 24px">
+                    ${innerHtml}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
   `;
 }
 
@@ -50,24 +80,26 @@ export async function sendMagicLinkEmail(params: {
     from,
     to,
     subject: 'Tu link para entrar a Caudall',
-    html: wrapEmailBody(`
-      <h1 style="color:#0F5499;font-size:20px;font-weight:500;margin:0 0 16px">caudall</h1>
-      <p style="font-size:14px;line-height:1.5;margin:0 0 24px">
-        Hola, usa este link para entrar a tu cuenta de bienestar financiero
-        de <b>${tenantName}</b>. El link vence en 15 minutos y solo funciona una vez.
-      </p>
-      <p style="margin:0 0 24px">
-        <a href="${verifyUrl}"
-           style="background:#0F5499;color:#fff;padding:12px 20px;border-radius:8px;
-                  text-decoration:none;font-size:14px;display:inline-block">
-          Entrar a Caudall
-        </a>
-      </p>
-      <p style="font-size:12px;color:#737373;line-height:1.5;margin:0">
-        Si no pediste este link, puedes ignorar este correo. Tu empresa nunca
-        verá esta actividad ni tus respuestas individuales.
-      </p>
-    `)
+    html: renderEmailShell(
+      new URL(verifyUrl).origin,
+      `
+        <p style="font-size:14px;line-height:1.5;margin:0 0 24px">
+          Hola, usa este link para entrar a tu cuenta de bienestar financiero
+          de <b>${tenantName}</b>. El link vence en 15 minutos y solo funciona una vez.
+        </p>
+        <p style="margin:0 0 24px">
+          <a href="${verifyUrl}" class="cd-btn"
+             style="background:#0F5499;color:#fff;padding:12px 20px;border-radius:8px;
+                    text-decoration:none;font-size:14px;display:inline-block">
+            Entrar a Caudall
+          </a>
+        </p>
+        <p style="font-size:12px;color:#737373;line-height:1.5;margin:0">
+          Si no pediste este link, puedes ignorar este correo. Tu empresa nunca
+          verá esta actividad ni tus respuestas individuales.
+        </p>
+      `
+    )
   });
 
   if (error) {
@@ -87,22 +119,24 @@ export async function sendAdminWelcomeEmail(params: { to: string; tenantName: st
     from,
     to,
     subject: 'Ya tienes acceso al panel de Caudall',
-    html: wrapEmailBody(`
-      <h1 style="color:#0F5499;font-size:20px;font-weight:500;margin:0 0 16px">caudall</h1>
-      <p style="font-size:14px;line-height:1.5;margin:0 0 24px">
-        Ya tienes acceso al panel administrativo de Caudall para <b>${tenantName}</b>.
-      </p>
-      <p style="margin:0 0 24px">
-        <a href="${panelUrl}"
-           style="background:#0F5499;color:#fff;padding:12px 20px;border-radius:8px;
-                  text-decoration:none;font-size:14px;display:inline-block">
-          Entrar al panel
-        </a>
-      </p>
-      <p style="font-size:12px;color:#737373;line-height:1.5;margin:0">
-        Entra con este correo (${to}) y te enviaremos un link de acceso válido por 15 minutos.
-      </p>
-    `)
+    html: renderEmailShell(
+      new URL(panelUrl).origin,
+      `
+        <p style="font-size:14px;line-height:1.5;margin:0 0 24px">
+          Ya tienes acceso al panel administrativo de Caudall para <b>${tenantName}</b>.
+        </p>
+        <p style="margin:0 0 24px">
+          <a href="${panelUrl}" class="cd-btn"
+             style="background:#0F5499;color:#fff;padding:12px 20px;border-radius:8px;
+                    text-decoration:none;font-size:14px;display:inline-block">
+            Entrar al panel
+          </a>
+        </p>
+        <p style="font-size:12px;color:#737373;line-height:1.5;margin:0">
+          Entra con este correo (${to}) y te enviaremos un link de acceso válido por 15 minutos.
+        </p>
+      `
+    )
   });
 
   if (error) {
@@ -121,23 +155,25 @@ export async function sendEmailChangeConfirmation(params: { to: string; verifyUr
     from,
     to,
     subject: 'Confirma tu nuevo correo en Caudall',
-    html: wrapEmailBody(`
-      <h1 style="color:#0F5499;font-size:20px;font-weight:500;margin:0 0 16px">caudall</h1>
-      <p style="font-size:14px;line-height:1.5;margin:0 0 24px">
-        Pediste cambiar el correo de tu cuenta de Caudall a esta dirección.
-        Confirma para completar el cambio. El link vence en 15 minutos.
-      </p>
-      <p style="margin:0 0 24px">
-        <a href="${verifyUrl}"
-           style="background:#0F5499;color:#fff;padding:12px 20px;border-radius:8px;
-                  text-decoration:none;font-size:14px;display:inline-block">
-          Confirmar mi correo nuevo
-        </a>
-      </p>
-      <p style="font-size:12px;color:#737373;line-height:1.5;margin:0">
-        Si no pediste este cambio, ignora este correo — tu cuenta sigue igual.
-      </p>
-    `)
+    html: renderEmailShell(
+      new URL(verifyUrl).origin,
+      `
+        <p style="font-size:14px;line-height:1.5;margin:0 0 24px">
+          Pediste cambiar el correo de tu cuenta de Caudall a esta dirección.
+          Confirma para completar el cambio. El link vence en 15 minutos.
+        </p>
+        <p style="margin:0 0 24px">
+          <a href="${verifyUrl}" class="cd-btn"
+             style="background:#0F5499;color:#fff;padding:12px 20px;border-radius:8px;
+                    text-decoration:none;font-size:14px;display:inline-block">
+            Confirmar mi correo nuevo
+          </a>
+        </p>
+        <p style="font-size:12px;color:#737373;line-height:1.5;margin:0">
+          Si no pediste este cambio, ignora este correo — tu cuenta sigue igual.
+        </p>
+      `
+    )
   });
 
   if (error) {
@@ -153,23 +189,25 @@ export async function sendAdminMagicLinkEmail(params: { to: string; verifyUrl: s
     from,
     to,
     subject: 'Tu link para entrar al panel de Caudall',
-    html: wrapEmailBody(`
-      <h1 style="color:#0F5499;font-size:20px;font-weight:500;margin:0 0 16px">caudall</h1>
-      <p style="font-size:14px;line-height:1.5;margin:0 0 24px">
-        Usa este link para entrar al panel administrativo. Vence en 15 minutos
-        y solo funciona una vez.
-      </p>
-      <p style="margin:0 0 24px">
-        <a href="${verifyUrl}"
-           style="background:#0F5499;color:#fff;padding:12px 20px;border-radius:8px;
-                  text-decoration:none;font-size:14px;display:inline-block">
-          Entrar al panel
-        </a>
-      </p>
-      <p style="font-size:12px;color:#737373;line-height:1.5;margin:0">
-        Si no pediste este link, puedes ignorar este correo.
-      </p>
-    `)
+    html: renderEmailShell(
+      new URL(verifyUrl).origin,
+      `
+        <p style="font-size:14px;line-height:1.5;margin:0 0 24px">
+          Usa este link para entrar al panel administrativo. Vence en 15 minutos
+          y solo funciona una vez.
+        </p>
+        <p style="margin:0 0 24px">
+          <a href="${verifyUrl}" class="cd-btn"
+             style="background:#0F5499;color:#fff;padding:12px 20px;border-radius:8px;
+                    text-decoration:none;font-size:14px;display:inline-block">
+            Entrar al panel
+          </a>
+        </p>
+        <p style="font-size:12px;color:#737373;line-height:1.5;margin:0">
+          Si no pediste este link, puedes ignorar este correo.
+        </p>
+      `
+    )
   });
 
   if (error) {
