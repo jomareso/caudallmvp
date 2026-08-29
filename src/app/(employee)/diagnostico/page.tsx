@@ -5,6 +5,7 @@ import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-cont
 import { getNextQuestion, countAnsweredAndTotal } from '@/lib/engines/diagnostic';
 import { finalizeDiagnostic } from '@/lib/engines/diagnostic-completion';
 import { DIMENSION_ICON, DEFAULT_DIMENSION_ICON } from '@/lib/engines/commitment-triggers';
+import { getPlatformSettings } from '@/lib/settings/platform-settings';
 import { QuestionForm } from './question-form';
 import { EmployeeTopBar } from '../employee-topbar';
 import { BackHomeLink } from '../back-home-link';
@@ -32,21 +33,22 @@ export default async function DiagnosticoPage() {
       redirect('/diagnostico/contexto');
     }
 
-    const dimension = question.dimensionId
-      ? await prisma.dimension.findUnique({ where: { id: question.dimensionId } })
-      : null;
-    const { answered } = await countAnsweredAndTotal(employeeId);
+    const [dimension, { answered }, settings] = await Promise.all([
+      question.dimensionId ? prisma.dimension.findUnique({ where: { id: question.dimensionId } }) : null,
+      countAnsweredAndTotal(employeeId),
+      getPlatformSettings()
+    ]);
 
     // El banco es adaptativo (spec §23): cuántas preguntas "faltan" cambia
     // según lo que se responde, porque respuestas nuevas desbloquean
     // preguntas que antes no aplicaban. No se muestra ningún número (ni
     // "Pregunta N" ni "N de M") porque cualquier cantidad sería una promesa
     // que puede cambiar — solo una barra visual que avanza, sin texto. Usa
-    // la meta del STOP ENGINE (spec §24: "target 8–12 preguntas") nada más
-    // como referencia interna para el ancho; no afecta cuándo el
-    // diagnóstico realmente termina, eso lo decide getNextQuestion.
-    const PROGRESS_TARGET = 12;
-    const progressPercent = Math.min(92, Math.round((answered / PROGRESS_TARGET) * 100));
+    // la meta del STOP ENGINE (spec §24: "target 8–12 preguntas", editable
+    // en /admin/metodologia/parametros) nada más como referencia interna
+    // para el ancho; no afecta cuándo el diagnóstico realmente termina, eso
+    // lo decide getNextQuestion.
+    const progressPercent = Math.min(92, Math.round((answered / settings.progressTarget) * 100));
 
     const t = await getTranslations('diagnostic');
     const tDim = await getTranslations('diagnostic.dimensions');

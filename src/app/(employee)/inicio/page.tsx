@@ -15,7 +15,7 @@ export default async function InicioPage() {
   // Inicio (ver post-login-destination.ts) — lo único que cambia con el
   // tiempo es esta invitación a actualizarlo. Editable desde
   // /admin/configuracion (PlatformSettings.followupInviteAfterDays).
-  const { followupInviteAfterDays } = await getPlatformSettings();
+  const settings = await getPlatformSettings();
 
   const financialState = await runWithTenantContext(employeeTenantContext(baseEmployee), () =>
     prisma.financialState.findUnique({ where: { employeeId: baseEmployee.id } })
@@ -36,12 +36,15 @@ export default async function InicioPage() {
   const tAll = await getTranslations();
 
   const cfhiRounded = Math.round(financialState.cfhiScore);
-  const cfhiLevel = scoreToProgressTier(cfhiRounded);
+  const cfhiLevel = scoreToProgressTier(cfhiRounded, {
+    mid: settings.progressTierMidCutoff,
+    high: settings.progressTierHighCutoff
+  });
 
   const daysSinceCompleted = Math.floor(
     (Date.now() - financialState.lastDiagnosticCompletedAt.getTime()) / (1000 * 60 * 60 * 24)
   );
-  const showFollowupInvite = daysSinceCompleted >= followupInviteAfterDays;
+  const showFollowupInvite = daysSinceCompleted >= settings.followupInviteAfterDays;
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db/prisma';
 import type { Question, AnswerOption } from '@prisma/client';
 import { evaluateRule, type Facts } from './rules';
 import { applyConsistencyFlags } from './consistency';
+import { getPlatformSettings } from '@/lib/settings/platform-settings';
 
 // NOTA: la spec (docs/spec-v2.md §22) dice que el banco adaptativo "ya
 // existe y ya fue auditado" y que no debe rehacerse desde cero — y ahora sí
@@ -184,8 +185,11 @@ function sortByRoleThenPriority<T extends Question>(questions: T[]): T[] {
 // Los tres límites numéricos (target 8-12, soft max 15, hard max 18) son
 // la red de seguridad de la spec: nunca menos de STOP_FLOOR (aunque todo
 // ya "parezca" suficiente, según lo de arriba) y nunca más de
-// STOP_HARD_MAX (aunque falte confianza) — parametrizables acá, no
-// globalmente por cliente todavía (eso es de una fase posterior).
+// STOP_HARD_MAX (aunque falte confianza). Editables desde
+// /admin/metodologia/parametros (PlatformSettings) — global por ahora, no
+// por cliente todavía (eso es de una fase posterior). Estas constantes
+// quedan como default de referencia (y para tests que no tocan DB);
+// getNextQuestion() usa el valor real de la configuración.
 export const STOP_FLOOR = 8;
 export const STOP_SOFT_MAX = 15;
 export const STOP_HARD_MAX = 18;
@@ -206,7 +210,10 @@ export function isHighValue(q: Question, threshold: number): boolean {
 // bloque de contexto (CONTEXT) no es parte de esta secuencia, ver
 // getNextContextQuestion() más abajo.
 export async function getNextQuestion(employeeId: string): Promise<QuestionWithOptions | null> {
-  const { bank, facts, answeredSet, debtDimensionId } = await loadBankAndState(employeeId);
+  const [{ bank, facts, answeredSet, debtDimensionId }, settings] = await Promise.all([
+    loadBankAndState(employeeId),
+    getPlatformSettings()
+  ]);
   if (!bank) return null;
 
   const financialQuestions = sortByRoleThenPriority(bank.questions.filter((q) => q.role !== 'CONTEXT'));
@@ -220,7 +227,7 @@ export async function getNextQuestion(employeeId: string): Promise<QuestionWithO
   // una inconsistencia sin aclarar. Se revisa antes que nada porque, a
   // diferencia del resto, también debe cortar la ruta de aclaración de
   // abajo.
-  if (answeredCount >= STOP_HARD_MAX) return null;
+  if (answeredCount >= settings.stopHardMax) return null;
 
   // Consistency Resolution Engine (spec §20): una inconsistencia detectada
   // (ver consistency.ts) se resuelve SIEMPRE antes de parar, sin pasar por
@@ -267,9 +274,9 @@ export async function getNextQuestion(employeeId: string): Promise<QuestionWithO
   // Antes del mínimo objetivo, seguimos preguntando lo mejor disponible
   // sin importar si su valor ya bajó del umbral — el piso de la spec
   // manda sobre el criterio de "alto valor".
-  if (answeredCount < STOP_FLOOR) return applicableRemaining[0];
+  if (answeredCount < settings.stopFloor) return applicableRemaining[0];
 
-  const threshold = answeredCount >= STOP_SOFT_MAX ? HIGH_VALUE_THRESHOLD_SOFT : HIGH_VALUE_THRESHOLD;
+  const threshold = answeredCount >= settings.stopSoftMax ? settings.highValueThresholdSoft : settings.highValueThreshold;
   const nextHighValue = applicableRemaining.find((q) => isHighValue(q, threshold));
 
   return nextHighValue ?? null;

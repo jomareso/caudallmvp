@@ -119,19 +119,19 @@ model Employee {
   createdAt          DateTime       @default(now())
   lastActiveAt       DateTime?
 
-  tenant          Tenant                 @relation(fields: [tenantId], references: [id])
-  license         License?               @relation(fields: [licenseId], references: [id])
-  segments        EmployeeSegment[]
-  evidence        Evidence[]
-  variableStates  VariableState[]
-  constructScores ConstructScore[]
-  dimensionScores DimensionScore[]
-  financialState  FinancialState?
-  safetyFlags     SafetyFlag[]
-  interventions   EmployeeIntervention[]
-  pushSubscriptions PushSubscription[]
+  tenant                 Tenant                  @relation(fields: [tenantId], references: [id])
+  license                License?                @relation(fields: [licenseId], references: [id])
+  segments               EmployeeSegment[]
+  evidence               Evidence[]
+  variableStates         VariableState[]
+  constructScores        ConstructScore[]
+  dimensionScores        DimensionScore[]
+  financialState         FinancialState?
+  safetyFlags            SafetyFlag[]
+  interventions          EmployeeIntervention[]
+  pushSubscriptions      PushSubscription[]
   notificationPreference NotificationPreference?
-  notificationLogs NotificationLog[]
+  notificationLogs       NotificationLog[]
 
   @@unique([tenantId, personalEmail])
   @@index([tenantId])
@@ -301,7 +301,7 @@ enum FunctionalRole {
 // logo se guarda como bytes directo en la base de datos (decisión de
 // Reynoso: simple para el MVP, sin agregar un servicio de storage nuevo).
 model PlatformSettings {
-  id           String   @id @default("singleton")
+  id           String  @id @default("singleton")
   logoData     Bytes?
   logoMimeType String?
 
@@ -316,6 +316,22 @@ model PlatformSettings {
   minCohortSize           Int     @default(30)
   minSampleSize           Int     @default(20)
   magicLinkTtlMinutes     Int     @default(15)
+
+  // Parámetros del motor de diagnóstico (STOP ENGINE) y de las bandas de
+  // nivel — editables desde /admin/metodologia/parametros. Mismo criterio
+  // que el bloque de arriba: defaults = valores ya hardcodeados en
+  // diagnostic.ts/scoring.ts, sin cambio de comportamiento en el deploy.
+  stopFloor              Int   @default(8)
+  stopSoftMax            Int   @default(15)
+  stopHardMax            Int   @default(18)
+  highValueThreshold     Float @default(0.9)
+  highValueThresholdSoft Float @default(0.97)
+  // Meta visual de la barra de progreso en /diagnostico — antes un número
+  // suelto (PROGRESS_TARGET=12) desconectado de stopSoftMax/stopHardMax;
+  // ahora vive junto a esos valores para que se editen coherentes entre sí.
+  progressTarget         Int   @default(12)
+  progressTierMidCutoff  Int   @default(41)
+  progressTierHighCutoff Int   @default(71)
 
   updatedAt DateTime @updatedAt
 
@@ -720,9 +736,9 @@ model FinancialState {
   // src/lib/engines/diagnostic-stats.ts). diagnosticStartedAt se fija una
   // sola vez, en la primera respuesta; los otros dos se fijan al terminar
   // (finalizeDiagnostic), como snapshot — no se recalculan después.
-  diagnosticStartedAt        DateTime?
-  diagnosticDurationSeconds  Int?
-  questionsAnsweredCount     Int?
+  diagnosticStartedAt       DateTime?
+  diagnosticDurationSeconds Int?
+  questionsAnsweredCount    Int?
   updatedAt                 DateTime  @updatedAt
 
   employee Employee @relation(fields: [employeeId], references: [id])
@@ -905,23 +921,23 @@ enum LearningEventType {
 // aparte. Ver prisma/seed-data/scripts/convert-national-benchmark.py
 // para el mapeo completo desde los datos originales.
 model NationalBenchmarkRecord {
-  id                String  @id @default(cuid())
-  version           String
-  studyYear         Int?
-  sourceLabel       String
-  sex               String?
-  ageBand           String?
-  educationLevel    String?
-  employmentStatus  String?
-  dependents        String?
-  incomeRangeRaw    String?
-  controlScore      Float
-  savingScore       Float
-  debtScore         Float
-  planningScore     Float
-  overallScore      Float
-  condition         String?
-  createdAt         DateTime @default(now())
+  id               String   @id @default(cuid())
+  version          String
+  studyYear        Int?
+  sourceLabel      String
+  sex              String?
+  ageBand          String?
+  educationLevel   String?
+  employmentStatus String?
+  dependents       String?
+  incomeRangeRaw   String?
+  controlScore     Float
+  savingScore      Float
+  debtScore        Float
+  planningScore    Float
+  overallScore     Float
+  condition        String?
+  createdAt        DateTime @default(now())
 
   @@index([version])
   @@index([ageBand])
