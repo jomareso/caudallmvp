@@ -176,24 +176,51 @@ model NotificationPreference {
   @@map("notification_preferences")
 }
 
+// Reglas de notificación (panel admin /admin/notificaciones): cada fila es
+// una instancia configurable de una de las 5 plantillas fijas
+// (NotificationType) — el admin puede desactivarla, editar título/cuerpo, o
+// (solo INCOMPLETE y LICENSE_EXPIRING, que dependen de un umbral) los días.
+// Puede haber más de una instancia por plantilla (ej. dos avisos de
+// "incompleto" a distintos días). Tabla de configuración global de
+// plataforma, no de datos de empleado — no lleva tenantId ni RLS, mismo
+// patrón que Intervention/Methodology/PlatformSettings.
+model NotificationRule {
+  id           String           @id @default(cuid())
+  templateType NotificationType
+  enabled      Boolean          @default(true)
+  title        String
+  body         String
+  days         Int?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  logs NotificationLog[]
+
+  @@index([templateType, enabled])
+  @@map("notification_rules")
+}
+
 // Motor de envío (Decisión 9 + ítem 7 de la auditoría UX): registra cada
 // push ya enviado para no repetirlo. refId identifica QUÉ disparó el envío
-// dentro de cada tipo (el id del EmployeeIntervention para COMMITMENT, el
+// dentro de cada regla (el id del EmployeeIntervention para COMMITMENT, el
 // id de la Intervention del catálogo para NEW_STEP, el id de la License
 // para LICENSE_EXPIRING) — así, si la causa cambia (un compromiso nuevo,
 // otra licencia), sí se vuelve a avisar; si sigue siendo la misma, no. Para
 // INCOMPLETE y RESULT_UPDATED, que son una única alerta por evento en vez
-// de por-entidad, refId queda null.
+// de por-entidad, refId queda null. El dedup es por INSTANCIA de regla
+// (ruleId), no por plantilla — si el admin crea dos reglas "incompleto" a
+// distintos días, cada una lleva su propio historial de envíos.
 model NotificationLog {
-  id         String           @id @default(cuid())
+  id         String   @id @default(cuid())
   employeeId String
-  type       NotificationType
+  ruleId     String
   refId      String?
-  sentAt     DateTime         @default(now())
+  sentAt     DateTime @default(now())
 
-  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  rule     NotificationRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
 
-  @@index([employeeId, type])
+  @@index([employeeId, ruleId])
   @@map("notification_logs")
 }
 
