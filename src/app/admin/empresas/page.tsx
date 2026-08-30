@@ -41,11 +41,12 @@ export default async function EmpresasPage() {
           <p className="text-xs text-nickel">{t('companyCount', { count: tenants.length })}</p>
         </header>
 
-        {/* El formulario se queda en su propio ancho (max-w-md), no el 6xl
-            de la página — sus campos no se benefician de más ancho, y
-            estirarlo solo dejaría espacio vacío dentro de la tarjeta
-            (mismo criterio que ya se aplicó en RRHH y Configuración). */}
-        <div className="max-w-md mb-8">
+        {/* max-w-2xl (no max-w-md): el formulario ahora reparte sus campos
+            en 2 columnas (ver create-tenant-form.tsx) — Reynoso señaló que
+            max-w-md dejaba mucho espacio en blanco a la derecha de la
+            tarjeta. Sigue sin llegar al 6xl de la página: sus campos no
+            se benefician de tanto ancho. */}
+        <div className="max-w-2xl mb-8">
           <CreateTenantForm
             durationOptions={durationOptions}
             labels={{
