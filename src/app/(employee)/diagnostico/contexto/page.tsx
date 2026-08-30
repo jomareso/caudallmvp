@@ -54,7 +54,6 @@ export default async function DiagnosticoContextoPage() {
                 title: tContext('title'),
                 body: tContext('body'),
                 ctaContinue: tContext('ctaContinue'),
-                ctaSkip: tContext('ctaSkip'),
                 formContinueLabel: t('ctaContinue'),
                 formErrorLabel: t('errorSelectOption')
               }}

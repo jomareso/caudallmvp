@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { QuestionForm } from '../question-form';
 
 export function ContextFlow({
@@ -20,7 +19,6 @@ export function ContextFlow({
     title: string;
     body: string;
     ctaContinue: string;
-    ctaSkip: string;
     formContinueLabel: string;
     formErrorLabel: string;
   };
@@ -38,16 +36,10 @@ export function ContextFlow({
         <button
           type="button"
           onClick={() => setStarted(true)}
-          className="w-full bg-yale text-white rounded-lg py-2.5 text-sm mb-2"
+          className="w-full bg-yale text-white rounded-lg py-2.5 text-sm"
         >
           {labels.ctaContinue}
         </button>
-        <Link
-          href="/diagnostico/resultado"
-          className="block text-center text-xs text-nickel underline py-1"
-        >
-          {labels.ctaSkip}
-        </Link>
       </div>
     );
   }

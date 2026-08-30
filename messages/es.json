@@ -675,10 +675,9 @@
     },
     "context": {
       "eyebrow": "Ya terminaste lo esencial",
-      "title": "Unas últimas preguntas, opcionales",
-      "body": "Con esto podemos compararte con personas en una situación similar a la tuya — mismo rango de edad, de ingresos, de responsabilidades — en vez de con el promedio general. Toma menos de un minuto, y puedes responderlas después si prefieres.",
-      "ctaContinue": "Continuar",
-      "ctaSkip": "Ahora no"
+      "title": "Unas últimas preguntas",
+      "body": "Con esto podemos compararte con personas en una situación similar a la tuya — mismo rango de edad, de ingresos, de responsabilidades — en vez de con el promedio general. Toma menos de un minuto.",
+      "ctaContinue": "Continuar"
     },
     "dimensions": {
       "CONTROL": "Control",
@@ -1731,7 +1730,7 @@
         }
       },
       "CTX-07": {
-        "text": "¿Quieres comparar tus resultados con personas que tienen un contexto financiero similar al tuyo?",
+        "text": "¿Quieres **comparar** tus resultados con personas que tienen un **contexto financiero similar** al tuyo?",
         "whyAsk": "Registra la decisión explícita del participante de ver o no una comparación contextual. La respuesta no modifica su puntuación ni sus recomendaciones.",
         "options": {
           "YES": "Sí, quiero ver la comparación",
@@ -1877,7 +1876,8 @@
           "MID": "Tu resultado está listo — seguí avanzando",
           "HIGH": "Tu resultado está listo — seguí manteniendo el rumbo"
         },
-        "emailCta": "Ver mi resultado completo"
+        "emailCta": "Ver mi resultado completo",
+        "generalIndexLabel": "Salud financiera general"
       }
     },
     "action": {

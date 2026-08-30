@@ -21,13 +21,26 @@ const TIER_META: Record<'LOW' | 'MID' | 'HIGH', { emoji: string; badge: string; 
 // según tier/posición ya resueltos.
 export async function SocialComparisonCard({ plan }: { plan: PostDiagnosticMessagePlan }) {
   const { comparison, action, tier } = plan;
-  if (!comparison.shown && comparison.reason === 'DISABLED') return null;
+  // NO_CONSENT: el empleado dijo explícitamente que no quiere ver
+  // comparación (CTX-07=NO) — se respeta igual que DISABLED, sin mostrar
+  // ni siquiera el refuerzo genérico de noData.
+  if (!comparison.shown && (comparison.reason === 'DISABLED' || comparison.reason === 'NO_CONSENT')) return null;
 
   const t = await getTranslations('diagnostic.result.socialComparison');
   const tDim = await getTranslations('diagnostic.dimensions');
   const tRoot = await getTranslations();
 
-  const dimensionLabel = comparison.priorityDimension ? tDim(comparison.priorityDimension) : '';
+  // GENERAL (fallback de Resiliencia): el percentil es del índice
+  // general, no de comparisonDimension ('RESILIENCE' se conserva para
+  // auditoría) — usar tDim acá diría "Tu Resiliencia..." sobre un número
+  // que en realidad es del CFHI general. Ver comentario del tipo en
+  // social-comparison.ts.
+  const dimensionLabel =
+    comparison.shown && comparison.comparisonScope === 'GENERAL'
+      ? t('generalIndexLabel')
+      : comparison.priorityDimension
+        ? tDim(comparison.priorityDimension)
+        : '';
 
   const reinforcement = comparison.shown
     ? t(`reinforcement.${tier}.${comparison.position}`, { dimension: dimensionLabel })

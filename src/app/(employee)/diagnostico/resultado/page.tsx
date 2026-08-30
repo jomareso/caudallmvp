@@ -102,11 +102,21 @@ export default async function ResultadoPage() {
     // (comparison.includeNumericComparison ya resuelve esa regla en el
     // motor — ver social-comparison.ts) ni sin datos suficientes.
     const { comparison } = messagePlan;
+    // GENERAL (fallback de Resiliencia): mismo motivo que en
+    // social-comparison-card.tsx — el percentil es del índice general,
+    // no de priorityDimension, así que la etiqueta no puede venir de
+    // tDim(priorityDimension) o el texto quedaría engañoso.
+    const comparisonDimensionLabel =
+      comparison.shown && comparison.comparisonScope === 'GENERAL'
+        ? tSocial('generalIndexLabel')
+        : comparison.priorityDimension
+          ? tDim(comparison.priorityDimension)
+          : null;
     const comparisonBadge =
-      comparison.shown && comparison.includeNumericComparison && comparison.priorityDimension
+      comparison.shown && comparison.includeNumericComparison && comparisonDimensionLabel
         ? {
             text: tSocial(comparison.position === 'SUPERIOR' ? 'statSuperior' : 'statSimilar', {
-              dimension: tDim(comparison.priorityDimension),
+              dimension: comparisonDimensionLabel,
               percentile: comparison.percentile
             }),
             className:
@@ -200,7 +210,8 @@ export default async function ResultadoPage() {
 
             <SocialComparisonCard plan={messagePlan} />
 
-            {!messagePlan.comparison.shown && messagePlan.comparison.reason === 'DISABLED' ? (
+            {!messagePlan.comparison.shown &&
+            (messagePlan.comparison.reason === 'DISABLED' || messagePlan.comparison.reason === 'NO_CONSENT') ? (
               <Link
                 href="/diagnostico/accion"
                 className="block mt-6 text-center bg-yale text-white rounded-lg py-2.5 px-6 text-sm"

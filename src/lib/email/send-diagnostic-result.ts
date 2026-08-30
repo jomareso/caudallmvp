@@ -34,7 +34,16 @@ export async function sendDiagnosticResultEmail(params: {
   const tDim = await getTranslations('diagnostic.dimensions');
   const tRoot = await getTranslations();
 
-  const dimensionLabel = comparison.priorityDimension ? tDim(comparison.priorityDimension) : '';
+  // GENERAL (fallback de Resiliencia): mismo motivo que en
+  // social-comparison-card.tsx/resultado/page.tsx — el percentil es del
+  // índice general, no de priorityDimension, así que la etiqueta no
+  // puede venir de tDim(priorityDimension) o el texto quedaría engañoso.
+  const dimensionLabel =
+    comparison.shown && comparison.comparisonScope === 'GENERAL'
+      ? t('generalIndexLabel')
+      : comparison.priorityDimension
+        ? tDim(comparison.priorityDimension)
+        : '';
 
   const reinforcement = comparison.shown
     ? t(`reinforcement.${tier}.${comparison.position}`, { dimension: dimensionLabel })
