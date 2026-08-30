@@ -6,8 +6,21 @@ import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { verifyMagicLinkToken } from './magic-link';
 import { authConfig } from './auth.config';
 import { ENROLLMENT_CODE_COOKIE } from './google-cookie';
-import { resolveOrCreateEmployeeForGoogle } from './google-employee';
+import { GoogleEnrollmentError, resolveOrCreateEmployeeForGoogle } from './google-employee';
 import type {} from './types';
+
+// Mismas claves que ya usa employee.access.errors (requestMagicLink en
+// (employee)/actions.ts) para las mismas 4 reglas de negocio — un solo
+// texto por caso, sin importar si el empleado entra por link mágico o por
+// Google. 'NO_CODE' no viene de GoogleEnrollmentError (nunca se
+// construye con ese código, ver google-employee.ts): se maneja aparte,
+// directo en el callback signIn() de abajo.
+const GOOGLE_ERROR_QUERY_PARAM: Record<Exclude<import('./google-employee').GoogleEnrollmentErrorCode, 'NO_CODE'>, string> = {
+  CODE_INVALID: 'invalidCode',
+  LICENSE_EXPIRED: 'licenseExpired',
+  LICENSE_TAKEN: 'codeAlreadyAssigned',
+  CORPORATE_EMAIL: 'useCorporateEmail'
+};
 
 type EmployeeAuthUser = {
   id: string;
@@ -42,12 +55,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
     // ADR-008: OAuth con Google, cuenta personal, como opción junto al
-    // magic link — no lo reemplaza. profile() (no signIn/jwt) es donde
-    // corre la resolución de Employee: es el único callback de un
-    // provider OAuth que puede devolver directamente el shape de `user`
-    // que después usa el callback jwt() compartido (ver auth.config.ts) —
-    // así ese callback no necesita saber que existe Google, solo ve un
-    // EmployeeAuthUser igual que si hubiera entrado por magic link.
+    // magic link — no lo reemplaza.
+    //
+    // La resolución de Employee (código válido, licencia no vencida/no
+    // tomada, correo no corporativo) vivía antes en profile(), lanzando
+    // GoogleEnrollmentError/Error('NO_CODE') directo. Eso se veía en
+    // producción como la pantalla genérica de Auth.js "There is a
+    // problem with the server configuration" — profile() no tiene forma
+    // de redirigir a una pantalla propia, cualquier excepción ahí cae en
+    // ese error opaco (encontrado por Reynoso probando "Continuar con
+    // Google"). Por eso esa resolución se movió al callback signIn() de
+    // abajo: es el único punto del pipeline de Auth.js donde devolver un
+    // string redirige al usuario a esa URL en vez de mostrar el error
+    // genérico (ver tipo de CallbacksOptions.signIn en @auth/core).
+    // profile() ahora solo mapea el perfil crudo de Google — nunca falla.
     Google({
       // Explícitos, no la convención AUTH_GOOGLE_ID/SECRET de Auth.js v5:
       // .env.example ya documentaba GOOGLE_CLIENT_ID/SECRET desde antes
@@ -57,11 +78,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       async profile(profile) {
-        const enrollmentCode = cookies().get(ENROLLMENT_CODE_COOKIE)?.value;
-        if (!enrollmentCode) {
-          throw new Error('NO_CODE');
-        }
-        return resolveOrCreateEmployeeForGoogle({ enrollmentCode, email: profile.email });
+        // tenantId placeholder: signIn() de abajo lo completa con el
+        // Employee real (o corta el login con un redirect) antes de que
+        // jwt() (ver auth.config.ts) llegue a leer este objeto — jwt()
+        // recibe la MISMA referencia de `user` que devuelve/muta este
+        // provider, no una copia, así que la mutación en signIn() sí le
+        // llega.
+        const placeholder: EmployeeAuthUser = { id: profile.sub, email: profile.email ?? '', tenantId: '', role: 'employee' };
+        return placeholder;
       }
     }),
     Credentials({
@@ -152,5 +176,49 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
       }
     })
-  ]
+  ],
+  callbacks: {
+    // ...authConfig.callbacks primero: jwt()/session() (ver auth.config.ts)
+    // no se tocan, solo se agrega signIn(). Spread, no reemplazo — un
+    // callbacks: {} acá pisaría por completo el de authConfig en vez de
+    // sumarse.
+    ...authConfig.callbacks,
+    async signIn({ user, account }) {
+      // authorize() (Credentials/magic-link) ya resuelve todo su propio
+      // caso arriba, devolviendo null si no es válido — nada que agregar
+      // acá para ese provider.
+      if (account?.provider !== 'google') return true;
+
+      const enrollmentCode = cookies().get(ENROLLMENT_CODE_COOKIE)?.value;
+      // Vuelve a /acceso (no /registro?code=...) porque sin cookie no hay
+      // código que reusar en la URL — mismo destino que un code inválido
+      // en /registro/page.tsx.
+      if (!enrollmentCode) return '/acceso';
+
+      try {
+        const employee = await resolveOrCreateEmployeeForGoogle({
+          enrollmentCode,
+          email: (user as EmployeeAuthUser).email
+        });
+        // Muta el mismo objeto `user` que profile() devolvió (ver
+        // comentario ahí) — jwt() lo lee después con los valores reales.
+        const authUser = user as EmployeeAuthUser;
+        authUser.id = employee.id;
+        authUser.email = employee.email;
+        authUser.tenantId = employee.tenantId;
+        authUser.role = 'employee';
+        return true;
+      } catch (error) {
+        // googleError se traduce y se muestra en el mismo formulario que
+        // ya tenía el usuario — mismos 4 textos que requestMagicLink en
+        // (employee)/actions.ts, para no decir cosas distintas según el
+        // método de entrada.
+        const reason =
+          error instanceof GoogleEnrollmentError && error.code !== 'NO_CODE'
+            ? GOOGLE_ERROR_QUERY_PARAM[error.code]
+            : 'googleUnknown';
+        return `/registro?code=${encodeURIComponent(enrollmentCode)}&googleError=${reason}`;
+      }
+    }
+  }
 });
