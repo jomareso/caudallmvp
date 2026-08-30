@@ -23,7 +23,8 @@
         "licenseExpired": "Esta licencia ya venció. Pide un código nuevo a tu equipo de RRHH.",
         "useCorporateEmail": "Usa tu correo personal, no el de la empresa. Esta cuenta es solo tuya.",
         "codeAlreadyAssigned": "Este código ya está asignado a otra persona.",
-        "invalidInput": "Revisa los datos ingresados."
+        "invalidInput": "Revisa los datos ingresados.",
+        "googleUnknown": "No pudimos completar el ingreso con Google. Intenta de nuevo o usa tu correo."
       }
     },
     "landing": {

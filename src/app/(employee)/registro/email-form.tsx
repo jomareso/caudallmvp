@@ -8,10 +8,16 @@ import { beginGoogleSignIn } from './google-actions';
 
 export function EmailForm({
   enrollmentCode,
-  tenantName
+  tenantName,
+  googleErrorMessage
 }: {
   enrollmentCode: string;
   tenantName: string;
+  // Viene de RegistroPage vía ?googleError=<clave> — el callback signIn()
+  // de src/lib/auth/auth.ts redirige acá cuando "Continuar con Google"
+  // falla por código/licencia/correo corporativo, en vez de la pantalla
+  // genérica de error de Auth.js.
+  googleErrorMessage: string | null;
 }) {
   const t = useTranslations('employee.email');
   const tTrust = useTranslations('employee.trust');
@@ -94,6 +100,8 @@ export function EmailForm({
             </svg>
             {t('ctaGoogle')}
           </button>
+
+          {googleErrorMessage ? <p className="text-xs text-bad mt-2">{googleErrorMessage}</p> : null}
 
           {/* En lg+ el panel de marca (brand-panel.tsx) ya muestra esta misma garantía — repetirla acá se vería duplicado */}
           <div className="bg-picton/10 rounded-lg px-3 py-2.5 mt-4 flex gap-2 items-start lg:hidden">
