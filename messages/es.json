@@ -142,7 +142,7 @@
           },
           "resultUpdated": {
             "name": "Resultado actualizado",
-            "desc": "Tu Índice de Salud Financiera cambió tras responder algo nuevo."
+            "desc": "Tu Índice de Salud Financiera cambió tras responder algo nuevo — incluye el correo con tu comparación al completar el diagnóstico."
           },
           "newStep": {
             "name": "Nuevo paso disponible",
