@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 
 // Sin esto, Next.js intenta pre-renderizar esta ruta en build time (no usa
@@ -17,13 +16,25 @@ export async function GET(request: Request) {
     // producción), esta ruta devolvía 404 y todo lo que la consume
     // (sidebar, menú móvil, login de admin) caía al texto genérico
     // "caudall" — el panel de Caudall no mostraba su propio logo. En vez
-    // de eso, cae al archivo estático que ya usan las pantallas del
-    // empleado (ver src/app/(employee)/acceso/brand-panel.tsx): admin
+    // de eso, sirve el mismo archivo estático que ya usan las pantallas
+    // del empleado (ver (employee)/acceso/brand-panel.tsx): admin
     // siempre tiene un logo real por defecto, y quien suba uno propio
     // desde Configuración lo sigue reemplazando igual que antes.
-    const fallback = NextResponse.redirect(new URL('/brand/caudall-logo-color.png', request.url));
-    fallback.headers.set('Cache-Control', 'public, max-age=300, must-revalidate');
-    return fallback;
+    //
+    // Un 200 con los bytes acá (no un redirect a /brand/...png): el
+    // service worker del PWA cachea /api/* con NetworkFirst (ver
+    // next-pwa/cache.js, regla "apis") — un redirect (3xx) es una forma
+    // de respuesta nueva para esta ruta que nunca se probó contra esa
+    // capa de caché, y la manera más segura de no depender de cómo la
+    // maneja es no generarla: la ruta responde siempre con la imagen
+    // directa, como ya hacía en la rama de logo subido.
+    const staticLogo = await fetch(new URL('/brand/caudall-logo-color.png', request.url));
+    return new Response(staticLogo.body, {
+      headers: {
+        'Content-Type': staticLogo.headers.get('Content-Type') ?? 'image/png',
+        'Cache-Control': 'public, max-age=300, must-revalidate'
+      }
+    });
   }
 
   return new Response(new Uint8Array(settings.logoData), {
