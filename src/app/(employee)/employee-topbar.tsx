@@ -30,15 +30,20 @@ export async function EmployeeTopBar({ showProfile = true }: { showProfile?: boo
             nunca solo la marca de la empresa" — el logo del tenant se
             agrega junto al de Caudall, nunca lo reemplaza. */}
         <div className="justify-self-center flex items-center gap-2">
+          {/* h-7: mismo tamaño que el logo en el resto de las barras de
+              navegación persistentes del producto (sidebar/topbar de
+              admin, header de la landing pública). El logo del tenant
+              sube junto con el de Caudall (misma altura, lado a lado) —
+              no queda uno más chico que el otro. */}
           {/* eslint-disable-next-line @next/next/no-img-element -- logo estático propio del bundle, no necesita el optimizador de next/image */}
-          <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-5 w-auto" />
+          <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-7 w-auto" />
           {tenant?.logoUrl ? (
             <>
               <span className="text-silver text-xs" aria-hidden="true">
                 ·
               </span>
               {/* eslint-disable-next-line @next/next/no-img-element -- URL externa configurada por el tenant, no un asset del bundle */}
-              <img src={tenant.logoUrl} alt={tenant.name} className="h-5 w-auto max-w-[96px] object-contain" />
+              <img src={tenant.logoUrl} alt={tenant.name} className="h-7 w-auto max-w-[96px] object-contain" />
             </>
           ) : null}
         </div>

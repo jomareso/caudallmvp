@@ -23,13 +23,5 @@ export default async function AdminLoginPage() {
     if (admin?.profileType === 'FUNCIONAL') redirect('/admin/funcional');
   }
 
-  // Mismo logo que ve el admin ya logueado (AdminLayout) — sin esto, esta
-  // pantalla mostraba siempre el texto genérico "caudall" aunque Reynoso
-  // ya hubiera subido el logo real desde /admin/configuracion.
-  // platform_settings es un singleton sin RLS (ver AdminLayout), no
-  // necesita contexto de tenant para leerse.
-  const settings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } });
-  const hasLogo = Boolean(settings?.logoData);
-
-  return <AdminLoginForm hasLogo={hasLogo} />;
+  return <AdminLoginForm />;
 }
