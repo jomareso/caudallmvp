@@ -391,7 +391,7 @@ export async function EmpresaDashboard({
                           </div>
                         ))}
                       </div>
-                      <p className="text-[11px] text-nickel mt-3">{segmentResult.employeeCount}</p>
+                      <p className="text-[11px] text-nickel mt-3">{t('employeeCount', { count: segmentResult.employeeCount })}</p>
                     </div>
                   </div>
                   <div className="lg:col-span-2 space-y-2">
