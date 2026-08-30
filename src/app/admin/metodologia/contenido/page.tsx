@@ -188,8 +188,12 @@ export default async function AdminMetodologiaContenidoPage({
   });
 
   return (
-    <main className="flex-1 p-6">
-      <div className="w-full max-w-2xl">
+    <main className="flex-1 p-6 lg:p-8">
+      {/* max-w-3xl (no max-w-2xl): un poco más de aire, pero sin
+          restructurar en grilla — este árbol usa indentación para
+          comunicar jerarquía (dimensión > constructo > variable >
+          pregunta) y forzarlo a columnas la rompería. */}
+      <div className="w-full max-w-3xl">
         <h1 className="text-lg font-medium text-quartz mb-2">{t('title')}</h1>
         <p className="text-xs text-nickel mb-4">{t('intro')}</p>
 

@@ -40,14 +40,20 @@ export default async function AdminMetodologiaConductualPage() {
   const triggerLabels = { ...sharedLabels, iconLabel: t('iconLabel') };
 
   return (
-    <main className="flex-1 p-6">
-      <div className="w-full max-w-sm">
+    <main className="flex-1 p-6 lg:p-8">
+      {/* max-w-4xl (no max-w-sm): mismo criterio que el resto de /admin ya
+          migrado. */}
+      <div className="w-full max-w-4xl">
         <h1 className="text-lg font-medium text-quartz mb-1">{t('title')}</h1>
         <p className="text-xs text-nickel mb-6">{t('description')}</p>
 
         <h2 className="text-sm font-medium text-quartz mb-1">{t('triggersSectionTitle')}</h2>
         <p className="text-xs text-nickel mb-3">{t('triggersSectionDescription')}</p>
-        <CreateTriggerForm labels={triggerLabels} />
+        {/* Los formularios se quedan en max-w-md: 3-4 campos cortos, no se
+            benefician de más ancho (mismo criterio que Administradores). */}
+        <div className="max-w-md">
+          <CreateTriggerForm labels={triggerLabels} />
+        </div>
         <h3 className="text-sm font-medium text-quartz mt-6 mb-2">{t('existingTitle')}</h3>
         <div className="space-y-2 mb-8">
           {triggers.map((trigger) => (
@@ -57,7 +63,9 @@ export default async function AdminMetodologiaConductualPage() {
 
         <h2 className="text-sm font-medium text-quartz mb-1">{t('reasonsSectionTitle')}</h2>
         <p className="text-xs text-nickel mb-3">{t('reasonsSectionDescription')}</p>
-        <CreateReasonForm labels={sharedLabels} />
+        <div className="max-w-md">
+          <CreateReasonForm labels={sharedLabels} />
+        </div>
         <h3 className="text-sm font-medium text-quartz mt-6 mb-2">{t('existingTitle')}</h3>
         <div className="space-y-2">
           {reasons.map((reason) => (

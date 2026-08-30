@@ -15,8 +15,11 @@ export default async function AdminMetodologiaReglasPage() {
   const content = getBancoMaestroContent();
 
   return (
-    <main className="flex-1 p-6">
-      <div className="w-full max-w-3xl">
+    <main className="flex-1 p-6 lg:p-8">
+      {/* max-w-5xl (no max-w-3xl): las tarjetas de cada sección van en
+          grilla de 2 columnas en escritorio (ver más abajo) — con más
+          ancho disponible al lado del sidebar. */}
+      <div className="w-full max-w-5xl">
         <h1 className="text-lg font-medium text-quartz mb-2">{t('title')}</h1>
         <p className="text-xs text-nickel mb-6">{t('intro')}</p>
 
@@ -25,7 +28,7 @@ export default async function AdminMetodologiaReglasPage() {
             <summary className="text-sm font-medium text-quartz cursor-pointer">
               {t('inferenceRulesTitle')} <span className="text-nickel font-normal">({content.inferenceRules.length})</span>
             </summary>
-            <div className="mt-3 space-y-2">
+            <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-2">
               {content.inferenceRules.map((rule) => (
                 <div key={rule.code} className="border border-silver/60 rounded-lg p-3 text-xs">
                   <div className="flex items-center gap-2 mb-1">
@@ -60,7 +63,7 @@ export default async function AdminMetodologiaReglasPage() {
             <summary className="text-sm font-medium text-quartz cursor-pointer">
               {t('forbiddenTitle')} <span className="text-nickel font-normal">({content.forbiddenInferences.length})</span>
             </summary>
-            <div className="mt-3 space-y-2">
+            <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-2">
               {content.forbiddenInferences.map((f, i) => (
                 <div key={i} className="border border-silver/60 rounded-lg p-3 text-xs">
                   <p className="text-quartz">
@@ -77,7 +80,7 @@ export default async function AdminMetodologiaReglasPage() {
             <summary className="text-sm font-medium text-quartz cursor-pointer">
               {t('qaTitle')} <span className="text-nickel font-normal">({content.qaScenarios.length})</span>
             </summary>
-            <div className="mt-3 space-y-2">
+            <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-2">
               {content.qaScenarios.map((qa) => (
                 <div key={qa.code} className="border border-silver/60 rounded-lg p-3 text-xs">
                   <div className="flex items-center gap-2 mb-1">
@@ -102,7 +105,7 @@ export default async function AdminMetodologiaReglasPage() {
             <summary className="text-sm font-medium text-quartz cursor-pointer">
               {t('techniquesTitle')} <span className="text-nickel font-normal">({content.behavioralTechniques.length})</span>
             </summary>
-            <div className="mt-3 space-y-2">
+            <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-2">
               {content.behavioralTechniques.map((tech, i) => (
                 <div key={i} className="border border-silver/60 rounded-lg p-3 text-xs">
                   <p className="text-quartz font-medium">
@@ -127,7 +130,7 @@ export default async function AdminMetodologiaReglasPage() {
             <summary className="text-sm font-medium text-quartz cursor-pointer">
               {t('biasMapTitle')} <span className="text-nickel font-normal">({content.behavioralBiasMap.length})</span>
             </summary>
-            <div className="mt-3 space-y-2">
+            <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-2">
               {content.behavioralBiasMap.map((bias, i) => (
                 <div key={i} className="border border-silver/60 rounded-lg p-3 text-xs">
                   <p className="text-quartz font-medium">{bias.construct}</p>

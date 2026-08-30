@@ -47,17 +47,20 @@ export function TriggerRow({
 
   if (editing) {
     return (
-      <form onSubmit={handleSave} className="bg-white border border-cola rounded-lg p-3 text-xs space-y-2">
+      // flex-wrap en una fila (no space-y-2 apilado) — mismo criterio que
+      // AdminRow/RuleRow: en escritorio los 3 campos caben junto al
+      // código en la misma línea.
+      <form onSubmit={handleSave} className="bg-white border border-cola rounded-lg p-3 text-xs flex flex-wrap items-center gap-2">
         <p className="text-quartz font-medium font-mono">{trigger.code}</p>
         <input
           value={icon}
           onChange={(event) => setIcon(event.target.value)}
-          className="w-full border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
+          className="w-16 border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
         />
         <input
           value={label}
           onChange={(event) => setLabel(event.target.value)}
-          className="w-full border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
+          className="flex-1 min-w-[140px] border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
         />
         <input
           type="number"
@@ -65,12 +68,10 @@ export function TriggerRow({
           max={1000}
           value={sortOrder}
           onChange={(event) => setSortOrder(event.target.value)}
-          className="w-full border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
+          className="w-20 border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
         />
 
-        {error ? <p className="text-bad">{error}</p> : null}
-
-        <div className="flex gap-2">
+        <div className="flex gap-2 ml-auto">
           <button type="submit" disabled={isPending} className="bg-yale text-white rounded-lg px-3 py-1.5 disabled:opacity-60">
             {isPending ? labels.saving : labels.saveCta}
           </button>
@@ -78,13 +79,15 @@ export function TriggerRow({
             {labels.cancelCta}
           </button>
         </div>
+
+        {error ? <p className="basis-full text-bad">{error}</p> : null}
       </form>
     );
   }
 
   return (
     <div className="bg-white border border-silver/60 rounded-lg p-3 text-xs">
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-center justify-between gap-2">
         <div>
           <p className="text-quartz font-medium">
             <span aria-hidden="true">{trigger.icon}</span> {trigger.label}
@@ -100,7 +103,7 @@ export function TriggerRow({
           </p>
           <p className="text-nickel font-mono">{trigger.code}</p>
         </div>
-        <div className="flex flex-col items-end gap-1 shrink-0">
+        <div className="flex gap-3 shrink-0">
           <button type="button" onClick={() => setEditing(true)} className="text-cola">
             {labels.editCta}
           </button>
