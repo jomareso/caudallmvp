@@ -154,69 +154,97 @@ export async function EmpresaDashboard({
       high: settings.progressTierHighCutoff
     });
 
+    // averageCfhiCard: mismo formato de card que completionCard/licenseCard/
+    // actionCommitmentCard (título + valor grande), no la variante suelta
+    // sin borde de antes — así las 4 caben en una sola fila en escritorio
+    // (stat-grid del mockup de rediseño, task #47) sin que una desentone.
+    const averageCfhiCard = (
+      <div className="bg-white border border-silver/60 rounded-xl p-4">
+        <p className="text-xs text-nickel mb-1">{t('averageCfhiLabel')}</p>
+        <p className="text-3xl font-medium text-yale leading-none mb-1.5">{cfhiRounded}</p>
+        <span className={`inline-block text-[11px] px-2.5 py-1 rounded-lg ${TIER_CLASS[cfhiTier]}`}>
+          {tTier(cfhiTier)}
+        </span>
+      </div>
+    );
+
+    const actionCommitmentCard = (
+      <div className="bg-white border border-silver/60 rounded-xl p-4">
+        <p className="text-xs text-nickel mb-1">{t('actionCommitmentTitle')}</p>
+        <p className="text-2xl font-medium text-quartz leading-none mb-1">
+          {Math.round(aggregates.actionCommitmentRate * 100)}%
+        </p>
+        <p className="text-[11px] text-nickel">{t('actionCommitmentDetail')}</p>
+      </div>
+    );
+
     return (
-      <main className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-sm">
+      <main className="flex-1 p-6 lg:p-8">
+        <div className="max-w-sm mx-auto lg:max-w-none">
           {banner}
-          <h1 className="text-lg font-medium text-quartz mb-1 text-center">
-            {t('title', { tenantName: tenant.name })}
-          </h1>
-          <p className="text-xs text-nickel mb-6 text-center">{t('employeeCount', { count: aggregates.employeeCount })}</p>
+          <header className="mb-6 lg:mb-8 text-center lg:text-left">
+            <h1 className="text-lg lg:text-xl font-medium text-quartz mb-1">{t('title', { tenantName: tenant.name })}</h1>
+            <p className="text-xs text-nickel">{t('employeeCount', { count: aggregates.employeeCount })}</p>
+          </header>
 
-          {completionCard}
-          {licenseCard}
-
-          <div className="text-center mb-4">
-            <p className="text-xs text-nickel mb-1">{t('averageCfhiLabel')}</p>
-            <p className="text-5xl font-medium text-yale leading-none mb-1">{cfhiRounded}</p>
-            <span className={`inline-block text-[11px] px-2.5 py-1 rounded-lg ${TIER_CLASS[cfhiTier]}`}>
-              {tTier(cfhiTier)}
-            </span>
+          {/* En escritorio, las 4 métricas de nivel superior van en una
+              fila (mockup: .stat-grid) en vez de apiladas usando el ancho
+              real — en móvil siguen apiladas, mismo orden. */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6 lg:mb-8">
+            {completionCard}
+            {licenseCard}
+            {averageCfhiCard}
+            {actionCommitmentCard}
           </div>
 
-          <div className="grid grid-cols-3 gap-1 text-center mb-6">
-            {(['LOW', 'MID', 'HIGH'] as const).map((tier) => (
-              <div key={tier} className="border border-silver/50 rounded-lg py-2 bg-white">
-                <p className="text-base font-medium text-quartz leading-none mb-1">
-                  {aggregates.cfhiTierDistribution[tier]}
-                </p>
-                <p className="text-[10px] text-nickel">{tTier(tier)}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-white border border-silver/60 rounded-xl p-4 mb-6">
-            <p className="text-xs text-nickel mb-1">{t('actionCommitmentTitle')}</p>
-            <p className="text-2xl font-medium text-quartz leading-none mb-1">
-              {Math.round(aggregates.actionCommitmentRate * 100)}%
-            </p>
-            <p className="text-[11px] text-nickel">{t('actionCommitmentDetail')}</p>
-          </div>
-
-          <p className="text-xs text-nickel mb-2">{t('dimensionsTitle')}</p>
-          <div className="space-y-2 mb-6">
-            {aggregates.dimensions.map((dimension) => {
-              const score = dimension.averageScore !== null ? Math.round(dimension.averageScore) : null;
-              const band = score !== null ? scoreToDimensionState(score) : 'NA';
-              return (
-                <div key={dimension.code} className="border border-silver/50 rounded-lg p-3 bg-white">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-medium text-quartz">{tDim(dimension.code)}</span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-lg ${BAND_CLASS[band]}`}>
-                      {score !== null ? `${score} · ${tBand(band)}` : tBand('NA')}
-                    </span>
+          {/* Condición general + Por dimensión lado a lado en escritorio
+              (no una columna angosta a la izquierda con la nota de
+              privacidad sola a la derecha — eso dejaba un bloque vacío
+              grande bajo la nota, que es mucho más corta que las 2 cards). */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+            <div className="bg-white border border-silver/60 rounded-xl p-6">
+              <h2 className="text-sm font-medium text-quartz mb-3">{t('conditionOverviewTitle')}</h2>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                {(['LOW', 'MID', 'HIGH'] as const).map((tier) => (
+                  <div key={tier} className="border border-silver/50 rounded-lg py-2 bg-white">
+                    <p className="text-base font-medium text-quartz leading-none mb-1">
+                      {aggregates.cfhiTierDistribution[tier]}
+                    </p>
+                    <p className="text-[10px] text-nickel">{tTier(tier)}</p>
                   </div>
-                  {score !== null ? (
-                    <div className="h-1.5 bg-silver/30 rounded-full overflow-hidden">
-                      <div className="h-full bg-cola" style={{ width: `${score}%` }} />
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white border border-silver/60 rounded-xl p-6">
+              <h2 className="text-sm font-medium text-quartz mb-3">{t('dimensionsTitle')}</h2>
+              <div className="space-y-2">
+                {aggregates.dimensions.map((dimension) => {
+                  const score = dimension.averageScore !== null ? Math.round(dimension.averageScore) : null;
+                  const band = score !== null ? scoreToDimensionState(score) : 'NA';
+                  return (
+                    <div key={dimension.code} className="border border-silver/50 rounded-lg p-3 bg-white">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm font-medium text-quartz">{tDim(dimension.code)}</span>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-lg ${BAND_CLASS[band]}`}>
+                          {score !== null ? `${score} · ${tBand(band)}` : tBand('NA')}
+                        </span>
+                      </div>
+                      {score !== null ? (
+                        <div className="h-1.5 bg-silver/30 rounded-full overflow-hidden">
+                          <div className="h-full bg-cola" style={{ width: `${score}%` }} />
+                        </div>
+                      ) : null}
                     </div>
-                  ) : null}
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
-          <p className="text-[11px] text-nickel text-center">{t('privacyNote')}</p>
+          <div className="bg-picton/10 border border-cola/20 rounded-lg px-4 py-3">
+            <p className="text-[11px] text-nickel">{t('privacyNote')}</p>
+          </div>
         </div>
       </main>
     );

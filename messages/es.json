@@ -560,6 +560,7 @@
         "MID": "Sobreviviendo",
         "HIGH": "Saludables"
       },
+      "conditionOverviewTitle": "Condición general",
       "dimensionsTitle": "Tus 5 dimensiones (promedio)",
       "insufficientTitle": "Todavía no hay suficientes datos",
       "insufficientBody": "Necesitas al menos {minRequired} empleados con el diagnóstico completo para ver agregados anónimos. Hoy tienes {count}. Esto protege la privacidad individual de tus empleados (nunca vemos datos de uno solo).",
