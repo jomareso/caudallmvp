@@ -37,12 +37,23 @@ export function AdminSidebar({ homeHref, roleLabel, tenantLabel, navGroups, logo
     // navegación siempre alcanzable.
     <aside className="hidden lg:flex lg:w-56 lg:shrink-0 lg:flex-col bg-sidebar text-white px-3.5 py-5 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
       <Link href={homeHref} className="flex items-center gap-2 px-1.5 pb-5">
-        {/* brightness-0 invert: fuerza el logo (el de Caudall por defecto,
-            o el que se haya subido en Configuración) a un silueta blanco
-            sólido — necesario acá porque el fondo es oscuro, sin importar
-            los colores reales del archivo. */}
-        {/* eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable */}
-        <img src="/api/branding/logo" alt="Caudall" className="h-7 brightness-0 invert" />
+        {/* Encontrado en producción (Reynoso, con el logo propio ya subido
+            desde Configuración): acá antes se usaba `brightness-0 invert`
+            para forzar un silueta blanco sólido sobre este fondo oscuro,
+            sin importar el color del archivo — pero esa técnica SÍ importa
+            la transparencia del archivo, no solo el color. Con el logo
+            default de Caudall (fondo transparente real) se veía bien; con
+            un logo subido por un tenant que no tenga transparencia real
+            (la gran mayoría de PNG/JPG exportados a mano), toda el área
+            opaca se pinta blanca por igual — un rectángulo blanco sólido
+            en vez del logo. Se cambia al mismo tratamiento que ya funciona
+            en el resto del panel (login-form.tsx, Configuración): una
+            chapita blanca de fondo + mix-blend-multiply, que sí tolera un
+            logo sin transparencia real. */}
+        <span className="bg-white rounded-md px-1.5 py-1 inline-flex items-center shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable */}
+          <img src="/api/branding/logo" alt="Caudall" className="h-5 mix-blend-multiply" />
+        </span>
         <span className="w-1 h-1 rounded-full bg-white/30" />
         <span className="text-[11px] text-white/55">{roleLabel}</span>
       </Link>
