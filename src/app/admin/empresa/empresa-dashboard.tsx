@@ -140,14 +140,16 @@ export async function EmpresaDashboard({
               quedado angosto cuando el resto del dashboard de RRHH, más
               abajo en este mismo archivo, ya tiene su propio ancho real
               — sobraba mucho espacio a los lados en cualquier monitor de
-              escritorio. Texto más grande en lg+ por el mismo motivo. */}
+              escritorio. Texto más grande en lg+ por el mismo motivo.
+              Las tarjetas de completionCard/licenseCard se quedan
+              apiladas (no lado a lado): partidas en dos columnas dentro
+              de este ancho quedaban chicas y apretadas — apiladas pero
+              con más ancho disponible cada una se ve mejor. */}
           <div className="w-full max-w-sm lg:max-w-2xl text-center">
             {banner}
             <h1 className="text-lg lg:text-2xl font-medium text-quartz mb-6">{t('title', { tenantName: tenant.name })}</h1>
-            <div className="lg:grid lg:grid-cols-2 lg:gap-4">
-              {completionCard}
-              {licenseCard}
-            </div>
+            {completionCard}
+            {licenseCard}
             <h2 className="text-base lg:text-xl font-medium text-quartz mb-2">{t('insufficientTitle')}</h2>
             <p className="text-sm lg:text-base text-nickel">
               {t('insufficientBody', { minRequired: aggregates.minRequired, count: aggregates.employeeCount })}
