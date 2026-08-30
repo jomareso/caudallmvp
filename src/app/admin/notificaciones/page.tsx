@@ -56,12 +56,17 @@ export default async function AdminNotificacionesPage() {
   };
 
   return (
-    <main className="flex-1 p-6">
-      <div className="w-full max-w-sm">
+    <main className="flex-1 p-6 lg:p-8">
+      {/* max-w-4xl (no max-w-sm): mismo criterio que el resto de /admin ya
+          migrado. */}
+      <div className="w-full max-w-4xl">
         <h1 className="text-lg font-medium text-quartz mb-1">{t('title')}</h1>
         <p className="text-xs text-nickel mb-6">{t('description')}</p>
 
-        <div className="bg-white border border-silver/60 rounded-xl p-6">
+        {/* max-w-md: es una herramienta de verificación (ver comentario
+            arriba), no producto — 3 campos, no se beneficia de más
+            ancho. */}
+        <div className="max-w-md bg-white border border-silver/60 rounded-xl p-6 mb-8">
           <SendTestForm
             labels={{
               emailLabel: t('emailLabel'),
@@ -74,12 +79,14 @@ export default async function AdminNotificacionesPage() {
           />
         </div>
 
-        <h2 className="text-sm font-medium text-quartz mt-8 mb-1">{tRules('sectionTitle')}</h2>
+        <h2 className="text-sm font-medium text-quartz mb-1">{tRules('sectionTitle')}</h2>
         <p className="text-xs text-nickel mb-3">{tRules('sectionDescription')}</p>
 
-        <CreateRuleForm labels={ruleLabels} />
+        <div className="max-w-2xl mb-6">
+          <CreateRuleForm labels={ruleLabels} />
+        </div>
 
-        <h3 className="text-sm font-medium text-quartz mt-6 mb-2">{tRules('existingTitle')}</h3>
+        <h3 className="text-sm font-medium text-quartz mb-2">{tRules('existingTitle')}</h3>
         {rules.length === 0 ? (
           <p className="text-xs text-nickel">{tRules('emptyState')}</p>
         ) : (
