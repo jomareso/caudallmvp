@@ -44,19 +44,29 @@ export default async function ResultadoPage() {
 
     // Motor de Comparación Social + notificación por correo (spec 30
     // secciones, confirmado con Reynoso — reemplaza al benchmark nacional
-    // gateado por CTX-07, retirado del banco activo). Dedup por
-    // (employeeId, completedAt): en visitas posteriores a la misma
-    // finalización, el snapshot ya existe y no se reenvía el correo. Todo
-    // el bloque va en try/catch — un fallo acá (ej. Resend caído) nunca
-    // debe romper el render del resultado.
+    // gateado por CTX-07, retirado del banco activo). El snapshot de
+    // auditoría (N, nivel, posición) se escribe una sola vez por
+    // (employeeId, completedAt) — eso sí debe ser idempotente. El envío del
+    // correo es una condición APARTE (emailSentAt), no "¿ya existe el
+    // snapshot?": antes ambas cosas compartían el mismo dedup, así que un
+    // primer intento de correo fallido (ej. Resend caído o mal configurado)
+    // dejaba el snapshot creado con emailSentAt=null para siempre — ninguna
+    // visita futura lo volvía a intentar. Ahora se reintenta en cada visita
+    // mientras emailSentAt siga vacío. Todo el bloque va en try/catch — un
+    // fallo acá nunca debe romper el render del resultado.
     if (financialState.lastDiagnosticCompletedAt) {
       const completedAt = financialState.lastDiagnosticCompletedAt;
       try {
-        const existingSnapshot = await prisma.socialComparisonSnapshot.findUnique({
+        let snapshot = await prisma.socialComparisonSnapshot.findUnique({
           where: { employeeId_completedAt: { employeeId, completedAt } }
         });
-        if (!existingSnapshot) {
+        if (!snapshot) {
           await recordSocialComparisonSnapshot(employeeId, completedAt, messagePlan.comparison);
+          snapshot = await prisma.socialComparisonSnapshot.findUnique({
+            where: { employeeId_completedAt: { employeeId, completedAt } }
+          });
+        }
+        if (snapshot && !snapshot.emailSentAt) {
           try {
             await sendDiagnosticResultEmail({ to: employee.personalEmail, employeeId, plan: messagePlan });
             await prisma.socialComparisonSnapshot.update({
