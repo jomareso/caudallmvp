@@ -12,15 +12,19 @@ export const SAFETY_BLOCKED_ACTIONS = [
   'NEW_FINANCIAL_COMMITMENT'
 ] as const;
 
-// Todos los flags de safety definidos en spec §19 son de la dimensión Deuda
-// hoy. Se deja como mapa (no una constante única) para que el motor de
-// Priority no tenga que asumirlo si en el futuro se agregan flags de otras
-// dimensiones.
+// La mayoría de los flags de safety definidos en spec §19 son de la
+// dimensión Deuda; CRITICAL_CASHFLOW_DEFICIT es de Control (regla CORE #24:
+// "si gastos > ingresos y hay señales críticas, opciones como invertir
+// pueden quedar excluidas temporalmente" — antes de esta regla, ninguna
+// condición de Control activaba Safety). Se deja como mapa (no una
+// constante única) para que el motor de Priority no tenga que asumir una
+// sola dimensión si en el futuro se agregan flags de otras.
 export const SAFETY_FLAG_DIMENSION: Record<string, string> = {
   DEBT_PAYMENT_STRESS: 'DEBT',
   DEBT_CYCLE_RISK: 'DEBT',
   CASHFLOW_CREDIT_DEPENDENCY: 'DEBT',
-  CRITICAL_DEBT: 'DEBT'
+  CRITICAL_DEBT: 'DEBT',
+  CRITICAL_CASHFLOW_DEFICIT: 'CONTROL'
 };
 
 export type SafetyRule = {
@@ -32,7 +36,17 @@ export type SafetyRule = {
 export const SAFETY_RULES: SafetyRule[] = [
   { flagCode: 'DEBT_PAYMENT_STRESS', variableCode: 'DEBT_ARREARS', triggerStates: ['CURRENT'] },
   { flagCode: 'DEBT_CYCLE_RISK', variableCode: 'DEBT_ROLLOVER', triggerStates: ['RECURRENT'] },
-  { flagCode: 'CASHFLOW_CREDIT_DEPENDENCY', variableCode: 'DEBT_ESSENTIAL_DEPENDENCY', triggerStates: ['RECURRENT'] }
+  { flagCode: 'CASHFLOW_CREDIT_DEPENDENCY', variableCode: 'DEBT_ESSENTIAL_DEPENDENCY', triggerStates: ['RECURRENT'] },
+  // CTRL_CASHFLOW=CRITICAL (CTRL-01) es la variable directa de "gastos >
+  // ingresos" que regla #24 exige como disparador — antes no existía
+  // ningún SafetyRule fuera de Deuda. Activa el mismo mecanismo ya
+  // construido que las demás: prioridad forzada (priority.ts) y
+  // Financial Readiness bloqueada a NOT_ELIGIBLE (readiness.ts), lo que
+  // ya excluye cualquier intervención que exija disposición financiera
+  // ELIGIBLE/STRONG — sin necesitar SAFETY_BLOCKED_ACTIONS, que sigue sin
+  // consumidor porque el catálogo actual no tiene tipos de acción que
+  // categorizar (Decisión 2: sin productos financieros en el MVP).
+  { flagCode: 'CRITICAL_CASHFLOW_DEFICIT', variableCode: 'CTRL_CASHFLOW', triggerStates: ['CRITICAL'] }
 ];
 
 async function raiseSafetyFlag(employeeId: string, flagCode: string, evidenceIds: string[]): Promise<void> {

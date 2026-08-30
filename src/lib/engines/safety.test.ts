@@ -16,6 +16,13 @@ describe('consistencia de las tablas de Safety', () => {
     expect(SAFETY_FLAG_DIMENSION.CRITICAL_DEBT).toBe('DEBT');
   });
 
+  it('regla CORE #24: CTRL_CASHFLOW=CRITICAL dispara un flag de safety de la dimensión Control', () => {
+    const rule = SAFETY_RULES.find((r) => r.variableCode === 'CTRL_CASHFLOW');
+    expect(rule, 'falta el SafetyRule de gastos > ingresos (regla CORE #24)').toBeDefined();
+    expect(rule?.triggerStates).toContain('CRITICAL');
+    expect(SAFETY_FLAG_DIMENSION[rule!.flagCode]).toBe('CONTROL');
+  });
+
   it('no hay acciones bloqueadas duplicadas', () => {
     expect(new Set(SAFETY_BLOCKED_ACTIONS).size).toBe(SAFETY_BLOCKED_ACTIONS.length);
   });
