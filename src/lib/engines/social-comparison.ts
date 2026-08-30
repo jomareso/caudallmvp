@@ -15,11 +15,49 @@
 // el bloque de contexto, o se omite en silencio si no hay datos
 // suficientes. national-benchmark.ts se deja intacto pero sin uso (no se
 // borra código ni datos existentes).
-import type { DimensionCode } from '@prisma/client';
+import type { DimensionCode, Prisma } from '@prisma/client';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { getPlatformSettings } from '@/lib/settings/platform-settings';
 import { scoreToProgressTier, type ProgressTier } from './scoring';
 import { computePriority } from './priority';
+
+// Mientras la base de empleados reales crece, el grupo comparable se
+// completa con los Estudios de Salud Financiera 2021-2024
+// (NationalBenchmarkRecord, 4,748 encuestas — ver national-benchmark.ts,
+// retirado como pantalla propia pero cuyos datos siguen intactos en la
+// tabla). Decisión explícita de Reynoso: mezclar ambas fuentes en el
+// mismo grupo comparable en vez de esperar a tener volumen real, siempre
+// que las variables de agrupación calcen.
+//
+// sex/dependents/employmentStatus/ageBand del estudio usan los MISMOS
+// códigos que CTX_SEX/CTX_DEPENDENTS/CTX_EMPLOYMENT_STATUS/CTX_AGE_BAND
+// del banco vivo (verificado 1:1 contra los datos reales) — se pueden
+// comparar directo. El ingreso NO: el estudio usa sus propios rangos en
+// pesos (instrumento distinto), así que cada rango se asigna a la banda
+// INC_* del banco vivo con la que más se superpone (aproximación
+// documentada, mismo criterio que los cortes provisionales de
+// classifyPosition más abajo). "No estoy trabajando" no es un rango de
+// ingreso — queda sin banda, fuera de la comparación por ingreso.
+const INCOME_BAND_TO_RAW: Record<string, string[]> = {
+  INC_LT_25K: ['Menos de RD$ 13,500', 'RD$ 13,501 -RD$ 27,000'],
+  INC_25_49K: ['RD$ 27,001 -RD$ 40,500', 'RD$ 40,501 -RD$ 54,000'],
+  INC_50_74K: ['RD$ 54,001 -RD$ 81,000'],
+  INC_75_99K: ['RD$ 81,001 -RD$ 108,000'],
+  INC_100_149K: ['RD$ 108,001 -RD$ 135,000'],
+  INC_150_199K: ['RD$ 135,001 -RD$ 202,500'],
+  INC_200K_PLUS: ['Más de RD$ 202,500']
+};
+
+// Resiliencia queda fuera a propósito: el instrumento del estudio la
+// mezclaba con Ahorro (regla CORE #5, ver también el comentario en el
+// modelo NationalBenchmarkRecord) — no hay score real que aportar ahí,
+// así que el estudio simplemente no participa en esa comparación.
+const DIMENSION_TO_BENCHMARK_FIELD: Partial<Record<DimensionCode, 'controlScore' | 'savingScore' | 'debtScore' | 'planningScore'>> = {
+  CONTROL: 'controlScore',
+  SAVING: 'savingScore',
+  DEBT: 'debtScore',
+  PLANNING: 'planningScore'
+};
 
 const DIMENSION_CODES: readonly DimensionCode[] = ['CONTROL', 'RESILIENCE', 'DEBT', 'SAVING', 'PLANNING'];
 function isDimensionCode(value: string): value is DimensionCode {
@@ -154,6 +192,52 @@ async function intersectComparableEmployeeIds(
   return result ?? new Set();
 }
 
+const CTX_TO_BENCHMARK_FIELD: Record<Exclude<CtxKey, 'income'>, 'sex' | 'ageBand' | 'dependents' | 'employmentStatus'> = {
+  age: 'ageBand',
+  dependents: 'dependents',
+  employment: 'employmentStatus',
+  sex: 'sex'
+};
+
+// Devuelve los scores de la dimensión pedida entre los encuestados del
+// estudio que calzan con el mismo grupo — null si la dimensión no tiene
+// equivalente en el estudio (Resiliencia) o si el ingreso propio no tiene
+// banda mapeada (DECLINED, o directamente sin responder). `version` fija
+// el estudio más reciente (por si en el futuro se agrega uno nuevo sin
+// retirar el actual — hoy solo existe "2021-2024").
+async function matchingBenchmarkScores(
+  levelKeys: readonly CtxKey[],
+  ownValues: CtxValues,
+  benchmarkField: 'controlScore' | 'savingScore' | 'debtScore' | 'planningScore',
+  version: string
+): Promise<number[]> {
+  const where: Prisma.NationalBenchmarkRecordWhereInput = { version };
+
+  for (const key of levelKeys) {
+    const value = ownValues[key];
+    if (!value) return [];
+
+    if (key === 'income') {
+      const rawValues = INCOME_BAND_TO_RAW[value];
+      if (!rawValues) return [];
+      where.incomeRangeRaw = { in: rawValues };
+    } else {
+      where[CTX_TO_BENCHMARK_FIELD[key]] = value;
+    }
+  }
+
+  // Ver comentario en computeGroupAverages (national-benchmark.ts):
+  // debtScore=100 en el estudio significa "no tenía deuda", no "score
+  // perfecto" — confirmado por Reynoso, quien dirigió el estudio. Regla
+  // CORE #7 prohíbe tratar Debt N/A como 100; se excluye igual acá.
+  if (benchmarkField === 'debtScore') {
+    where.debtScore = { not: 100 };
+  }
+
+  const records = await prisma.nationalBenchmarkRecord.findMany({ where, select: { [benchmarkField]: true } });
+  return records.map((r) => r[benchmarkField]);
+}
+
 export type SocialComparisonResult =
   | {
       shown: false;
@@ -185,6 +269,11 @@ export type SocialComparisonResult =
       // PASO (ver post-diagnostic-message.ts, que lee este flag en vez de
       // reinterpretar `position` por su cuenta).
       includeNumericComparison: boolean;
+      // Auditoría de qué alimentó esta comparación puntual (spec: "fuente
+      // de datos") — LIVE_EMPLOYEES cuando el grupo se completó solo con
+      // empleados reales, HISTORICAL_STUDY cuando el estudio 2021-2024
+      // fue la única fuente disponible, MIXED cuando ambos aportaron.
+      dataSource: 'LIVE_EMPLOYEES' | 'HISTORICAL_STUDY' | 'MIXED';
     };
 
 // Orquestador con acceso a datos. Corre bajo el contexto de tenant de quien
@@ -254,30 +343,54 @@ export async function computeSocialComparison(employeeId: string): Promise<Socia
     return { shown: false, reason: 'NO_PRIORITY_DIMENSION', ...baseResult };
   }
 
+  // Estudio más reciente disponible (hoy solo existe "2021-2024") — se
+  // resuelve una vez acá, no por nivel, porque no cambia entre niveles.
+  const latestBenchmark = await prisma.nationalBenchmarkRecord.findFirst({
+    select: { version: true },
+    orderBy: { createdAt: 'desc' }
+  });
+  const benchmarkField = isDimensionCode(priorityDimension) ? DIMENSION_TO_BENCHMARK_FIELD[priorityDimension] : undefined;
+
   return runWithTenantContext({ kind: 'platform-admin' }, async () => {
     for (const { level, variables: levelKeys } of levels) {
       const candidateIds = await intersectComparableEmployeeIds(levelKeys, varIdByKey, ownValues);
-      if (candidateIds.size < settings.socialComparisonMinN) continue;
 
-      const completedStates = await prisma.financialState.findMany({
-        where: { employeeId: { in: [...candidateIds] }, lastDiagnosticCompletedAt: { not: null } },
-        select: { employeeId: true }
-      });
+      const historicalScores =
+        benchmarkField && latestBenchmark
+          ? await matchingBenchmarkScores(levelKeys, ownValues, benchmarkField, latestBenchmark.version)
+          : [];
+
+      const completedStates =
+        candidateIds.size > 0
+          ? await prisma.financialState.findMany({
+              where: { employeeId: { in: [...candidateIds] }, lastDiagnosticCompletedAt: { not: null } },
+              select: { employeeId: true }
+            })
+          : [];
       const completedIds = completedStates.map((s) => s.employeeId);
-      if (completedIds.length < settings.socialComparisonMinN) continue;
 
-      const peerScores = (
-        await prisma.dimensionScore.findMany({
-          where: { employeeId: { in: completedIds }, dimensionId: dimension.id, state: { not: 'NA' } },
-          select: { employeeId: true, score: true }
-        })
+      // Umbral de N sobre el total combinado (empleados reales +
+      // encuestados del estudio) — es justo el punto de este cambio:
+      // mientras la base de empleados reales es chica, el estudio la
+      // completa; cuando ya alcance sola, esto no cambia nada.
+      if (completedIds.length + historicalScores.length < settings.socialComparisonMinN) continue;
+
+      const livePeerScores = (
+        completedIds.length > 0
+          ? await prisma.dimensionScore.findMany({
+              where: { employeeId: { in: completedIds }, dimensionId: dimension.id, state: { not: 'NA' } },
+              select: { employeeId: true, score: true }
+            })
+          : []
       )
         .filter((row) => row.employeeId !== employeeId)
         .map((row) => row.score);
 
-      // completedIds ya pasó el umbral de N; esta comprobación solo cubre
-      // el caso defensivo de que, tras excluir al propio empleado y los
-      // NA de esta dimensión, no quede ningún par real con quien comparar.
+      const peerScores = [...livePeerScores, ...historicalScores];
+
+      // El umbral de arriba ya se cumplió con el total combinado; esto
+      // solo cubre el caso defensivo de que, tras excluir al propio
+      // empleado y los NA de esta dimensión, no quede ningún par real.
       if (peerScores.length === 0) continue;
 
       const ownDimensionScore = await prisma.dimensionScore.findFirst({
@@ -293,6 +406,9 @@ export async function computeSocialComparison(employeeId: string): Promise<Socia
         inferior: settings.socialComparisonInferiorCutoff
       });
 
+      const dataSource: 'LIVE_EMPLOYEES' | 'HISTORICAL_STUDY' | 'MIXED' =
+        historicalScores.length === 0 ? 'LIVE_EMPLOYEES' : livePeerScores.length === 0 ? 'HISTORICAL_STUDY' : 'MIXED';
+
       return {
         shown: true,
         groupLevel: level,
@@ -302,6 +418,7 @@ export async function computeSocialComparison(employeeId: string): Promise<Socia
         percentile,
         position,
         includeNumericComparison: position !== 'INFERIOR',
+        dataSource,
         ...baseResult
       };
     }
@@ -341,7 +458,8 @@ export async function recordSocialComparisonSnapshot(
         groupN: result.groupN,
         comparisonDimension: result.comparisonDimension,
         percentile: result.percentile,
-        position: result.position
+        position: result.position,
+        dataSource: result.dataSource
       }
     });
     return;
