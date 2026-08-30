@@ -13,8 +13,9 @@ export default async function AdminMetodologiaParametrosPage() {
   const t = await getTranslations('admin.metodologia.parametros');
 
   return (
-    <main className="flex-1 p-6">
-      <div className="w-full max-w-sm">
+    <main className="flex-1 p-6 lg:p-8">
+      {/* max-w-4xl (no max-w-sm): mismo criterio que Configuración. */}
+      <div className="w-full max-w-4xl">
         <h1 className="text-lg font-medium text-quartz mb-1">{t('title')}</h1>
         <p className="text-xs text-nickel mb-6">{t('description')}</p>
 

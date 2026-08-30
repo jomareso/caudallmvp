@@ -33,8 +33,11 @@ export default async function AdminMetodologiaPage() {
     : null;
 
   return (
-    <main className="flex-1 p-6">
-      <div className="w-full max-w-sm">
+    <main className="flex-1 p-6 lg:p-8">
+      {/* max-w-md (no max-w-sm): consistencia con el resto de /admin ya
+          migrado — es un resumen corto de una tarjeta + 4 links, no se
+          beneficia de mucho más ancho (mismo criterio que Empleados). */}
+      <div className="w-full max-w-md">
         <h1 className="text-lg font-medium text-quartz mb-6">{t('title')}</h1>
 
         <div className="bg-white border border-silver/60 rounded-xl p-6">
