@@ -36,8 +36,10 @@ export function AdminMobileNav({ homeHref, navGroups, logoutLabel, openLabel, cl
     <div className="lg:hidden border-b border-silver/60">
       <div className="px-4 py-3 flex items-center justify-between">
         <Link href={homeHref} className="flex items-center">
+          {/* h-7: mismo tamaño que AdminSidebar (misma marca, mismo rol de
+              navegación persistente, solo en mobile en vez de escritorio). */}
           {/* eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable */}
-          <img src="/api/branding/logo" alt="Caudall" className="h-8 mix-blend-multiply" />
+          <img src="/api/branding/logo" alt="Caudall" className="h-7 mix-blend-multiply" />
         </Link>
         <button
           type="button"

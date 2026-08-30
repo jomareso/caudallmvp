@@ -48,8 +48,11 @@ export default async function HomePage() {
     <div className="bg-white text-quartz">
       <header className="border-b border-silver/40">
         <div className="max-w-6xl mx-auto px-6 lg:px-10 py-6 flex items-center justify-between gap-4">
+          {/* h-7: mismo tamaño que el logo en la barra de navegación
+              persistente del resto del producto (admin, topbar del
+              empleado). */}
           {/* eslint-disable-next-line @next/next/no-img-element -- logo estático propio del bundle, no necesita el optimizador de next/image */}
-          <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-6 w-auto" />
+          <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-7 w-auto" />
           {hero ? <CtaButton href={hero.ctaUrl} label={hero.ctaLabel} variant="solid" /> : null}
         </div>
       </header>

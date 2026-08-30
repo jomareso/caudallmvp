@@ -5,12 +5,15 @@ import { useTranslations } from 'next-intl';
 import { requestAdminMagicLink } from './actions';
 
 function AdminLogo() {
-  // Mismo logo que AdminLayout muestra una vez logueado — h-14 tiene que
-  // calzar con el h-14 de ahí: es el mismo logo, mostrado en el mismo rol
-  // de "marca de entrada", solo que antes de loguearse en vez de después.
+  // h-10: un poco más grande que el logo "de marca de entrada" del resto
+  // del producto (h-8 en BrandPanel/landing-form.tsx) — esta pantalla es
+  // una tarjeta corta centrada sola en toda la altura de la ventana, así
+  // que le sobra espacio en blanco alrededor en cualquier monitor de
+  // escritorio (mismo criterio que el resto de las pantallas de
+  // confirmación de un solo mensaje, ver registro/enviado y afines).
   return (
     // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-    <img src="/api/branding/logo" alt="Caudall" className="h-14 mx-auto mb-3 mix-blend-multiply" />
+    <img src="/api/branding/logo" alt="Caudall" className="h-10 mx-auto mb-4 mix-blend-multiply" />
   );
 }
 
@@ -38,10 +41,14 @@ export function AdminLoginForm() {
   if (sent) {
     return (
       <main className="min-h-screen flex items-center justify-center p-6">
-        <div className="w-full max-w-sm text-center">
+        {/* max-w-md, text-2xl/text-base (no max-w-sm, text-lg/text-sm): esta
+            pantalla es una tarjeta sola, centrada en toda la altura de la
+            ventana, sin nada más al lado — en un monitor de escritorio le
+            sobraba espacio en blanco alrededor de un mensaje chico. */}
+        <div className="w-full max-w-md text-center">
           <AdminLogo />
-          <h2 className="text-lg font-medium text-quartz mb-2">{t('sentTitle')}</h2>
-          <p className="text-sm text-nickel">{t('sentBody')}</p>
+          <h2 className="text-2xl font-medium text-quartz mb-3">{t('sentTitle')}</h2>
+          <p className="text-base text-nickel">{t('sentBody')}</p>
         </div>
       </main>
     );
@@ -49,9 +56,9 @@ export function AdminLoginForm() {
 
   return (
     <main className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-sm text-center">
+      <div className="w-full max-w-md text-center">
         <AdminLogo />
-        <p className="text-nickel text-sm mb-8">{t('subtitle')}</p>
+        <p className="text-nickel text-base mb-8">{t('subtitle')}</p>
 
         <form onSubmit={handleSubmit} className="bg-white border border-silver/60 rounded-xl p-6 text-left">
           <label htmlFor="email" className="block text-xs text-nickel mb-1">
