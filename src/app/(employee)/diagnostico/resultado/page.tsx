@@ -76,6 +76,7 @@ export default async function ResultadoPage() {
     const tDim = await getTranslations('diagnostic.dimensions');
     const tLevel = await getTranslations('diagnostic.result.levels');
     const tInterpretation = await getTranslations('diagnostic.result.interpretation');
+    const tSocial = await getTranslations('diagnostic.result.socialComparison');
 
     const cfhiRounded = Math.round(financialState.cfhiScore);
     const cfhiBand = scoreToDimensionState(cfhiRounded);
@@ -83,6 +84,32 @@ export default async function ResultadoPage() {
       mid: settings.progressTierMidCutoff,
       high: settings.progressTierHighCutoff
     });
+
+    // Percentil/posición del Motor de Comparación Social, mostrado junto al
+    // índice (no dentro del ScoreGauge: el gauge es del CFHI general, esto
+    // compara la dimensión prioritaria — mezclarlos en el mismo número
+    // sería engañoso). Nunca se muestra en INFERIOR
+    // (comparison.includeNumericComparison ya resuelve esa regla en el
+    // motor — ver social-comparison.ts) ni sin datos suficientes.
+    const { comparison } = messagePlan;
+    const comparisonBadge =
+      comparison.shown && comparison.includeNumericComparison && comparison.priorityDimension
+        ? {
+            text: tSocial(comparison.position === 'SUPERIOR' ? 'statSuperior' : 'statSimilar', {
+              dimension: tDim(comparison.priorityDimension),
+              percentile: comparison.percentile
+            }),
+            className:
+              comparison.position === 'SUPERIOR' ? 'bg-ok/10 text-ok' : 'bg-picton/10 text-yale'
+          }
+        : null;
+
+    const CFHI_BAND_CLASS: Record<string, string> = {
+      CRITICAL: 'bg-bad/10 text-bad',
+      UNMET: 'bg-warn/10 text-warn',
+      PARTIAL: 'bg-warn/10 text-warn',
+      MET: 'bg-ok/10 text-ok'
+    };
 
     return (
       <div className="min-h-screen flex flex-col">
@@ -99,7 +126,13 @@ export default async function ResultadoPage() {
               {tLevel('prefix')}: {tLevel(cfhiLevel)}
             </span>
 
-            <p className="text-xs text-nickel text-left mt-3 leading-relaxed">
+            {comparisonBadge ? (
+              <p className={`text-sm font-medium rounded-xl px-4 py-3 mt-3 leading-snug ${comparisonBadge.className}`}>
+                {comparisonBadge.text}
+              </p>
+            ) : null}
+
+            <p className={`text-sm text-left mt-3 leading-relaxed rounded-xl px-4 py-3 ${CFHI_BAND_CLASS[cfhiBand]}`}>
               {tInterpretation(`cfhi.${cfhiBand}`)}
             </p>
           </div>
