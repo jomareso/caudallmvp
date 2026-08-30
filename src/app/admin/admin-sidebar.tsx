@@ -4,10 +4,11 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import { LogoutButton } from './logout-button';
+import { AdminNavIcon, type AdminNavIconName } from './admin-nav-icons';
 
 export type AdminNavGroup = {
   label: string | null;
-  items: { href: Route; label: string; icon: string }[];
+  items: { href: Route; label: string; icon: AdminNavIconName }[];
 };
 
 type AdminSidebarProps = {
@@ -69,9 +70,7 @@ export function AdminSidebar({ hasLogo, homeHref, roleLabel, tenantLabel, navGro
                   {active ? (
                     <span className="absolute -left-3.5 top-2 bottom-2 w-[3px] bg-picton rounded-r" aria-hidden />
                   ) : null}
-                  <span className="w-4 text-center text-sm shrink-0" aria-hidden>
-                    {item.icon}
-                  </span>
+                  <AdminNavIcon name={item.icon} className="w-4 h-4 shrink-0" />
                   {item.label}
                 </Link>
               );
@@ -82,9 +81,7 @@ export function AdminSidebar({ hasLogo, homeHref, roleLabel, tenantLabel, navGro
 
       <div className="border-t border-white/10 pt-3 mt-2">
         <div className="flex items-center gap-2 px-2.5 py-2">
-          <span className="w-4 text-center text-sm shrink-0 text-white/55" aria-hidden>
-            ↩
-          </span>
+          <AdminNavIcon name="logout" className="w-4 h-4 shrink-0 text-white/55" />
           <LogoutButton label={logoutLabel} className="text-sm text-white/70 hover:text-white disabled:opacity-60" />
         </div>
       </div>
