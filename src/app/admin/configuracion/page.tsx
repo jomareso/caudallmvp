@@ -21,40 +21,51 @@ export default async function AdminConfiguracionPage() {
   const tParams = await getTranslations('admin.settings.parameters');
 
   return (
-    <main className="flex-1 p-6">
-      <div className="w-full max-w-sm">
+    <main className="flex-1 p-6 lg:p-8">
+      {/* max-w-4xl (no max-w-sm): la página entera vivía en una tarjeta de
+          384px sin importar el ancho real de escritorio disponible al
+          lado del sidebar (ver PR de rediseño admin, task #47) — Reynoso
+          lo señaló primero acá mismo, en Configuración. */}
+      <div className="w-full max-w-4xl">
         <h1 className="text-lg font-medium text-quartz mb-6">{t('title')}</h1>
 
-        <h2 className="text-sm font-medium text-quartz mb-1">{t('logoTitle')}</h2>
-        <p className="text-xs text-nickel mb-4">{t('logoDescription')}</p>
+        {/* El logo se queda en su propio ancho corto (max-w-sm) en vez de
+            estirarse a los 4xl de la página: su contenido (una preview +
+            un input de archivo) no lo necesita, y estirarlo solo dejaría
+            el mismo hueco vacío que ya se corrigió en el dashboard de
+            RRHH (ver PR "usa colores de marca y elimina espacio vacío"). */}
+        <div className="max-w-sm mb-8">
+          <h2 className="text-sm font-medium text-quartz mb-1">{t('logoTitle')}</h2>
+          <p className="text-xs text-nickel mb-4">{t('logoDescription')}</p>
 
-        {hasLogo ? (
-          // max-h-24 (no h-14 como en login-form.tsx/layout.tsx): acá es a
-          // propósito más grande — es una vista previa de lo que se subió,
-          // no el logo puesto en su lugar real de uso. max-w-full evita que
-          // un archivo subido muy ancho se salga del contenedor.
-          // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-          <img
-            src="/api/branding/logo"
-            alt={t('logoCurrentAlt')}
-            className="max-h-24 max-w-full mb-6 mix-blend-multiply"
-          />
-        ) : (
-          <p className="text-xs text-nickel mb-6">{t('logoNone')}</p>
-        )}
+          {hasLogo ? (
+            // max-h-24 (no h-14 como en login-form.tsx/layout.tsx): acá es a
+            // propósito más grande — es una vista previa de lo que se subió,
+            // no el logo puesto en su lugar real de uso. max-w-full evita que
+            // un archivo subido muy ancho se salga del contenedor.
+            // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
+            <img
+              src="/api/branding/logo"
+              alt={t('logoCurrentAlt')}
+              className="max-h-24 max-w-full mb-6 mix-blend-multiply"
+            />
+          ) : (
+            <p className="text-xs text-nickel mb-6">{t('logoNone')}</p>
+          )}
 
-        <div className="bg-white border border-silver/60 rounded-xl p-6">
-          <LogoUploadForm
-            labels={{
-              uploadLabel: t('uploadLabel'),
-              uploadCta: t('uploadCta'),
-              uploading: t('uploading'),
-              uploadSuccess: t('uploadSuccess')
-            }}
-          />
+          <div className="bg-white border border-silver/60 rounded-xl p-6">
+            <LogoUploadForm
+              labels={{
+                uploadLabel: t('uploadLabel'),
+                uploadCta: t('uploadCta'),
+                uploading: t('uploading'),
+                uploadSuccess: t('uploadSuccess')
+              }}
+            />
+          </div>
         </div>
 
-        <h2 className="text-sm font-medium text-quartz mt-8 mb-1">{tParams('title')}</h2>
+        <h2 className="text-sm font-medium text-quartz mb-1">{tParams('title')}</h2>
         <p className="text-xs text-nickel mb-3">{tParams('description')}</p>
 
         <ParametersForm
