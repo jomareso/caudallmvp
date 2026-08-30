@@ -68,13 +68,18 @@ export function AdminRow({
 
   if (editing) {
     return (
-      <form onSubmit={handleSave} className="bg-white border border-cola rounded-lg p-3 text-xs space-y-2">
+      // flex-wrap en una fila (no space-y-2 apilado): en escritorio, con
+      // más ancho disponible que una tarjeta de max-w-sm, los selects no
+      // necesitan estirarse a lo ancho ni apilarse uno bajo otro — caben
+      // junto al correo en la misma línea, y se envuelven solos en
+      // pantallas chicas.
+      <form onSubmit={handleSave} className="bg-white border border-cola rounded-lg p-3 text-xs flex flex-wrap items-center gap-2">
         <p className="text-quartz font-medium">{admin.email}</p>
 
         <select
           value={profileType}
           onChange={(event) => setProfileType(event.target.value as ProfileType)}
-          className="w-full border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
+          className="border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
         >
           <option value="ADM">{labels.profileTypeAdm}</option>
           <option value="EMPRESA">{labels.profileTypeEmpresa}</option>
@@ -85,7 +90,7 @@ export function AdminRow({
           <select
             value={tenantId}
             onChange={(event) => setTenantId(event.target.value)}
-            className="w-full border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
+            className="border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
           >
             <option value="">{labels.tenantPlaceholder}</option>
             {tenants.map((tenant) => (
@@ -100,7 +105,7 @@ export function AdminRow({
           <select
             value={functionalRole}
             onChange={(event) => setFunctionalRole(event.target.value as FunctionalRole)}
-            className="w-full border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
+            className="border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
           >
             <option value="METHODOLOGIST">{labels.functionalRoleMethodologist}</option>
             <option value="PRODUCT_ADMIN">{labels.functionalRoleProductAdmin}</option>
@@ -109,9 +114,7 @@ export function AdminRow({
           </select>
         ) : null}
 
-        {error ? <p className="text-bad">{error}</p> : null}
-
-        <div className="flex gap-2">
+        <div className="flex gap-2 ml-auto">
           <button type="submit" disabled={isPending} className="bg-yale text-white rounded-lg px-3 py-1.5 disabled:opacity-60">
             {isPending ? labels.saving : labels.saveCta}
           </button>
@@ -119,13 +122,15 @@ export function AdminRow({
             {labels.cancelCta}
           </button>
         </div>
+
+        {error ? <p className="basis-full text-bad">{error}</p> : null}
       </form>
     );
   }
 
   return (
     <div className="bg-white border border-silver/60 rounded-lg p-3 text-xs">
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-center justify-between gap-2">
         <div>
           <p className="text-quartz font-medium">
             {admin.email}
@@ -140,7 +145,7 @@ export function AdminRow({
             {admin.tenantName ? ` · ${admin.tenantName}` : ''}
           </p>
         </div>
-        <div className="flex gap-2 shrink-0">
+        <div className="flex gap-3 shrink-0">
           <button type="button" onClick={() => setEditing(true)} className="text-cola">
             {labels.editCta}
           </button>

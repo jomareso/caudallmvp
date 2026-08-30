@@ -32,33 +32,41 @@ export default async function AdministradoresPage() {
   const t = await getTranslations('admin.administradores');
 
   return (
-    <main className="flex-1 p-6">
-      <div className="w-full max-w-sm">
+    <main className="flex-1 p-6 lg:p-8">
+      {/* max-w-4xl (no max-w-sm): mismo criterio que Configuración/RRHH/
+          Empresas — el sidebar ya deja mucho más ancho disponible. */}
+      <div className="w-full max-w-4xl">
         <h1 className="text-lg font-medium text-quartz mb-6">{t('title')}</h1>
 
-        <CreateAdminForm
-          tenants={tenants}
-          labels={{
-            emailLabel: t('emailLabel'),
-            emailPlaceholder: t('emailPlaceholder'),
-            profileTypeLabel: t('profileTypeLabel'),
-            profileTypeAdm: t('profileTypeAdm'),
-            profileTypeEmpresa: t('profileTypeEmpresa'),
-            profileTypeFuncional: t('profileTypeFuncional'),
-            tenantLabel: t('tenantLabel'),
-            tenantPlaceholder: t('tenantPlaceholder'),
-            functionalRoleLabel: t('functionalRoleLabel'),
-            functionalRoleMethodologist: t('functionalRoleMethodologist'),
-            functionalRoleProductAdmin: t('functionalRoleProductAdmin'),
-            functionalRoleAnalyst: t('functionalRoleAnalyst'),
-            functionalRoleViewer: t('functionalRoleViewer'),
-            cta: t('cta'),
-            creating: t('creating'),
-            success: t('success')
-          }}
-        />
+        {/* El formulario se queda en su propio ancho (max-w-md): nunca
+            tiene más de 3 campos visibles a la vez (email + tipo de
+            perfil + UNO de empresa/rol funcional), no se beneficia de
+            más ancho. */}
+        <div className="max-w-md mb-8">
+          <CreateAdminForm
+            tenants={tenants}
+            labels={{
+              emailLabel: t('emailLabel'),
+              emailPlaceholder: t('emailPlaceholder'),
+              profileTypeLabel: t('profileTypeLabel'),
+              profileTypeAdm: t('profileTypeAdm'),
+              profileTypeEmpresa: t('profileTypeEmpresa'),
+              profileTypeFuncional: t('profileTypeFuncional'),
+              tenantLabel: t('tenantLabel'),
+              tenantPlaceholder: t('tenantPlaceholder'),
+              functionalRoleLabel: t('functionalRoleLabel'),
+              functionalRoleMethodologist: t('functionalRoleMethodologist'),
+              functionalRoleProductAdmin: t('functionalRoleProductAdmin'),
+              functionalRoleAnalyst: t('functionalRoleAnalyst'),
+              functionalRoleViewer: t('functionalRoleViewer'),
+              cta: t('cta'),
+              creating: t('creating'),
+              success: t('success')
+            }}
+          />
+        </div>
 
-        <h2 className="text-sm font-medium text-quartz mt-6 mb-2">{t('existingTitle')}</h2>
+        <h2 className="text-sm font-medium text-quartz mb-2">{t('existingTitle')}</h2>
         <div className="space-y-2">
           {admins.map((a) => (
             <AdminRow
