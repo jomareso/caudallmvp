@@ -197,26 +197,40 @@ export async function EmpresaDashboard({
             {actionCommitmentCard}
           </div>
 
-          {/* Condición general + Por dimensión lado a lado en escritorio
-              (no una columna angosta a la izquierda con la nota de
-              privacidad sola a la derecha — eso dejaba un bloque vacío
-              grande bajo la nota, que es mucho más corta que las 2 cards). */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-            <div className="bg-white border border-silver/60 rounded-xl p-6">
-              <h2 className="text-sm font-medium text-quartz mb-3">{t('conditionOverviewTitle')}</h2>
-              <div className="grid grid-cols-3 gap-2 text-center">
-                {(['LOW', 'MID', 'HIGH'] as const).map((tier) => (
-                  <div key={tier} className="border border-silver/50 rounded-lg py-2 bg-white">
-                    <p className="text-base font-medium text-quartz leading-none mb-1">
-                      {aggregates.cfhiTierDistribution[tier]}
-                    </p>
-                    <p className="text-[10px] text-nickel">{tTier(tier)}</p>
-                  </div>
-                ))}
+          {/* Condición general (3 cajas cortas) es bastante más corto que
+              Por dimensión (5 filas) — un 50/50 con la misma altura
+              forzada (comportamiento por default de CSS grid) dejaba a
+              Condición general con un bloque vacío grande abajo, real
+              incluso con datos reales de verdad (no solo un artefacto de
+              prueba local sin metodología). En vez de forzar la misma
+              altura, se le da a Condición general una columna angosta
+              (1 de 3) con la nota de privacidad debajo — usa el espacio
+              en vez de dejarlo en blanco — y a Por dimensión el resto
+              del ancho (2 de 3), donde su contenido sí lo necesita. */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:items-start">
+            <div className="lg:col-span-1 flex flex-col gap-4">
+              <div className="bg-white border border-silver/60 rounded-xl p-6">
+                <h2 className="text-sm font-medium text-quartz mb-3">{t('conditionOverviewTitle')}</h2>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  {(['LOW', 'MID', 'HIGH'] as const).map((tier) => (
+                    // TIER_CLASS (rojo/ámbar/verde): antes esta grilla no
+                    // tenía ningún color, a diferencia del resto de la
+                    // página (el pill de CFHI promedio y los badges de
+                    // "Por dimensión" sí usan semáforo).
+                    <div key={tier} className={`rounded-lg py-2.5 ${TIER_CLASS[tier]}`}>
+                      <p className="text-base font-semibold leading-none mb-1">{aggregates.cfhiTierDistribution[tier]}</p>
+                      <p className="text-[10px] opacity-80">{tTier(tier)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-picton/10 border border-cola/20 rounded-lg px-4 py-3">
+                <p className="text-[11px] text-nickel">{t('privacyNote')}</p>
               </div>
             </div>
 
-            <div className="bg-white border border-silver/60 rounded-xl p-6">
+            <div className="lg:col-span-2 bg-white border border-silver/60 rounded-xl p-6">
               <h2 className="text-sm font-medium text-quartz mb-3">{t('dimensionsTitle')}</h2>
               <div className="space-y-2">
                 {aggregates.dimensions.map((dimension) => {
@@ -240,10 +254,6 @@ export async function EmpresaDashboard({
                 })}
               </div>
             </div>
-          </div>
-
-          <div className="bg-picton/10 border border-cola/20 rounded-lg px-4 py-3">
-            <p className="text-[11px] text-nickel">{t('privacyNote')}</p>
           </div>
         </div>
       </main>
