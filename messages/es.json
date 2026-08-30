@@ -302,7 +302,19 @@
         "errorGeneric": "Revisa los datos ingresados.",
         "errorStopOrder": "El orden debe ser: mínimo ≤ máximo blando ≤ máximo duro.",
         "errorThresholdOrder": "El umbral estricto debe ser mayor o igual al umbral normal.",
-        "errorTierOrder": "El puntaje mínimo de \"Capitán\" debe ser mayor al de \"Navegante\"."
+        "errorTierOrder": "El puntaje mínimo de \"Capitán\" debe ser mayor al de \"Navegante\".",
+        "socialComparisonSectionTitle": "Comparación social",
+        "socialComparisonEnabledLabel": "Activar comparación social en el resultado",
+        "socialComparisonEnabledHelp": "Si está apagado, el resultado no muestra ninguna comparación ni se envía el correo post-diagnóstico.",
+        "socialComparisonMinNLabel": "N mínimo del grupo comparable",
+        "socialComparisonMinNHelp": "Mínimo de personas con el mismo contexto (edad, ingreso, dependientes, situación laboral, sexo) para mostrar una comparación. Con menos, se amplía el grupo o se omite.",
+        "socialComparisonMinNRRHHLabel": "N mínimo por segmento en el dashboard de RRHH",
+        "socialComparisonMinNRRHHHelp": "Un segmento con menos empleados que este número nunca se muestra en el dashboard de RRHH, para proteger la identidad de los empleados.",
+        "socialComparisonSuperiorCutoffLabel": "Percentil mínimo para \"por encima\"",
+        "socialComparisonSuperiorCutoffHelp": "Percentil igual o mayor a este número se clasifica como posición superior.",
+        "socialComparisonInferiorCutoffLabel": "Percentil máximo para \"por debajo\"",
+        "socialComparisonInferiorCutoffHelp": "Percentil igual o menor a este número se clasifica como posición inferior. Debe ser menor al mínimo de \"por encima\".",
+        "errorSocialComparisonCutoffOrder": "El percentil de \"por debajo\" debe ser menor al de \"por encima\"."
       },
       "conductual": {
         "title": "Opciones conductuales",
@@ -585,7 +597,22 @@
       "completionTitle": "Tasa de finalización del diagnóstico",
       "completionDetail": "{completed} de {registered} empleados registrados lo completaron",
       "actionCommitmentTitle": "Se comprometieron con una acción",
-      "actionCommitmentDetail": "% de empleados con diagnóstico completo que aceptaron al menos una recomendación"
+      "actionCommitmentDetail": "% de empleados con diagnóstico completo que aceptaron al menos una recomendación",
+      "segmentation": {
+        "title": "Ver por segmento",
+        "description": "Filtra por una o más de estas variables para ver el mismo resumen, pero solo de ese grupo de empleados.",
+        "allOption": "Todos",
+        "ageLabel": "Edad",
+        "incomeLabel": "Nivel de ingreso",
+        "dependentsLabel": "Dependientes",
+        "employmentLabel": "Situación laboral",
+        "sexLabel": "Sexo",
+        "applyCta": "Filtrar",
+        "clearCta": "Quitar filtros",
+        "resultTitle": "Resultado del segmento",
+        "insufficientTitle": "Este segmento es muy chico para mostrarlo",
+        "insufficientBody": "Necesitas al menos {minRequired} empleados con diagnóstico completo en este segmento exacto para verlo — hoy hay {count}. Esto protege que ningún empleado pueda ser identificado a partir de un grupo muy reducido."
+      }
     },
     "funcional": {
       "title": "Todavía no hay herramientas para tu rol",
@@ -1813,6 +1840,45 @@
             "CRITICAL": "No tienes objetivos financieros definidos todavía: es el punto de partida para empezar a planificar."
           }
         }
+      },
+      "socialComparison": {
+        "title": "Tu próximo paso",
+        "statSuperior": "Tu resultado en {dimension} está en el {percentile}% superior entre personas en un contexto similar al tuyo.",
+        "statSimilar": "Tu resultado en {dimension} está en un rango parecido al de personas en un contexto similar al tuyo (percentil {percentile}).",
+        "reinforcement": {
+          "LOW": {
+            "SUPERIOR": "En {dimension} ya vas mejor que la mayoría de las personas en un contexto similar al tuyo — es un buen punto de partida. No te confíes: mantenerlo es tan importante como haber llegado hasta acá.",
+            "SIMILAR": "En {dimension} estás en una situación parecida a la de muchas personas con un contexto similar al tuyo. Es un punto de partida normal — y hay una oportunidad clara de mejorar.",
+            "INFERIOR": "Hay una oportunidad real de mejorar tu {dimension}. No hace falta compararte con nadie para dar el primer paso — solo empezar ya hace diferencia."
+          },
+          "MID": {
+            "SUPERIOR": "Tu manejo de {dimension} está entre los mejores de personas en un contexto similar al tuyo. Vale la pena sostenerlo, sobre todo cuando algo cambie en tu situación.",
+            "SIMILAR": "En {dimension} vas a un ritmo parecido al de muchas personas con un contexto similar al tuyo. Seguir avanzando un poco más te puede sacar de ese promedio.",
+            "INFERIOR": "Tu {dimension} todavía tiene una oportunidad clara de mejora. Ya diste varios pasos en otras áreas — este puede ser el siguiente."
+          },
+          "HIGH": {
+            "SUPERIOR": "Tu {dimension} está entre las más sólidas de personas en un contexto similar al tuyo. Mantener este nivel, incluso cuando las cosas cambien, es el verdadero logro.",
+            "SIMILAR": "En {dimension} estás a la par de muchas personas con un contexto similar al tuyo que también manejan bien sus finanzas. Todavía queda margen para afinar.",
+            "INFERIOR": "Con todo lo que ya lograste, tu {dimension} sigue siendo un punto por reforzar. Vale la pena cerrarlo para que ninguna área quede atrás."
+          }
+        },
+        "noData": {
+          "LOW": "Estás dando tus primeros pasos en el control de tus finanzas. Cada acción cuenta, aunque sea pequeña.",
+          "MID": "Ya llevas un camino recorrido en el manejo de tus finanzas. Seguir avanzando en {dimension} es el siguiente paso lógico.",
+          "HIGH": "Tu salud financiera general está sólida. Reforzar {dimension} ayuda a mantener el rumbo."
+        },
+        "cta": {
+          "LOW": "Dar mi primer paso",
+          "MID": "Seguir avanzando",
+          "HIGH": "Mantener el rumbo"
+        },
+        "actionTitle": "Tu próxima acción sugerida",
+        "emailSubject": {
+          "LOW": "Ya tienes tu resultado — es hora de dar tu primer paso",
+          "MID": "Tu resultado está listo — seguí avanzando",
+          "HIGH": "Tu resultado está listo — seguí manteniendo el rumbo"
+        },
+        "emailCta": "Ver mi resultado completo"
       }
     },
     "action": {

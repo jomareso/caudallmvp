@@ -17,6 +17,11 @@ export function DiagnosticParametersForm({
     progressTarget: number;
     progressTierMidCutoff: number;
     progressTierHighCutoff: number;
+    socialComparisonEnabled: boolean;
+    socialComparisonMinN: number;
+    socialComparisonMinNRRHH: number;
+    socialComparisonSuperiorCutoff: number;
+    socialComparisonInferiorCutoff: number;
   };
   labels: Record<string, string>;
 }) {
@@ -29,6 +34,15 @@ export function DiagnosticParametersForm({
   const [progressTarget, setProgressTarget] = useState(String(initial.progressTarget));
   const [progressTierMidCutoff, setProgressTierMidCutoff] = useState(String(initial.progressTierMidCutoff));
   const [progressTierHighCutoff, setProgressTierHighCutoff] = useState(String(initial.progressTierHighCutoff));
+  const [socialComparisonEnabled, setSocialComparisonEnabled] = useState(initial.socialComparisonEnabled);
+  const [socialComparisonMinN, setSocialComparisonMinN] = useState(String(initial.socialComparisonMinN));
+  const [socialComparisonMinNRRHH, setSocialComparisonMinNRRHH] = useState(String(initial.socialComparisonMinNRRHH));
+  const [socialComparisonSuperiorCutoff, setSocialComparisonSuperiorCutoff] = useState(
+    String(initial.socialComparisonSuperiorCutoff)
+  );
+  const [socialComparisonInferiorCutoff, setSocialComparisonInferiorCutoff] = useState(
+    String(initial.socialComparisonInferiorCutoff)
+  );
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -47,7 +61,12 @@ export function DiagnosticParametersForm({
         highValueThresholdSoft,
         progressTarget,
         progressTierMidCutoff,
-        progressTierHighCutoff
+        progressTierHighCutoff,
+        socialComparisonEnabled,
+        socialComparisonMinN,
+        socialComparisonMinNRRHH,
+        socialComparisonSuperiorCutoff,
+        socialComparisonInferiorCutoff
       });
       if (!result.ok) {
         setError(result.message);
@@ -201,6 +220,87 @@ export function DiagnosticParametersForm({
             className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-1 focus:outline-none focus:border-cola"
           />
           <p className="text-[11px] text-nickel mb-3">{labels.progressTierHighCutoffHelp}</p>
+        </div>
+      </div>
+
+      <p className="text-sm font-medium text-quartz mb-3">{labels.socialComparisonSectionTitle}</p>
+
+      <div className="mb-3">
+        <label htmlFor="socialComparisonEnabled" className="flex items-center gap-2 text-xs text-nickel mb-1">
+          <input
+            id="socialComparisonEnabled"
+            type="checkbox"
+            checked={socialComparisonEnabled}
+            onChange={(event) => setSocialComparisonEnabled(event.target.checked)}
+          />
+          {labels.socialComparisonEnabledLabel}
+        </label>
+        <p className="text-[11px] text-nickel">{labels.socialComparisonEnabledHelp}</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 mb-1">
+        <div>
+          <label htmlFor="socialComparisonMinN" className="block text-xs text-nickel mb-1">
+            {labels.socialComparisonMinNLabel}
+          </label>
+          <input
+            id="socialComparisonMinN"
+            type="number"
+            min={1}
+            max={10000}
+            value={socialComparisonMinN}
+            onChange={(event) => setSocialComparisonMinN(event.target.value)}
+            className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-1 focus:outline-none focus:border-cola"
+          />
+          <p className="text-[11px] text-nickel mb-3">{labels.socialComparisonMinNHelp}</p>
+        </div>
+
+        <div>
+          <label htmlFor="socialComparisonMinNRRHH" className="block text-xs text-nickel mb-1">
+            {labels.socialComparisonMinNRRHHLabel}
+          </label>
+          <input
+            id="socialComparisonMinNRRHH"
+            type="number"
+            min={1}
+            max={10000}
+            value={socialComparisonMinNRRHH}
+            onChange={(event) => setSocialComparisonMinNRRHH(event.target.value)}
+            className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-1 focus:outline-none focus:border-cola"
+          />
+          <p className="text-[11px] text-nickel mb-3">{labels.socialComparisonMinNRRHHHelp}</p>
+        </div>
+
+        <div>
+          <label htmlFor="socialComparisonSuperiorCutoff" className="block text-xs text-nickel mb-1">
+            {labels.socialComparisonSuperiorCutoffLabel}
+          </label>
+          <input
+            id="socialComparisonSuperiorCutoff"
+            type="number"
+            min={0}
+            max={100}
+            value={socialComparisonSuperiorCutoff}
+            onChange={(event) => setSocialComparisonSuperiorCutoff(event.target.value)}
+            className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-1 focus:outline-none focus:border-cola"
+          />
+          <p className="text-[11px] text-nickel mb-3">{labels.socialComparisonSuperiorCutoffHelp}</p>
+        </div>
+
+        <div>
+          <label htmlFor="socialComparisonInferiorCutoff" className="block text-xs text-nickel mb-1">
+            {labels.socialComparisonInferiorCutoffLabel}
+          </label>
+          <input
+            id="socialComparisonInferiorCutoff"
+            type="number"
+            min={0}
+            max={100}
+            value={socialComparisonInferiorCutoff}
+            onChange={(event) => setSocialComparisonInferiorCutoff(event.target.value)}
+            className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-1 focus:outline-none focus:border-cola"
+          />
+          <p className="text-[11px] text-nickel mb-3">{labels.socialComparisonInferiorCutoffHelp}</p>
         </div>
       </div>
 

@@ -4,8 +4,45 @@ import type { Route } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { getTenantAggregates } from '@/lib/engines/tenant-aggregates';
+import { getTenantSegmentAggregates, type SegmentFilters } from '@/lib/engines/tenant-segment-aggregates';
+import type { CtxKey } from '@/lib/engines/social-comparison';
 import { scoreToDimensionState, scoreToProgressTier } from '@/lib/engines/scoring';
 import { getPlatformSettings } from '@/lib/settings/platform-settings';
+
+// Opciones del filtro de segmentación (spec: "permitir filtrar/analizar
+// por las mismas 5 variables" del Motor de Comparación Social) — mismas
+// preguntas/estados del banco de contexto (CTX-01/02/04/08/09), reusando
+// sus traducciones existentes en vez de duplicar el texto. DECLINED queda
+// fuera a propósito: no tiene sentido filtrar por "prefirió no responder",
+// y excluirlo reduce la superficie de un segmento accidentalmente chico.
+const CTX_FILTER_DEFS: { key: CtxKey; questionCode: string; states: string[] }[] = [
+  {
+    key: 'age',
+    questionCode: 'CTX-01',
+    states: ['AGE_18_24', 'AGE_25_34', 'AGE_35_44', 'AGE_45_54', 'AGE_55_64', 'AGE_65_PLUS']
+  },
+  {
+    key: 'income',
+    questionCode: 'CTX-04',
+    states: ['INC_LT_25K', 'INC_25_49K', 'INC_50_74K', 'INC_75_99K', 'INC_100_149K', 'INC_150_199K', 'INC_200K_PLUS']
+  },
+  { key: 'dependents', questionCode: 'CTX-02', states: ['DEP_0', 'DEP_1', 'DEP_2', 'DEP_3', 'DEP_4_PLUS'] },
+  {
+    key: 'employment',
+    questionCode: 'CTX-09',
+    states: [
+      'PRIVATE_EMPLOYEE',
+      'PUBLIC_EMPLOYEE',
+      'SELF_EMPLOYED',
+      'EMPLOYER',
+      'UNEMPLOYED',
+      'STUDENT',
+      'RETIRED',
+      'HOMEMAKER'
+    ]
+  },
+  { key: 'sex', questionCode: 'CTX-08', states: ['FEMALE', 'MALE'] }
+];
 
 const BAND_CLASS: Record<string, string> = {
   CRITICAL: 'bg-bad/10 text-bad',
@@ -31,7 +68,8 @@ const TIER_CLASS: Record<string, string> = {
 // PostgreSQL, no quién invoca esta función (Decisión 1).
 export async function EmpresaDashboard({
   tenantId,
-  backHref
+  backHref,
+  searchParams
 }: {
   tenantId: string;
   // Si viene, se muestra un aviso de "estás viendo como ADM" con un link
@@ -39,6 +77,12 @@ export async function EmpresaDashboard({
   // Route (no `string` plano) porque typedRoutes solo puede validar un
   // href literal en el JSX, no uno que llegue por prop.
   backHref?: Route;
+  // Filtros de segmentación (spec §16), leídos de la URL — un <form
+  // method="GET"> plano sin JS, no un componente cliente con estado: cada
+  // combinación de filtros es una URL compartible/recargable, y el umbral
+  // de anonimato se re-evalúa en cada request igual que el resto del
+  // motor (nunca queda cacheado un resultado que ya no cumpliría el N).
+  searchParams?: Record<string, string | string[] | undefined>;
 }) {
   return runWithTenantContext({ kind: 'tenant', tenantId }, async () => {
     // Tenant es catálogo de plataforma (no lleva RLS), pero se lee dentro
@@ -47,10 +91,21 @@ export async function EmpresaDashboard({
     if (!tenant) redirect('/admin');
 
     const t = await getTranslations('admin.empresa');
+    const tSeg = await getTranslations('admin.empresa.segmentation');
+    const tQ = await getTranslations('diagnostic.questions');
     const tDim = await getTranslations('diagnostic.dimensions');
     const tBand = await getTranslations('diagnostic.result.bands');
     const tTier = await getTranslations('admin.empresa.tiers');
     const tViewAs = await getTranslations('admin.viewAs');
+
+    const segmentFilters: SegmentFilters = {};
+    for (const def of CTX_FILTER_DEFS) {
+      const raw = searchParams?.[def.key];
+      const value = Array.isArray(raw) ? raw[0] : raw;
+      if (value && def.states.includes(value)) segmentFilters[def.key] = value;
+    }
+    const hasSegmentFilters = Object.keys(segmentFilters).length > 0;
+    const segmentResult = hasSegmentFilters ? await getTenantSegmentAggregates(tenant.id, segmentFilters) : null;
 
     const [aggregates, licenseCounts, settings] = await Promise.all([
       getTenantAggregates(tenant.id),
@@ -265,6 +320,99 @@ export async function EmpresaDashboard({
                 })}
               </div>
             </div>
+          </div>
+
+          <div className="bg-white border border-silver/60 rounded-xl p-6 mt-4">
+            <h2 className="text-sm font-medium text-quartz mb-1">{tSeg('title')}</h2>
+            <p className="text-xs text-nickel mb-4">{tSeg('description')}</p>
+
+            <form className="grid grid-cols-1 lg:grid-cols-5 gap-3 items-end mb-2">
+              {CTX_FILTER_DEFS.map((def) => (
+                <div key={def.key}>
+                  <label htmlFor={`segment-${def.key}`} className="block text-[11px] text-nickel mb-1">
+                    {tSeg(`${def.key}Label`)}
+                  </label>
+                  <select
+                    id={`segment-${def.key}`}
+                    name={def.key}
+                    defaultValue={segmentFilters[def.key] ?? ''}
+                    className="w-full border border-silver rounded-lg px-2.5 py-2 text-xs text-quartz focus:outline-none focus:border-cola"
+                  >
+                    <option value="">{tSeg('allOption')}</option>
+                    {def.states.map((state) => (
+                      <option key={state} value={state}>
+                        {tQ(`${def.questionCode}.options.${state}`)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+              <div className="flex gap-2">
+                <button type="submit" className="flex-1 bg-yale text-white rounded-lg py-2 text-xs">
+                  {tSeg('applyCta')}
+                </button>
+                {hasSegmentFilters ? (
+                  <Link
+                    href={(backHref ?? '/admin/empresa') as Route}
+                    className="flex-1 flex items-center justify-center border border-silver rounded-lg py-2 text-xs text-nickel"
+                  >
+                    {tSeg('clearCta')}
+                  </Link>
+                ) : null}
+              </div>
+            </form>
+
+            {segmentResult && segmentResult.status === 'INSUFFICIENT_ANONYMITY' ? (
+              <div className="bg-picton/10 border border-cola/20 rounded-lg px-4 py-3 mt-2">
+                <p className="text-xs font-medium text-quartz mb-1">{tSeg('insufficientTitle')}</p>
+                <p className="text-[11px] text-nickel">
+                  {tSeg('insufficientBody', { minRequired: segmentResult.minRequired, count: segmentResult.employeeCount })}
+                </p>
+              </div>
+            ) : null}
+
+            {segmentResult && segmentResult.status === 'OK' ? (
+              <div className="mt-4 pt-4 border-t border-silver/40">
+                <p className="text-xs text-nickel mb-3">{tSeg('resultTitle')}</p>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div className="lg:col-span-1">
+                    <div className="bg-silver/10 rounded-lg p-4 text-center">
+                      <p className="text-2xl font-medium text-yale leading-none mb-1.5">
+                        {Math.round(segmentResult.averageCfhi)}
+                      </p>
+                      <p className="text-[11px] text-nickel mb-3">{t('averageCfhiLabel')}</p>
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        {(['LOW', 'MID', 'HIGH'] as const).map((tier) => (
+                          <div key={tier} className={`rounded-lg py-2 ${TIER_CLASS[tier]}`}>
+                            <p className="text-sm font-semibold leading-none mb-1">
+                              {segmentResult.cfhiTierDistribution[tier]}
+                            </p>
+                            <p className="text-[9px] opacity-80">{tTier(tier)}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-[11px] text-nickel mt-3">{t('employeeCount', { count: segmentResult.employeeCount })}</p>
+                    </div>
+                  </div>
+                  <div className="lg:col-span-2 space-y-2">
+                    {segmentResult.dimensions.map((dimension) => {
+                      const score = dimension.averageScore !== null ? Math.round(dimension.averageScore) : null;
+                      const band = score !== null ? scoreToDimensionState(score) : 'NA';
+                      return (
+                        <div key={dimension.code} className="border border-silver/50 rounded-lg p-2.5 bg-white">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-medium text-quartz">{tDim(dimension.code)}</span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-lg ${BAND_CLASS[band]}`}>
+                              {score !== null ? `${score} · ${tBand(band)}` : tBand('NA')}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       </main>
