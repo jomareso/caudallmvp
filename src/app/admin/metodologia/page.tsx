@@ -49,10 +49,30 @@ export default async function AdminMetodologiaPage() {
       <div className="w-full max-w-5xl">
         <h1 className="text-lg font-medium text-quartz mb-6">{t('title')}</h1>
 
+        {/* Los 4 links de antes (una lista subrayada apretada dentro de la
+            misma tarjeta) pasan a tarjetas de navegación reales, en grilla
+            de 2 columnas — mismo tratamiento de "tarjeta clickeable" que
+            el resto de /admin ya rediseñado, y usan el resto del ancho
+            disponible en vez de una lista de una sola línea cada una. */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          {navCards.map((card) => (
+            <Link
+              key={card.href}
+              href={card.href}
+              className="block bg-white border border-silver/60 rounded-xl p-5 hover:border-cola transition-colors"
+            >
+              <p className="text-sm font-medium text-yale mb-1">{card.label}</p>
+              <p className="text-xs text-nickel">{card.description}</p>
+            </Link>
+          ))}
+        </div>
+
         {/* max-w-2xl (no todo el ancho de la página): es texto + un botón,
             no una tabla — estirarlo a 5xl completo dejaría las líneas de
-            texto incómodamente largas para leer. */}
-        <div className="max-w-2xl bg-white border border-silver/60 rounded-xl p-6 mb-6">
+            texto incómodamente largas para leer. Debajo de las 4 tarjetas
+            (Reynoso: se usa mucho menos seguido que navegar a las
+            sub-páginas, no debería ser lo primero que se ve). */}
+        <div className="max-w-2xl bg-white border border-silver/60 rounded-xl p-6">
           <p className="text-xs text-nickel mb-1">
             {t('currentVersion')}: <span className="text-quartz font-medium">{methodology?.version ?? '—'}</span>
             {questionBank ? ` (${questionBank.version})` : ''}
@@ -80,24 +100,6 @@ export default async function AdminMetodologiaPage() {
               error: t('syncError')
             }}
           />
-        </div>
-
-        {/* Los 4 links de antes (una lista subrayada apretada dentro de la
-            misma tarjeta) pasan a tarjetas de navegación reales, en grilla
-            de 2 columnas — mismo tratamiento de "tarjeta clickeable" que
-            el resto de /admin ya rediseñado, y usan el resto del ancho
-            disponible en vez de una lista de una sola línea cada una. */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {navCards.map((card) => (
-            <Link
-              key={card.href}
-              href={card.href}
-              className="block bg-white border border-silver/60 rounded-xl p-5 hover:border-cola transition-colors"
-            >
-              <p className="text-sm font-medium text-yale mb-1">{card.label}</p>
-              <p className="text-xs text-nickel">{card.description}</p>
-            </Link>
-          ))}
         </div>
       </div>
     </main>
