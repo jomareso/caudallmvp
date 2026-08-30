@@ -29,12 +29,41 @@ export default async function AdminConfiguracionPage() {
       <div className="w-full max-w-4xl">
         <h1 className="text-lg font-medium text-quartz mb-6">{t('title')}</h1>
 
-        {/* El logo se queda en su propio ancho corto (max-w-sm) en vez de
+        <h2 className="text-sm font-medium text-quartz mb-1">{tParams('title')}</h2>
+        <p className="text-xs text-nickel mb-3">{tParams('description')}</p>
+
+        <ParametersForm
+          initial={parameters}
+          labels={{
+            followupInviteAfterDaysLabel: tParams('followupInviteAfterDaysLabel'),
+            followupInviteAfterDaysHelp: tParams('followupInviteAfterDaysHelp'),
+            licenseDurationsMonthsLabel: tParams('licenseDurationsMonthsLabel'),
+            licenseDurationsMonthsHelp: tParams('licenseDurationsMonthsHelp'),
+            minCohortSizeLabel: tParams('minCohortSizeLabel'),
+            minCohortSizeHelp: tParams('minCohortSizeHelp'),
+            minSampleSizeLabel: tParams('minSampleSizeLabel'),
+            minSampleSizeHelp: tParams('minSampleSizeHelp'),
+            magicLinkTtlMinutesLabel: tParams('magicLinkTtlMinutesLabel'),
+            magicLinkTtlMinutesHelp: tParams('magicLinkTtlMinutesHelp'),
+            sampleConfidenceLevelLabel: tParams('sampleConfidenceLevelLabel'),
+            sampleConfidenceLevelHelp: tParams('sampleConfidenceLevelHelp'),
+            sampleMarginOfErrorLabel: tParams('sampleMarginOfErrorLabel'),
+            sampleMarginOfErrorHelp: tParams('sampleMarginOfErrorHelp'),
+            showInterventionVideosLabel: tParams('showInterventionVideosLabel'),
+            saveCta: tParams('saveCta'),
+            saving: tParams('saving'),
+            saveSuccess: tParams('saveSuccess')
+          }}
+        />
+
+        {/* Debajo de los parámetros (Reynoso: se usa mucho menos seguido
+            que ajustar los parámetros, no debería ser lo primero que se
+            ve). Se queda en su propio ancho corto (max-w-sm) en vez de
             estirarse a los 4xl de la página: su contenido (una preview +
             un input de archivo) no lo necesita, y estirarlo solo dejaría
             el mismo hueco vacío que ya se corrigió en el dashboard de
             RRHH (ver PR "usa colores de marca y elimina espacio vacío"). */}
-        <div className="max-w-sm mb-8">
+        <div className="max-w-sm mt-8">
           <h2 className="text-sm font-medium text-quartz mb-1">{t('logoTitle')}</h2>
           <p className="text-xs text-nickel mb-4">{t('logoDescription')}</p>
 
@@ -64,33 +93,6 @@ export default async function AdminConfiguracionPage() {
             />
           </div>
         </div>
-
-        <h2 className="text-sm font-medium text-quartz mb-1">{tParams('title')}</h2>
-        <p className="text-xs text-nickel mb-3">{tParams('description')}</p>
-
-        <ParametersForm
-          initial={parameters}
-          labels={{
-            followupInviteAfterDaysLabel: tParams('followupInviteAfterDaysLabel'),
-            followupInviteAfterDaysHelp: tParams('followupInviteAfterDaysHelp'),
-            licenseDurationsMonthsLabel: tParams('licenseDurationsMonthsLabel'),
-            licenseDurationsMonthsHelp: tParams('licenseDurationsMonthsHelp'),
-            minCohortSizeLabel: tParams('minCohortSizeLabel'),
-            minCohortSizeHelp: tParams('minCohortSizeHelp'),
-            minSampleSizeLabel: tParams('minSampleSizeLabel'),
-            minSampleSizeHelp: tParams('minSampleSizeHelp'),
-            magicLinkTtlMinutesLabel: tParams('magicLinkTtlMinutesLabel'),
-            magicLinkTtlMinutesHelp: tParams('magicLinkTtlMinutesHelp'),
-            sampleConfidenceLevelLabel: tParams('sampleConfidenceLevelLabel'),
-            sampleConfidenceLevelHelp: tParams('sampleConfidenceLevelHelp'),
-            sampleMarginOfErrorLabel: tParams('sampleMarginOfErrorLabel'),
-            sampleMarginOfErrorHelp: tParams('sampleMarginOfErrorHelp'),
-            showInterventionVideosLabel: tParams('showInterventionVideosLabel'),
-            saveCta: tParams('saveCta'),
-            saving: tParams('saving'),
-            saveSuccess: tParams('saveSuccess')
-          }}
-        />
       </div>
     </main>
   );
