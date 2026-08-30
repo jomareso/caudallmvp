@@ -80,32 +80,38 @@ export function RuleRow({
 
   if (editing) {
     return (
-      <form onSubmit={handleSave} className="bg-white border border-cola rounded-lg p-3 text-xs space-y-2">
-        <p className="text-quartz font-medium">{rule.templateLabel}</p>
+      <form onSubmit={handleSave} className="bg-white border border-cola rounded-lg p-3 text-xs">
+        <p className="text-quartz font-medium mb-2">{rule.templateLabel}</p>
 
-        <input
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          className="w-full border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
-        />
+        {/* título + días lado a lado (cuando aplica), cuerpo a ancho
+            completo debajo — mismo criterio que create-rule-form.tsx, en
+            vez de las 3 líneas apiladas de antes sin usar el ancho
+            disponible en escritorio. */}
+        <div className="flex flex-wrap gap-2 mb-2">
+          <input
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            className="flex-1 min-w-[180px] border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
+          />
+          {needsDays ? (
+            <input
+              type="number"
+              min={1}
+              max={365}
+              value={days}
+              onChange={(event) => setDays(event.target.value)}
+              className="w-24 border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
+            />
+          ) : null}
+        </div>
         <textarea
           value={body}
           onChange={(event) => setBody(event.target.value)}
           rows={2}
-          className="w-full border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
+          className="w-full border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz mb-2"
         />
-        {needsDays ? (
-          <input
-            type="number"
-            min={1}
-            max={365}
-            value={days}
-            onChange={(event) => setDays(event.target.value)}
-            className="w-full border border-silver rounded-lg px-2 py-1.5 text-xs text-quartz"
-          />
-        ) : null}
 
-        {error ? <p className="text-bad">{error}</p> : null}
+        {error ? <p className="text-bad mb-2">{error}</p> : null}
 
         <div className="flex gap-2">
           <button type="submit" disabled={isPending} className="bg-yale text-white rounded-lg px-3 py-1.5 disabled:opacity-60">
@@ -139,7 +145,7 @@ export function RuleRow({
           <p className="text-nickel">{rule.body}</p>
           {rule.days ? <p className="text-nickel mt-1">{labels.daysLabel}: {rule.days}</p> : null}
         </div>
-        <div className="flex flex-col items-end gap-1 shrink-0">
+        <div className="flex gap-3 shrink-0">
           <button type="button" onClick={() => setEditing(true)} className="text-cola">
             {labels.editCta}
           </button>
