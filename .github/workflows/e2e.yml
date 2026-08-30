@@ -1,0 +1,66 @@
+name: E2E
+
+on:
+  pull_request:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: caudall
+          POSTGRES_PASSWORD: caudall
+          POSTGRES_DB: caudall_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://caudall:caudall@localhost:5432/caudall_e2e
+      AUTH_SECRET: e2e-ci-secret-not-used-in-production
+      AUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Instalar navegador de Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Aplicar migraciones y sembrar datos de prueba
+        run: |
+          npx prisma migrate deploy
+          npm run prisma:seed
+
+      # webServer de playwright.config.ts corre `npm run start` — necesita
+      # un build ya hecho, no `next dev` (ver comentario en ese archivo:
+      # un diagnóstico de ~25 preguntas seguidas puede superar el timeout
+      # de un test si cada ruta compila JIT la primera vez que se pide).
+      - name: Build de producción
+        run: npm run build
+
+      - name: Correr pruebas e2e
+        run: npm run test:e2e
+
+      - name: Subir el reporte de Playwright si falló
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

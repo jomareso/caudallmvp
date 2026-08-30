@@ -17,12 +17,9 @@ import { rawPrisma } from './db';
 // TypeScript de Playwright no resuelve de forma confiable para módulos
 // fuera de e2e/ — más simple y robusto firmar acá con el mismo secreto
 // (AUTH_SECRET) que duplicar esa cadena de imports.
-async function signTestMagicLinkToken(payload: {
-  type: 'employee';
-  tenantId: string;
-  employeeId: string;
-  email: string;
-}): Promise<string> {
+async function signTestMagicLinkToken(
+  payload: { type: 'employee'; tenantId: string; employeeId: string; email: string } | { type: 'admin'; adminUserId: string; email: string }
+): Promise<string> {
   const secret = process.env.AUTH_SECRET;
   if (!secret) {
     throw new Error('AUTH_SECRET no está configurado — ver e2e/README.md.');
@@ -56,6 +53,32 @@ export async function loginAsEmployee(page: Page, employee: { employeeId: string
     tenantId: employee.tenantId,
     employeeId: employee.employeeId,
     email: employee.email
+  });
+
+  await page.goto(`/api/auth/verify?token=${encodeURIComponent(token)}`);
+}
+
+// Admin EMPRESA (RRHH) del tenant demo — mismo mecanismo de bypass que
+// createTestEmployee/loginAsEmployee de arriba (firma el mismo tipo de
+// token que createMagicLinkToken() produce para un admin en producción,
+// visita el mismo /api/auth/verify real). tenantId propio (no
+// ACME2026 fijo dentro del helper) para poder reusarlo con cualquier
+// tenant si algún test futuro lo necesita.
+export async function createTestEmpresaAdmin(tenantId: string): Promise<{ adminUserId: string; email: string }> {
+  const email = `e2e-admin-${randomUUID()}@example.com`;
+
+  const admin = await rawPrisma.adminUser.create({
+    data: { email, profileType: 'EMPRESA', tenantId }
+  });
+
+  return { adminUserId: admin.id, email };
+}
+
+export async function loginAsAdmin(page: Page, admin: { adminUserId: string; email: string }): Promise<void> {
+  const token = await signTestMagicLinkToken({
+    type: 'admin',
+    adminUserId: admin.adminUserId,
+    email: admin.email
   });
 
   await page.goto(`/api/auth/verify?token=${encodeURIComponent(token)}`);

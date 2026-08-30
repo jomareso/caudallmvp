@@ -169,6 +169,11 @@ test.describe('Journey del empleado: diagnóstico completo', () => {
     // El score es un número real calculado por el motor (CFHI), no un
     // placeholder — "de 100" es el sufijo fijo del gauge (ScoreGauge).
     await expect(page.getByText('de 100')).toBeVisible();
+
+    // Desglose por dimensión (Control/Resiliencia/Deuda/Ahorro/
+    // Planificación) — mismo resultado.tsx, sección aparte del score
+    // general (ver diagnostic.result.dimensionsTitle).
+    await expect(page.getByText('Tus 5 dimensiones')).toBeVisible();
   });
 
   test('/diagnostico/accion responde con una sugerencia real o un estado vacío coherente — nunca en blanco', async ({
