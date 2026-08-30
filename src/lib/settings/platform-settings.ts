@@ -24,7 +24,18 @@ export const PLATFORM_SETTINGS_DEFAULTS = {
   highValueThresholdSoft: 0.97,
   progressTarget: 12,
   progressTierMidCutoff: 41,
-  progressTierHighCutoff: 71
+  progressTierHighCutoff: 71,
+  // Motor de Comparación Social — ver src/lib/engines/social-comparison.ts.
+  // minN es el mínimo de la cohorte comparable para mostrar una comparación
+  // al empleado (distinto de minCohortSize/minSampleSize, que gobiernan el
+  // benchmark nacional retirado). minNRRHH es el umbral, más estricto, para
+  // mostrar un segmento en el dashboard de RRHH (distinto de
+  // Tenant.aggregationMinSegmentSize, que es por-tenant).
+  socialComparisonEnabled: true,
+  socialComparisonMinN: 50,
+  socialComparisonMinNRRHH: 20,
+  socialComparisonSuperiorCutoff: 60,
+  socialComparisonInferiorCutoff: 40
 };
 
 export type PlatformSettingsValues = typeof PLATFORM_SETTINGS_DEFAULTS;
@@ -58,6 +69,11 @@ export async function getPlatformSettings(): Promise<PlatformSettingsValues> {
     highValueThresholdSoft: settings.highValueThresholdSoft,
     progressTarget: settings.progressTarget,
     progressTierMidCutoff: settings.progressTierMidCutoff,
-    progressTierHighCutoff: settings.progressTierHighCutoff
+    progressTierHighCutoff: settings.progressTierHighCutoff,
+    socialComparisonEnabled: settings.socialComparisonEnabled,
+    socialComparisonMinN: settings.socialComparisonMinN,
+    socialComparisonMinNRRHH: settings.socialComparisonMinNRRHH,
+    socialComparisonSuperiorCutoff: settings.socialComparisonSuperiorCutoff,
+    socialComparisonInferiorCutoff: settings.socialComparisonInferiorCutoff
   };
 }

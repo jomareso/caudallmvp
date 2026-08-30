@@ -12,7 +12,13 @@ import { EmpresaDashboard } from '../../../empresa/empresa-dashboard';
 // (Decisión 1: el aislamiento lo da RLS, no quién invoca el código).
 // Queda auditado en AuditLog para que quede registro de qué ADM vio el
 // dashboard de qué empresa y cuándo.
-export default async function EmpresaViewAsPage({ params }: { params: { id: string } }) {
+export default async function EmpresaViewAsPage({
+  params,
+  searchParams
+}: {
+  params: { id: string };
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
   const admin = await requireAdm();
 
   // Tenant es catálogo de plataforma (sin RLS) — platform-admin por
@@ -37,5 +43,5 @@ export default async function EmpresaViewAsPage({ params }: { params: { id: stri
   // el patrón /admin/empresas/[id] sí existe (ver el `Route` importado).
   const backHref = `/admin/empresas/${tenant.id}` as Route;
 
-  return <EmpresaDashboard tenantId={tenant.id} backHref={backHref} />;
+  return <EmpresaDashboard tenantId={tenant.id} backHref={backHref} searchParams={searchParams} />;
 }

@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 
 let resendClient: Resend | null = null;
 
-function getResendClient(): Resend {
+export function getResendClient(): Resend {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     throw new Error('RESEND_API_KEY no está configurado. Ver .env.example.');
@@ -32,7 +32,7 @@ function getResendClient(): Resend {
 // recibe (verifyUrl/panelUrl), que ya es request-aware (ver
 // src/lib/http/request-origin.ts) y por lo tanto correcta también en
 // Deploy Previews, no solo en producción.
-function renderEmailShell(origin: string, innerHtml: string): string {
+export function renderEmailShell(origin: string, innerHtml: string): string {
   const logoUrl = `${origin}/brand/caudall-logo-color.png`;
 
   return `

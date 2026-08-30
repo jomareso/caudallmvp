@@ -6,11 +6,13 @@ import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-cont
 import { scoreToDimensionState, scoreToProgressTier } from '@/lib/engines/scoring';
 import { getPlatformSettings } from '@/lib/settings/platform-settings';
 import { countContextAnsweredAndTotal } from '@/lib/engines/diagnostic';
-import { getNationalComparison, getSegmentComparison, type NationalComparison } from '@/lib/engines/national-benchmark';
+import { buildPostDiagnosticMessagePlan } from '@/lib/engines/post-diagnostic-message';
+import { recordSocialComparisonSnapshot } from '@/lib/engines/social-comparison';
+import { sendDiagnosticResultEmail } from '@/lib/email/send-diagnostic-result';
 import { EmployeeTopBar } from '../../employee-topbar';
 import { BackHomeLink } from '../../back-home-link';
-import { SegmentComparison, type ComparisonRow, type ComparisonTab } from './segment-comparison';
 import { ScoreGauge } from './score-gauge';
+import { SocialComparisonCard } from './social-comparison-card';
 
 export default async function ResultadoPage() {
   const employee = await requireEmployee();
@@ -37,12 +39,38 @@ export default async function ResultadoPage() {
 
     const { answered: ctxAnswered, total: ctxTotal } = await countContextAnsweredAndTotal(employeeId);
     const showContextBanner = ctxTotal > 0 && ctxAnswered < ctxTotal;
-    const [generalComparison, ageComparison, incomeComparison, sexComparison] = await Promise.all([
-      getNationalComparison(employeeId),
-      getSegmentComparison(employeeId, 'AGE'),
-      getSegmentComparison(employeeId, 'INCOME'),
-      getSegmentComparison(employeeId, 'SEX')
-    ]);
+
+    const messagePlan = await buildPostDiagnosticMessagePlan(employeeId);
+
+    // Motor de Comparación Social + notificación por correo (spec 30
+    // secciones, confirmado con Reynoso — reemplaza al benchmark nacional
+    // gateado por CTX-07, retirado del banco activo). Dedup por
+    // (employeeId, completedAt): en visitas posteriores a la misma
+    // finalización, el snapshot ya existe y no se reenvía el correo. Todo
+    // el bloque va en try/catch — un fallo acá (ej. Resend caído) nunca
+    // debe romper el render del resultado.
+    if (financialState.lastDiagnosticCompletedAt) {
+      const completedAt = financialState.lastDiagnosticCompletedAt;
+      try {
+        const existingSnapshot = await prisma.socialComparisonSnapshot.findUnique({
+          where: { employeeId_completedAt: { employeeId, completedAt } }
+        });
+        if (!existingSnapshot) {
+          await recordSocialComparisonSnapshot(employeeId, completedAt, messagePlan.comparison);
+          try {
+            await sendDiagnosticResultEmail({ to: employee.personalEmail, employeeId, plan: messagePlan });
+            await prisma.socialComparisonSnapshot.update({
+              where: { employeeId_completedAt: { employeeId, completedAt } },
+              data: { emailSentAt: new Date() }
+            });
+          } catch (emailError) {
+            console.error('sendDiagnosticResultEmail falló', emailError);
+          }
+        }
+      } catch (snapshotError) {
+        console.error('recordSocialComparisonSnapshot falló', snapshotError);
+      }
+    }
 
     const t = await getTranslations('diagnostic.result');
     const tDim = await getTranslations('diagnostic.dimensions');
@@ -56,55 +84,6 @@ export default async function ResultadoPage() {
       high: settings.progressTierHighCutoff
     });
 
-    // Resiliencia queda fuera a propósito (regla CORE #5 — ver
-    // national-benchmark.ts): el estudio de origen no la mide aparte.
-    const BENCHMARK_FIELD_BY_DIMENSION: Record<string, 'control' | 'saving' | 'debt' | 'planning'> = {
-      CONTROL: 'control',
-      SAVING: 'saving',
-      DEBT: 'debt',
-      PLANNING: 'planning'
-    };
-    function buildComparisonRows(comparison: NationalComparison): ComparisonRow[] {
-      return [
-        { code: 'CFHI', label: t('title'), you: cfhiRounded, avg: comparison.overall },
-        ...(methodology?.dimensions ?? [])
-          .filter((d) => d.code in BENCHMARK_FIELD_BY_DIMENSION)
-          .map((d): ComparisonRow | null => {
-            const ds = scoreByDimensionId.get(d.id);
-            const isNA = ds?.state === 'NA';
-            const score = ds && !isNA ? Math.round(ds.score) : null;
-            if (score === null) return null;
-            return { code: d.code, label: tDim(d.code), you: score, avg: comparison[BENCHMARK_FIELD_BY_DIMENSION[d.code]] };
-          })
-          .filter((row): row is ComparisonRow => row !== null)
-      ];
-    }
-    function buildSubtitle(comparison: NationalComparison): string {
-      return comparison.scope === 'COHORT'
-        ? t('comparison.subtitleCohort', { n: comparison.n })
-        : t('comparison.subtitleNational', { n: comparison.n });
-    }
-
-    // Ítem 9 de la auditoría UX: además del comparativo general (cohorte
-    // combinada sexo × edad × situación laboral, o nacional si esa
-    // cohorte es muy chica), el empleado puede elegir UNA variable a la
-    // vez. Una pestaña solo aparece si esa variable puntual tiene datos
-    // (el empleado la respondió y no la declinó) — ver getSegmentComparison.
-    const segmentDefs: { key: ComparisonTab['key']; labelKey: string; comparison: NationalComparison | null }[] = [
-      { key: 'GENERAL', labelKey: 'general', comparison: generalComparison },
-      { key: 'AGE', labelKey: 'age', comparison: ageComparison },
-      { key: 'INCOME', labelKey: 'income', comparison: incomeComparison },
-      { key: 'SEX', labelKey: 'sex', comparison: sexComparison }
-    ];
-    const comparisonTabs: ComparisonTab[] = segmentDefs
-      .filter((def): def is typeof def & { comparison: NationalComparison } => def.comparison !== null)
-      .map((def) => ({
-        key: def.key,
-        label: t(`comparison.tabs.${def.labelKey}`),
-        subtitle: buildSubtitle(def.comparison),
-        rows: buildComparisonRows(def.comparison)
-      }));
-
     return (
       <div className="min-h-screen flex flex-col">
         <EmployeeTopBar />
@@ -115,12 +94,7 @@ export default async function ResultadoPage() {
           </div>
           <div className="lg:max-w-md lg:mx-auto">
             <p className="text-sm font-semibold text-yale mb-2">{t('title')}</p>
-            <ScoreGauge
-              score={cfhiRounded}
-              vsAverage={generalComparison ? cfhiRounded - generalComparison.overall : null}
-              outOfLabel={t('outOf100')}
-              vsAverageLabel={t('comparison.vsAverage')}
-            />
+            <ScoreGauge score={cfhiRounded} vsAverage={null} outOfLabel={t('outOf100')} vsAverageLabel={t('comparison.vsAverage')} />
             <span className="inline-block text-[11px] px-2.5 py-1 rounded-lg bg-picton/10 text-yale mt-2">
               {tLevel('prefix')}: {tLevel(cfhiLevel)}
             </span>
@@ -172,19 +146,6 @@ export default async function ResultadoPage() {
           </div>
 
           <div className="lg:max-w-md lg:mx-auto">
-            {comparisonTabs.length > 0 ? (
-              <SegmentComparison
-                tabs={comparisonTabs}
-                labels={{
-                  title: t('comparison.title'),
-                  you: t('comparison.you'),
-                  average: t('comparison.average'),
-                  vsAverage: t('comparison.vsAverage'),
-                  privacyNote: t('comparison.privacyNote')
-                }}
-              />
-            ) : null}
-
             {showContextBanner ? (
               <div className="mt-6 bg-picton/10 border border-cola/30 rounded-lg p-4 text-left">
                 <p className="text-xs text-nickel mb-2">{t('contextBanner.body')}</p>
@@ -194,12 +155,16 @@ export default async function ResultadoPage() {
               </div>
             ) : null}
 
-            <Link
-              href="/diagnostico/accion"
-              className="block mt-6 text-center bg-yale text-white rounded-lg py-2.5 px-6 text-sm"
-            >
-              {t('ctaNextStep')}
-            </Link>
+            <SocialComparisonCard plan={messagePlan} />
+
+            {!messagePlan.comparison.shown && messagePlan.comparison.reason === 'DISABLED' ? (
+              <Link
+                href="/diagnostico/accion"
+                className="block mt-6 text-center bg-yale text-white rounded-lg py-2.5 px-6 text-sm"
+              >
+                {t('ctaNextStep')}
+              </Link>
+            ) : null}
           </div>
         </div>
         </main>

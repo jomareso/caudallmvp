@@ -126,19 +126,20 @@ model Employee {
   createdAt          DateTime       @default(now())
   lastActiveAt       DateTime?
 
-  tenant                 Tenant                  @relation(fields: [tenantId], references: [id])
-  license                License?                @relation(fields: [licenseId], references: [id])
-  segments               EmployeeSegment[]
-  evidence               Evidence[]
-  variableStates         VariableState[]
-  constructScores        ConstructScore[]
-  dimensionScores        DimensionScore[]
-  financialState         FinancialState?
-  safetyFlags            SafetyFlag[]
-  interventions          EmployeeIntervention[]
-  pushSubscriptions      PushSubscription[]
-  notificationPreference NotificationPreference?
-  notificationLogs       NotificationLog[]
+  tenant                    Tenant                     @relation(fields: [tenantId], references: [id])
+  license                   License?                   @relation(fields: [licenseId], references: [id])
+  segments                  EmployeeSegment[]
+  evidence                  Evidence[]
+  variableStates            VariableState[]
+  constructScores           ConstructScore[]
+  dimensionScores           DimensionScore[]
+  financialState            FinancialState?
+  safetyFlags               SafetyFlag[]
+  interventions             EmployeeIntervention[]
+  pushSubscriptions         PushSubscription[]
+  notificationPreference    NotificationPreference?
+  notificationLogs          NotificationLog[]
+  socialComparisonSnapshots SocialComparisonSnapshot[]
 
   @@unique([tenantId, personalEmail])
   @@index([tenantId])
@@ -239,6 +240,65 @@ enum NotificationType {
   LICENSE_EXPIRING
 }
 
+// Motor de comparación social (CAUDALL — ver docs/decisions.md si se
+// agrega ahí): un snapshot auditable por diagnóstico completado, no una
+// tabla de configuración — igual que EmployeeIntervention es "lo que se
+// decidió mostrar", esta tabla es "qué comparación se calculó y se
+// mostró", para poder estudiar después COMPARACIÓN -> MENSAJE -> CLIC ->
+// COMPROMISO -> ACCIÓN sin recalcular todo desde cero. Ligada por
+// employeeId, sin tenantId propio — mismo patrón de RLS que
+// notification_logs/push_subscriptions (empleado, no tenant, es el límite
+// de acceso real).
+model SocialComparisonSnapshot {
+  id          String   @id @default(cuid())
+  employeeId  String
+  // FinancialState.lastDiagnosticCompletedAt de este diagnóstico — clave de
+  // dedup: no se recalcula ni se reenvía el correo dos veces para la misma
+  // finalización (mismo criterio que NotificationLog.refId para
+  // RESULT_UPDATED).
+  completedAt DateTime
+
+  // Auditoría del grupo comparable (spec: "Registrar internamente: N;
+  // variables utilizadas; variables retiradas; nivel de similitud; fuente
+  // de datos; fecha del cálculo").
+  contextVariablesAnswered String[]
+  contextVariablesOmitted  String[]
+  groupLevel               Int?
+  groupVariablesUsed       String[]
+  groupN                   Int?
+  dataSource               String   @default("LIVE_EMPLOYEES")
+
+  // Snapshot del resultado en el momento del cálculo (puede diferir de
+  // FinancialState si el empleado vuelve a diagnosticarse después).
+  cfhiScore         Float
+  progressTier      String
+  priorityDimension String?
+
+  // La comparación específica mostrada (spec: "normalmente UNA
+  // comparación principal") — la dimensión prioritaria, salvo que no haya
+  // contenido conductual útil para ella.
+  comparisonDimension String?
+  percentile          Int?
+  position            SocialComparisonPosition?
+  shown               Boolean                   @default(false)
+
+  interventionId String?
+  emailSentAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, completedAt])
+  @@index([employeeId])
+  @@map("social_comparison_snapshots")
+}
+
+enum SocialComparisonPosition {
+  SUPERIOR
+  SIMILAR
+  INFERIOR
+}
+
 enum AuthMethod {
   MAGIC_LINK
   GOOGLE_OAUTH
@@ -272,14 +332,14 @@ model EmployeeSegment {
 // FUNCIONAL = equipo de Caudall con un rol específico, no control total
 // (antes los demás roles de PlatformUser) — functionalRole define cuál.
 model AdminUser {
-  id             String           @id @default(cuid())
-  email          String           @unique
-  profileType    AdminProfileType
-  functionalRole FunctionalRole?
-  tenantId       String?
-  active         Boolean          @default(true)
-  createdAt      DateTime         @default(now())
-  lastActiveAt   DateTime?
+  id                       String           @id @default(cuid())
+  email                    String           @unique
+  profileType              AdminProfileType
+  functionalRole           FunctionalRole?
+  tenantId                 String?
+  active                   Boolean          @default(true)
+  createdAt                DateTime         @default(now())
+  lastActiveAt             DateTime?
   // Cooldown para pedir un magic link nuevo (ver
   // src/app/admin/actions.ts, requestAdminMagicLink) — sin esto, no hay
   // ningún límite a cuántos correos se pueden disparar a la bandeja de un
@@ -334,8 +394,8 @@ model PlatformSettings {
   // Tenant.employeeCount (ver src/lib/engines/sample-size.ts). Fracciones
   // 0–1, mismo criterio que highValueThreshold/highValueThresholdSoft más
   // abajo — el admin escribe 0.95, no 95.
-  sampleConfidenceLevel   Float   @default(0.95)
-  sampleMarginOfError     Float   @default(0.05)
+  sampleConfidenceLevel Float @default(0.95)
+  sampleMarginOfError   Float @default(0.05)
 
   // Parámetros del motor de diagnóstico (STOP ENGINE) y de las bandas de
   // nivel — editables desde /admin/metodologia/parametros. Mismo criterio
@@ -352,6 +412,31 @@ model PlatformSettings {
   progressTarget         Int   @default(12)
   progressTierMidCutoff  Int   @default(41)
   progressTierHighCutoff Int   @default(71)
+
+  // Motor de comparación social — editables desde
+  // /admin/metodologia/parametros. La jerarquía de variables del grupo
+  // comparable (spec: "no quiero que quede enterrada en código") vive como
+  // constante auditable en src/lib/engines/social-comparison.ts, no acá:
+  // es una lista ordenada de combinaciones de variables, no un número —
+  // no encaja en el patrón de campo escalar de esta tabla, y una UI para
+  // editarla libremente sería sobreingeniería para el MVP.
+  socialComparisonEnabled        Boolean @default(true)
+  // Umbral N mínimo para comparación individual (pantalla de resultado +
+  // correo post-diagnóstico) — distinto de minCohortSize (usado por el
+  // benchmark nacional 2021-2024, national-benchmark.ts, que sigue
+  // existiendo pero ya no se muestra en resultado).
+  socialComparisonMinN           Int     @default(50)
+  // Umbral N mínimo para mostrar un segmento en el dashboard de RRHH —
+  // distinto de Tenant.aggregationMinSegmentSize (el umbral general del
+  // dashboard, default 5): un segmento demográfico dentro de un tenant ya
+  // filtrado necesita un piso más alto para no poder deducirse quién es
+  // quién combinando filtros sucesivos.
+  socialComparisonMinNRRHH       Int     @default(20)
+  // Percentil >= este valor => posición "Superior"; <= inferiorCutoff =>
+  // "Inferior"; entre los dos => "Similar". Hipótesis inicial del MVP
+  // (spec §9), no un corte validado científicamente todavía.
+  socialComparisonSuperiorCutoff Int     @default(60)
+  socialComparisonInferiorCutoff Int     @default(40)
 
   updatedAt DateTime @updatedAt
 

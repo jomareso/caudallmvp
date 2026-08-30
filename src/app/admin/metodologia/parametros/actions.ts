@@ -18,7 +18,13 @@ const diagnosticParametersSchema = z.object({
   highValueThresholdSoft: z.coerce.number().min(0).max(1),
   progressTarget: z.coerce.number().int().min(1).max(200),
   progressTierMidCutoff: z.coerce.number().int().min(0).max(100),
-  progressTierHighCutoff: z.coerce.number().int().min(0).max(100)
+  progressTierHighCutoff: z.coerce.number().int().min(0).max(100),
+  // Motor de Comparación Social — ver src/lib/engines/social-comparison.ts.
+  socialComparisonEnabled: z.boolean(),
+  socialComparisonMinN: z.coerce.number().int().min(1).max(10000),
+  socialComparisonMinNRRHH: z.coerce.number().int().min(1).max(10000),
+  socialComparisonSuperiorCutoff: z.coerce.number().int().min(0).max(100),
+  socialComparisonInferiorCutoff: z.coerce.number().int().min(0).max(100)
 });
 
 export async function updateDiagnosticParameters(
@@ -45,6 +51,9 @@ export async function updateDiagnosticParameters(
   if (data.progressTierMidCutoff >= data.progressTierHighCutoff) {
     return { ok: false, message: t('errorTierOrder') };
   }
+  if (data.socialComparisonInferiorCutoff >= data.socialComparisonSuperiorCutoff) {
+    return { ok: false, message: t('errorSocialComparisonCutoffOrder') };
+  }
 
   const previous = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } });
 
@@ -70,7 +79,12 @@ export async function updateDiagnosticParameters(
             highValueThresholdSoft: previous.highValueThresholdSoft,
             progressTarget: previous.progressTarget,
             progressTierMidCutoff: previous.progressTierMidCutoff,
-            progressTierHighCutoff: previous.progressTierHighCutoff
+            progressTierHighCutoff: previous.progressTierHighCutoff,
+            socialComparisonEnabled: previous.socialComparisonEnabled,
+            socialComparisonMinN: previous.socialComparisonMinN,
+            socialComparisonMinNRRHH: previous.socialComparisonMinNRRHH,
+            socialComparisonSuperiorCutoff: previous.socialComparisonSuperiorCutoff,
+            socialComparisonInferiorCutoff: previous.socialComparisonInferiorCutoff
           }
         : undefined,
       newValue: data
@@ -78,6 +92,7 @@ export async function updateDiagnosticParameters(
   });
 
   revalidatePath('/diagnostico');
+  revalidatePath('/diagnostico/resultado');
   revalidatePath('/admin/metodologia/parametros');
   return { ok: true };
 }
