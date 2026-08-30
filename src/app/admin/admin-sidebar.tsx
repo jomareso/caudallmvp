@@ -12,7 +12,6 @@ export type AdminNavGroup = {
 };
 
 type AdminSidebarProps = {
-  hasLogo: boolean;
   homeHref: Route;
   roleLabel: string;
   tenantLabel: string;
@@ -27,7 +26,7 @@ type AdminSidebarProps = {
 // cambio). 'use client' porque necesita usePathname() para el estado
 // activo del link actual — no hay forma de saberlo en un Server Component
 // sin pasar la ruta actual a mano desde cada página.
-export function AdminSidebar({ hasLogo, homeHref, roleLabel, tenantLabel, navGroups, logoutLabel }: AdminSidebarProps) {
+export function AdminSidebar({ homeHref, roleLabel, tenantLabel, navGroups, logoutLabel }: AdminSidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -38,12 +37,12 @@ export function AdminSidebar({ hasLogo, homeHref, roleLabel, tenantLabel, navGro
     // navegación siempre alcanzable.
     <aside className="hidden lg:flex lg:w-56 lg:shrink-0 lg:flex-col bg-sidebar text-white px-3.5 py-5 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
       <Link href={homeHref} className="flex items-center gap-2 px-1.5 pb-5">
-        {hasLogo ? (
-          // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-          <img src="/api/branding/logo" alt="Caudall" className="h-7 brightness-0 invert" />
-        ) : (
-          <span className="text-lg font-semibold">caudall</span>
-        )}
+        {/* brightness-0 invert: fuerza el logo (el de Caudall por defecto,
+            o el que se haya subido en Configuración) a un silueta blanco
+            sólido — necesario acá porque el fondo es oscuro, sin importar
+            los colores reales del archivo. */}
+        {/* eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable */}
+        <img src="/api/branding/logo" alt="Caudall" className="h-7 brightness-0 invert" />
         <span className="w-1 h-1 rounded-full bg-white/30" />
         <span className="text-[11px] text-white/55">{roleLabel}</span>
       </Link>

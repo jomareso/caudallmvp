@@ -31,12 +31,12 @@ const config: Config = {
         // Fondo del sidebar de /admin (ver admin-sidebar.tsx) — no
         // overridable por tenant (a diferencia de 'yale'): es el panel
         // interno de Caudall/RRHH, no una pantalla de marca del empleado.
-        // hsl(210, 70%, 16%): mismo tono (210°) que 'yale' (#0F5499 ≈
-        // hsl(210, 82%, 33%)), solo oscurecido — no un navy genérico sin
-        // relación con la marca (el valor original, #14213A, tomado tal
-        // cual del mockup, se veía negro/gris en vez de "azul Caudall
-        // oscuro").
-        'sidebar': '#0C2945'
+        // Mismo azul que 'yale' (#0F5499), fijo en vez de la variable CSS
+        // de 'yale' — es el azul real de marca (ver el degradé
+        // from-yale-to-cola de brand-panel.tsx/página de acceso), no un
+        // navy oscurecido sin relación visual con el resto del producto
+        // (el valor anterior, #0C2945, se veía casi negro).
+        'sidebar': '#0F5499'
       },
       fontFamily: {
         sans: ['-apple-system', 'BlinkMacSystemFont', 'Helvetica Neue', 'Arial', 'sans-serif']

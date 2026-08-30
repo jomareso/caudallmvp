@@ -9,7 +9,6 @@ import type { AdminNavGroup } from './admin-sidebar';
 import { AdminNavIcon } from './admin-nav-icons';
 
 type AdminMobileNavProps = {
-  hasLogo: boolean;
   homeHref: Route;
   navGroups: AdminNavGroup[];
   logoutLabel: string;
@@ -22,7 +21,7 @@ type AdminMobileNavProps = {
 // /admin mostraba la misma barra lateral y contenido de escritorio
 // achicados a la fuerza — esto le da a móvil su propio patrón (topbar +
 // menú desplegable), como cualquier app real.
-export function AdminMobileNav({ hasLogo, homeHref, navGroups, logoutLabel, openLabel, closeLabel }: AdminMobileNavProps) {
+export function AdminMobileNav({ homeHref, navGroups, logoutLabel, openLabel, closeLabel }: AdminMobileNavProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -37,12 +36,8 @@ export function AdminMobileNav({ hasLogo, homeHref, navGroups, logoutLabel, open
     <div className="lg:hidden border-b border-silver/60">
       <div className="px-4 py-3 flex items-center justify-between">
         <Link href={homeHref} className="flex items-center">
-          {hasLogo ? (
-            // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-            <img src="/api/branding/logo" alt="Caudall" className="h-8 mix-blend-multiply" />
-          ) : (
-            <span className="text-lg font-medium text-yale">caudall</span>
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable */}
+          <img src="/api/branding/logo" alt="Caudall" className="h-8 mix-blend-multiply" />
         </Link>
         <button
           type="button"

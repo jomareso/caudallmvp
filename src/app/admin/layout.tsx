@@ -35,10 +35,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   // corta al empleado.
   if (!admin.active || admin.tenant?.status === 'SUSPENDED') redirect('/admin');
 
-  // platform_settings es un singleton global sin tenantId — no lleva RLS,
-  // así que no necesita ningún contexto fijado para leerse.
-  const settings = await prisma.platformSettings.findUnique({ where: { id: 'singleton' } });
-  const hasLogo = Boolean(settings?.logoData);
   const t = await getTranslations('admin.nav');
   const tVersion = await getTranslations('admin.version');
 
@@ -105,7 +101,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   return (
     <div className="min-h-screen lg:flex">
       <AdminSidebar
-        hasLogo={hasLogo}
         homeHref={homeHref}
         roleLabel={roleLabel}
         tenantLabel={tenantLabel}
@@ -115,7 +110,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
       <div className="flex-1 min-w-0 flex flex-col">
         <AdminMobileNav
-          hasLogo={hasLogo}
           homeHref={homeHref}
           navGroups={navGroups}
           logoutLabel={t('logout')}

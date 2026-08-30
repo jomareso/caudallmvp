@@ -4,23 +4,17 @@ import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { requestAdminMagicLink } from './actions';
 
-function AdminLogo({ hasLogo }: { hasLogo: boolean }) {
-  // Mismo logo (o mismo fallback de texto) que AdminLayout muestra una vez
-  // logueado — antes esta pantalla ignoraba el logo real subido y, encima,
-  // el estado "sent" ni siquiera tenía el texto "caudall", así que la
-  // identidad de marca cambiaba de una pantalla a otra dentro del mismo
-  // flujo de login. h-14 tiene que calzar con el h-14 de AdminLayout — es
-  // el mismo logo, mostrado en el mismo rol de "marca de entrada", solo
-  // que antes de loguearse en vez de después.
-  return hasLogo ? (
+function AdminLogo() {
+  // Mismo logo que AdminLayout muestra una vez logueado — h-14 tiene que
+  // calzar con el h-14 de ahí: es el mismo logo, mostrado en el mismo rol
+  // de "marca de entrada", solo que antes de loguearse en vez de después.
+  return (
     // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
     <img src="/api/branding/logo" alt="Caudall" className="h-14 mx-auto mb-3 mix-blend-multiply" />
-  ) : (
-    <h1 className="text-2xl font-medium text-yale mb-1">caudall</h1>
   );
 }
 
-export function AdminLoginForm({ hasLogo }: { hasLogo: boolean }) {
+export function AdminLoginForm() {
   const t = useTranslations('admin.login');
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +39,7 @@ export function AdminLoginForm({ hasLogo }: { hasLogo: boolean }) {
     return (
       <main className="min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-sm text-center">
-          <AdminLogo hasLogo={hasLogo} />
+          <AdminLogo />
           <h2 className="text-lg font-medium text-quartz mb-2">{t('sentTitle')}</h2>
           <p className="text-sm text-nickel">{t('sentBody')}</p>
         </div>
@@ -56,7 +50,7 @@ export function AdminLoginForm({ hasLogo }: { hasLogo: boolean }) {
   return (
     <main className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-sm text-center">
-        <AdminLogo hasLogo={hasLogo} />
+        <AdminLogo />
         <p className="text-nickel text-sm mb-8">{t('subtitle')}</p>
 
         <form onSubmit={handleSubmit} className="bg-white border border-silver/60 rounded-xl p-6 text-left">
