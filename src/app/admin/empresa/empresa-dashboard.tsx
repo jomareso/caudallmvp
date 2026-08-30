@@ -134,13 +134,22 @@ export async function EmpresaDashboard({
     if (aggregates.status === 'INSUFFICIENT_ANONYMITY') {
       return (
         <main className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-sm text-center">
+          {/* max-w-sm en mobile, lg:max-w-2xl en escritorio (no max-w-sm
+              fijo): este branch (tenant nuevo/chico, todavía sin
+              suficientes empleados para el umbral de anonimato) se había
+              quedado angosto cuando el resto del dashboard de RRHH, más
+              abajo en este mismo archivo, ya tiene su propio ancho real
+              — sobraba mucho espacio a los lados en cualquier monitor de
+              escritorio. Texto más grande en lg+ por el mismo motivo. */}
+          <div className="w-full max-w-sm lg:max-w-2xl text-center">
             {banner}
-            <h1 className="text-lg font-medium text-quartz mb-6">{t('title', { tenantName: tenant.name })}</h1>
-            {completionCard}
-            {licenseCard}
-            <h2 className="text-base font-medium text-quartz mb-2">{t('insufficientTitle')}</h2>
-            <p className="text-sm text-nickel">
+            <h1 className="text-lg lg:text-2xl font-medium text-quartz mb-6">{t('title', { tenantName: tenant.name })}</h1>
+            <div className="lg:grid lg:grid-cols-2 lg:gap-4">
+              {completionCard}
+              {licenseCard}
+            </div>
+            <h2 className="text-base lg:text-xl font-medium text-quartz mb-2">{t('insufficientTitle')}</h2>
+            <p className="text-sm lg:text-base text-nickel">
               {t('insufficientBody', { minRequired: aggregates.minRequired, count: aggregates.employeeCount })}
             </p>
           </div>

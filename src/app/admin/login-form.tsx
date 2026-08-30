@@ -41,14 +41,14 @@ export function AdminLoginForm() {
   if (sent) {
     return (
       <main className="min-h-screen flex items-center justify-center p-6">
-        {/* max-w-md, text-2xl/text-base (no max-w-sm, text-lg/text-sm): esta
+        {/* max-w-lg, text-3xl/text-lg (no max-w-sm, text-lg/text-sm): esta
             pantalla es una tarjeta sola, centrada en toda la altura de la
             ventana, sin nada más al lado — en un monitor de escritorio le
             sobraba espacio en blanco alrededor de un mensaje chico. */}
-        <div className="w-full max-w-md text-center">
+        <div className="w-full max-w-lg text-center">
           <AdminLogo />
-          <h2 className="text-2xl font-medium text-quartz mb-3">{t('sentTitle')}</h2>
-          <p className="text-base text-nickel">{t('sentBody')}</p>
+          <h2 className="text-3xl font-medium text-quartz mb-3">{t('sentTitle')}</h2>
+          <p className="text-lg text-nickel">{t('sentBody')}</p>
         </div>
       </main>
     );
@@ -56,12 +56,12 @@ export function AdminLoginForm() {
 
   return (
     <main className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-md text-center">
+      <div className="w-full max-w-lg text-center">
         <AdminLogo />
-        <p className="text-nickel text-base mb-8">{t('subtitle')}</p>
+        <p className="text-nickel text-lg mb-8">{t('subtitle')}</p>
 
         <form onSubmit={handleSubmit} className="bg-white border border-silver/60 rounded-xl p-6 text-left">
-          <label htmlFor="email" className="block text-xs text-nickel mb-1">
+          <label htmlFor="email" className="block text-sm text-nickel mb-1">
             {t('emailLabel')}
           </label>
           <input
@@ -70,15 +70,15 @@ export function AdminLoginForm() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder={t('emailPlaceholder')}
-            className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-3 focus:outline-none focus:border-cola"
+            className="w-full border border-silver rounded-lg px-3 py-2.5 text-base text-quartz mb-3 focus:outline-none focus:border-cola"
           />
 
-          {error ? <p className="text-xs text-bad mb-3">{error}</p> : null}
+          {error ? <p className="text-sm text-bad mb-3">{error}</p> : null}
 
           <button
             type="submit"
             disabled={isPending}
-            className="w-full bg-yale text-white rounded-lg py-2.5 text-sm disabled:opacity-60"
+            className="w-full bg-yale text-white rounded-lg py-2.5 text-base disabled:opacity-60"
           >
             {isPending ? t('sending') : t('ctaSendLink')}
           </button>
