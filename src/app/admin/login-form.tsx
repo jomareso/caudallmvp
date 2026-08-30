@@ -5,15 +5,14 @@ import { useTranslations } from 'next-intl';
 import { requestAdminMagicLink } from './actions';
 
 function AdminLogo() {
-  // h-10: un poco más grande que el logo "de marca de entrada" del resto
-  // del producto (h-8 en BrandPanel/landing-form.tsx) — esta pantalla es
-  // una tarjeta corta centrada sola en toda la altura de la ventana, así
-  // que le sobra espacio en blanco alrededor en cualquier monitor de
-  // escritorio (mismo criterio que el resto de las pantallas de
-  // confirmación de un solo mensaje, ver registro/enviado y afines).
+  // h-8: mismo tamaño que el logo "de marca de entrada" del resto del
+  // producto (BrandPanel/landing-form.tsx) — antes esta pantalla usaba
+  // h-10 a propósito ("un poco más grande"), pero eso la dejaba
+  // inconsistente con el resto de pantallas de un solo mensaje
+  // (registro/enviado y afines), que si usan h-8.
   return (
     // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-    <img src="/api/branding/logo" alt="Caudall" className="h-10 mx-auto mb-4 mix-blend-multiply" />
+    <img src="/api/branding/logo" alt="Caudall" className="h-8 mx-auto mb-4 mix-blend-multiply" />
   );
 }
 

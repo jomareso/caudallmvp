@@ -21,19 +21,14 @@ export async function SocialComparisonCard({ plan }: { plan: PostDiagnosticMessa
     ? t(`reinforcement.${tier}.${comparison.position}`, { dimension: dimensionLabel })
     : t(`noData.${tier}`, { dimension: dimensionLabel });
 
-  const statLine =
-    comparison.shown && comparison.includeNumericComparison
-      ? t(comparison.position === 'SUPERIOR' ? 'statSuperior' : 'statSimilar', {
-          dimension: dimensionLabel,
-          percentile: comparison.percentile
-        })
-      : null;
-
+  // El percentil/posición ya se muestra como una tarjeta grande junto al
+  // gauge del CFHI (ver resultado/page.tsx) — repetirlo acá abajo, más
+  // chico, sería redundante. Esta tarjeta se queda solo con el REFUERZO
+  // cualitativo y el PRÓXIMO PASO/CTA.
   return (
     <div className="mt-6 bg-white border border-silver/60 rounded-xl p-4 text-left">
       <p className="text-xs font-semibold text-yale mb-2">{t('title')}</p>
       <p className="text-sm text-quartz leading-relaxed">{reinforcement}</p>
-      {statLine ? <p className="text-xs text-nickel leading-relaxed mt-2">{statLine}</p> : null}
 
       {action ? (
         <div className="mt-4 pt-4 border-t border-silver/40">

@@ -44,19 +44,29 @@ export default async function ResultadoPage() {
 
     // Motor de Comparación Social + notificación por correo (spec 30
     // secciones, confirmado con Reynoso — reemplaza al benchmark nacional
-    // gateado por CTX-07, retirado del banco activo). Dedup por
-    // (employeeId, completedAt): en visitas posteriores a la misma
-    // finalización, el snapshot ya existe y no se reenvía el correo. Todo
-    // el bloque va en try/catch — un fallo acá (ej. Resend caído) nunca
-    // debe romper el render del resultado.
+    // gateado por CTX-07, retirado del banco activo). El snapshot de
+    // auditoría (N, nivel, posición) se escribe una sola vez por
+    // (employeeId, completedAt) — eso sí debe ser idempotente. El envío del
+    // correo es una condición APARTE (emailSentAt), no "¿ya existe el
+    // snapshot?": antes ambas cosas compartían el mismo dedup, así que un
+    // primer intento de correo fallido (ej. Resend caído o mal configurado)
+    // dejaba el snapshot creado con emailSentAt=null para siempre — ninguna
+    // visita futura lo volvía a intentar. Ahora se reintenta en cada visita
+    // mientras emailSentAt siga vacío. Todo el bloque va en try/catch — un
+    // fallo acá nunca debe romper el render del resultado.
     if (financialState.lastDiagnosticCompletedAt) {
       const completedAt = financialState.lastDiagnosticCompletedAt;
       try {
-        const existingSnapshot = await prisma.socialComparisonSnapshot.findUnique({
+        let snapshot = await prisma.socialComparisonSnapshot.findUnique({
           where: { employeeId_completedAt: { employeeId, completedAt } }
         });
-        if (!existingSnapshot) {
+        if (!snapshot) {
           await recordSocialComparisonSnapshot(employeeId, completedAt, messagePlan.comparison);
+          snapshot = await prisma.socialComparisonSnapshot.findUnique({
+            where: { employeeId_completedAt: { employeeId, completedAt } }
+          });
+        }
+        if (snapshot && !snapshot.emailSentAt) {
           try {
             await sendDiagnosticResultEmail({ to: employee.personalEmail, employeeId, plan: messagePlan });
             await prisma.socialComparisonSnapshot.update({
@@ -76,6 +86,7 @@ export default async function ResultadoPage() {
     const tDim = await getTranslations('diagnostic.dimensions');
     const tLevel = await getTranslations('diagnostic.result.levels');
     const tInterpretation = await getTranslations('diagnostic.result.interpretation');
+    const tSocial = await getTranslations('diagnostic.result.socialComparison');
 
     const cfhiRounded = Math.round(financialState.cfhiScore);
     const cfhiBand = scoreToDimensionState(cfhiRounded);
@@ -83,6 +94,32 @@ export default async function ResultadoPage() {
       mid: settings.progressTierMidCutoff,
       high: settings.progressTierHighCutoff
     });
+
+    // Percentil/posición del Motor de Comparación Social, mostrado junto al
+    // índice (no dentro del ScoreGauge: el gauge es del CFHI general, esto
+    // compara la dimensión prioritaria — mezclarlos en el mismo número
+    // sería engañoso). Nunca se muestra en INFERIOR
+    // (comparison.includeNumericComparison ya resuelve esa regla en el
+    // motor — ver social-comparison.ts) ni sin datos suficientes.
+    const { comparison } = messagePlan;
+    const comparisonBadge =
+      comparison.shown && comparison.includeNumericComparison && comparison.priorityDimension
+        ? {
+            text: tSocial(comparison.position === 'SUPERIOR' ? 'statSuperior' : 'statSimilar', {
+              dimension: tDim(comparison.priorityDimension),
+              percentile: comparison.percentile
+            }),
+            className:
+              comparison.position === 'SUPERIOR' ? 'bg-ok/10 text-ok' : 'bg-picton/10 text-yale'
+          }
+        : null;
+
+    const CFHI_BAND_CLASS: Record<string, string> = {
+      CRITICAL: 'bg-bad/10 text-bad',
+      UNMET: 'bg-warn/10 text-warn',
+      PARTIAL: 'bg-warn/10 text-warn',
+      MET: 'bg-ok/10 text-ok'
+    };
 
     return (
       <div className="min-h-screen flex flex-col">
@@ -99,7 +136,13 @@ export default async function ResultadoPage() {
               {tLevel('prefix')}: {tLevel(cfhiLevel)}
             </span>
 
-            <p className="text-xs text-nickel text-left mt-3 leading-relaxed">
+            {comparisonBadge ? (
+              <p className={`text-sm font-medium rounded-xl px-4 py-3 mt-3 leading-snug ${comparisonBadge.className}`}>
+                {comparisonBadge.text}
+              </p>
+            ) : null}
+
+            <p className={`text-sm text-left mt-3 leading-relaxed rounded-xl px-4 py-3 ${CFHI_BAND_CLASS[cfhiBand]}`}>
               {tInterpretation(`cfhi.${cfhiBand}`)}
             </p>
           </div>

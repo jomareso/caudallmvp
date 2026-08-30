@@ -30,8 +30,10 @@ export function ContextFlow({
   if (!started) {
     return (
       <div className="bg-white border border-silver/60 rounded-xl p-6 text-center">
-        <p className="text-xs text-nickel mb-2">{labels.eyebrow}</p>
-        <h1 className="text-lg font-medium text-quartz mb-3">{labels.title}</h1>
+        <span className="inline-block text-[11px] font-medium px-2.5 py-1 rounded-lg bg-picton/10 text-yale mb-3">
+          {labels.eyebrow}
+        </span>
+        <h1 className="text-xl font-semibold text-yale mb-3">{labels.title}</h1>
         <p className="text-sm text-nickel mb-6">{labels.body}</p>
         <button
           type="button"

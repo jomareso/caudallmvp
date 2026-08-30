@@ -3512,8 +3512,7 @@
       "rawType": "CONTEXT",
       "states": [
         "FEMALE",
-        "MALE",
-        "DECLINED"
+        "MALE"
       ],
       "affectsCfhiNote": "NO_CFHI",
       "description": "Completada automáticamente desde las opciones de CTX-08."
@@ -28649,7 +28648,7 @@
         },
         {
           "order": 5,
-          "text": "Posgrado",
+          "text": "Postgrado/Maestría",
           "state": "EDU_POSTGRAD",
           "score": null,
           "secondaryUpdates": "CTX_EDUCATION_LEVEL=EDU_POSTGRAD",
@@ -28769,16 +28768,6 @@
           "state": "MALE",
           "score": null,
           "secondaryUpdates": "CTX_SEX=MALE",
-          "friction": null,
-          "nextCandidates": "CTX-02",
-          "notes": "Uso secundario, no afecta el CFHI."
-        },
-        {
-          "order": 3,
-          "text": "Prefiero no responder",
-          "state": "DECLINED",
-          "score": null,
-          "secondaryUpdates": null,
           "friction": null,
           "nextCandidates": "CTX-02",
           "notes": "Uso secundario, no afecta el CFHI."
