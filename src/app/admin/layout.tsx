@@ -76,18 +76,18 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           {
             label: t('groupPlatform'),
             items: [
-              { href: '/admin/configuracion', label: t('settings'), icon: '⚙️' },
-              { href: '/admin/contenido', label: t('content'), icon: '📄' },
-              { href: '/admin/metodologia', label: t('methodology'), icon: '🧭' }
+              { href: '/admin/configuracion', label: t('settings'), icon: 'settings' },
+              { href: '/admin/contenido', label: t('content'), icon: 'content' },
+              { href: '/admin/metodologia', label: t('methodology'), icon: 'methodology' }
             ]
           },
           {
             label: t('groupAccounts'),
             items: [
-              { href: '/admin/empresas', label: t('companies'), icon: '🏢' },
-              { href: '/admin/administradores', label: t('admins'), icon: '🛡️' },
-              { href: '/admin/empleados', label: t('employees'), icon: '👤' },
-              { href: '/admin/notificaciones', label: t('notifications'), icon: '🔔' }
+              { href: '/admin/empresas', label: t('companies'), icon: 'companies' },
+              { href: '/admin/administradores', label: t('admins'), icon: 'admins' },
+              { href: '/admin/empleados', label: t('employees'), icon: 'employees' },
+              { href: '/admin/notificaciones', label: t('notifications'), icon: 'notifications' }
             ]
           }
         ]

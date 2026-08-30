@@ -6,6 +6,7 @@ import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import { LogoutButton } from './logout-button';
 import type { AdminNavGroup } from './admin-sidebar';
+import { AdminNavIcon } from './admin-nav-icons';
 
 type AdminMobileNavProps = {
   hasLogo: boolean;
@@ -73,16 +74,15 @@ export function AdminMobileNav({ hasLogo, homeHref, navGroups, logoutLabel, open
                       active ? 'bg-picton/10 text-yale font-medium' : 'text-quartz'
                     }`}
                   >
-                    <span className="w-4 text-center text-sm shrink-0" aria-hidden>
-                      {item.icon}
-                    </span>
+                    <AdminNavIcon name={item.icon} className="w-4 h-4 shrink-0" />
                     {item.label}
                   </Link>
                 );
               })}
             </div>
           ))}
-          <div className="border-t border-silver/40 mt-2 pt-3 px-2.5">
+          <div className="border-t border-silver/40 mt-2 pt-3 px-2.5 flex items-center gap-2">
+            <AdminNavIcon name="logout" className="w-4 h-4 shrink-0 text-nickel" />
             <LogoutButton label={logoutLabel} className="text-sm text-nickel hover:text-yale disabled:opacity-60" />
           </div>
         </nav>
