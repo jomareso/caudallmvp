@@ -131,6 +131,11 @@ El scoring NO suma preguntas directamente.
 Debe seguir:
 Respuesta → Evidence → Variable → Constructo → Dimensión → CFHI
 
+Mecanismo de conversión (Variable → Constructo → Dimensión → CFHI):
+Cada opción de respuesta de una pregunta de tipo SCORE trae su propio puntaje (0-100), asignado por quien diseña el contenido según qué tan saludable es esa elección — no una fórmula derivada del enum. Ese puntaje viaja con la Evidence hasta el VariableState. Una variable de contexto o de gating (ej. DEBT_APPLICABILITY) no trae puntaje: solo abre o cierra ramas, nunca puntúa.
+Constructo, Dimensión y CFHI se calculan los tres con la misma función: promedio ponderado de sus entradas, excluyendo cualquiera sin dato o en N/A. Cuando una entrada queda excluida, su peso no se pierde ni se reparte con una fórmula aparte: el promedio se recalcula solo sobre el peso de lo que sí quedó, así que la redistribución es automáticamente proporcional (mismo mecanismo que excluye a Deuda N/A del CFHI, sección 12). Nunca hay una entrada tratada como 0 ni como 100 por estar ausente o no aplicar.
+La Confidence de un Constructo/Dimensión es el promedio simple de la confidence de sus entradas directas — no se pondera por el mismo peso que el score, es una señal aparte de "cuánta evidencia hay", no de "qué tan bien le va".
+
 Constructos iniciales:
 
 CONTROL
