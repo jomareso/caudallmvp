@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/db/prisma';
 import { requireAdm } from '@/lib/auth/admin-context';
@@ -32,15 +33,26 @@ export default async function AdminMetodologiaPage() {
       }).format(lastSync.when)
     : null;
 
+  const navCards: { href: Route; label: string; description: string }[] = [
+    { href: '/admin/metodologia/contenido', label: t('viewContentLink'), description: t('viewContentDescription') },
+    { href: '/admin/metodologia/reglas', label: t('viewRulesLink'), description: t('viewRulesDescription') },
+    { href: '/admin/metodologia/parametros', label: t('viewParametersLink'), description: t('viewParametersDescription') },
+    { href: '/admin/metodologia/conductual', label: t('viewBehavioralLink'), description: t('viewBehavioralDescription') }
+  ];
+
   return (
     <main className="flex-1 p-6 lg:p-8">
-      {/* max-w-md (no max-w-sm): consistencia con el resto de /admin ya
-          migrado — es un resumen corto de una tarjeta + 4 links, no se
-          beneficia de mucho más ancho (mismo criterio que Empleados). */}
-      <div className="w-full max-w-md">
+      {/* max-w-5xl (no max-w-md): la tarjeta única de antes dejaba casi
+          toda la pantalla en blanco en escritorio — el banco de preguntas
+          y los 4 links a las demás sub-páginas ahora se reparten en dos
+          bloques que sí usan el ancho real al lado del sidebar. */}
+      <div className="w-full max-w-5xl">
         <h1 className="text-lg font-medium text-quartz mb-6">{t('title')}</h1>
 
-        <div className="bg-white border border-silver/60 rounded-xl p-6">
+        {/* max-w-2xl (no todo el ancho de la página): es texto + un botón,
+            no una tabla — estirarlo a 5xl completo dejaría las líneas de
+            texto incómodamente largas para leer. */}
+        <div className="max-w-2xl bg-white border border-silver/60 rounded-xl p-6 mb-6">
           <p className="text-xs text-nickel mb-1">
             {t('currentVersion')}: <span className="text-quartz font-medium">{methodology?.version ?? '—'}</span>
             {questionBank ? ` (${questionBank.version})` : ''}
@@ -68,19 +80,24 @@ export default async function AdminMetodologiaPage() {
               error: t('syncError')
             }}
           />
+        </div>
 
-          <Link href="/admin/metodologia/contenido" className="block mt-4 text-xs text-yale underline">
-            {t('viewContentLink')}
-          </Link>
-          <Link href="/admin/metodologia/reglas" className="block mt-1 text-xs text-yale underline">
-            {t('viewRulesLink')}
-          </Link>
-          <Link href="/admin/metodologia/parametros" className="block mt-1 text-xs text-yale underline">
-            {t('viewParametersLink')}
-          </Link>
-          <Link href="/admin/metodologia/conductual" className="block mt-1 text-xs text-yale underline">
-            {t('viewBehavioralLink')}
-          </Link>
+        {/* Los 4 links de antes (una lista subrayada apretada dentro de la
+            misma tarjeta) pasan a tarjetas de navegación reales, en grilla
+            de 2 columnas — mismo tratamiento de "tarjeta clickeable" que
+            el resto de /admin ya rediseñado, y usan el resto del ancho
+            disponible en vez de una lista de una sola línea cada una. */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {navCards.map((card) => (
+            <Link
+              key={card.href}
+              href={card.href}
+              className="block bg-white border border-silver/60 rounded-xl p-5 hover:border-cola transition-colors"
+            >
+              <p className="text-sm font-medium text-yale mb-1">{card.label}</p>
+              <p className="text-xs text-nickel">{card.description}</p>
+            </Link>
+          ))}
         </div>
       </div>
     </main>
