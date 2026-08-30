@@ -1,14 +1,18 @@
 import type { ReactNode } from 'react';
-import Link from 'next/link';
+import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/lib/auth/auth';
 import { prisma } from '@/lib/db/prisma';
-import { LogoutButton } from './logout-button';
 import { runWithTenantContext } from '@/lib/db/prisma';
+import { AdminSidebar, type AdminNavGroup } from './admin-sidebar';
+import { AdminMobileNav } from './admin-mobile-nav';
 
-// Decisión 7: admin es desktop-only, así que este layout no necesita
-// adaptarse a mobile — a diferencia del resto de la app.
+// ADR-007 (actualizado): admin es desktop-first, pero funcional en
+// móvil, no bloqueado — por eso este layout arma AMBOS: AdminSidebar
+// para escritorio (lg y más ancho) y AdminMobileNav para el resto,
+// mutuamente excluyentes por Tailwind (hidden lg:flex / lg:hidden), no
+// una sola versión encogida a la fuerza para la otra.
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await auth();
   // Ver src/lib/auth/auth.ts sobre por qué el cast local.
@@ -53,84 +57,80 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   };
   const contextLabel = tVersion(`context.${CONTEXT_KEY[deployContext] ?? 'local'}`);
 
+  const homeHref: Route =
+    admin.profileType === 'ADM'
+      ? '/admin/configuracion'
+      : admin.profileType === 'EMPRESA'
+        ? '/admin/empresa'
+        : '/admin/funcional';
+
+  // Solo ADM tiene más de una página bajo su rol — EMPRESA (RRHH) y
+  // FUNCIONAL hoy son cada uno una sola pantalla (ver admin/empresa y
+  // admin/funcional), así que no hay nada real que listar en su nav
+  // todavía. Grupos (no una lista plana) porque 7 links de ADM en una
+  // sola columna sin separación es difícil de escanear — mismo criterio
+  // del mockup de rediseño (task #47).
+  const navGroups: AdminNavGroup[] =
+    admin.profileType === 'ADM'
+      ? [
+          {
+            label: t('groupPlatform'),
+            items: [
+              { href: '/admin/configuracion', label: t('settings'), icon: '⚙️' },
+              { href: '/admin/contenido', label: t('content'), icon: '📄' },
+              { href: '/admin/metodologia', label: t('methodology'), icon: '🧭' }
+            ]
+          },
+          {
+            label: t('groupAccounts'),
+            items: [
+              { href: '/admin/empresas', label: t('companies'), icon: '🏢' },
+              { href: '/admin/administradores', label: t('admins'), icon: '🛡️' },
+              { href: '/admin/empleados', label: t('employees'), icon: '👤' },
+              { href: '/admin/notificaciones', label: t('notifications'), icon: '🔔' }
+            ]
+          }
+        ]
+      : [];
+
+  const roleLabel =
+    admin.profileType === 'ADM' ? t('platformRole') : admin.profileType === 'EMPRESA' ? t('tenantRole') : t('functionalRole');
+  const tenantLabel = admin.profileType === 'EMPRESA' ? (admin.tenant?.name ?? '') : t('platformTenantLabel');
+
   // Nota: este layout NO envuelve `children` en runWithTenantContext — ese
   // contexto no se propaga a la Page anidada en Next.js App Router (cada
   // segmento de ruta corre en su propio tramo async). Cada page.tsx/
   // actions.ts bajo /admin resuelve su propio contexto vía
   // src/lib/auth/admin-context.ts (requireAdmin/requireAdminWithContext).
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b border-silver/60 shrink-0">
-        {/* max-w-5xl (no 3xl): con 7 links + "Cerrar sesión" para ADM, un
-            contenedor de 768px hacía que el nav se encimara con el logo en
-            vez de tener espacio — encontrado probando /admin/empleados,
-            el link que lo hizo desbordar. flex-wrap como red de seguridad
-            si en el futuro se agrega otro link más. */}
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between flex-wrap gap-y-2">
-          <Link
-            href={
-              admin.profileType === 'ADM'
-                ? '/admin/configuracion'
-                : admin.profileType === 'EMPRESA'
-                  ? '/admin/empresa'
-                  : '/admin/funcional'
-            }
-            className="flex items-center"
-          >
-            {hasLogo ? (
-              // h-14: mismo tamaño que el logo en la pantalla de login
-              // (login-form.tsx) — antes este header lo mostraba a h-20
-              // (80px) mientras que login usaba h-14 (56px), mismo archivo
-              // en dos tamaños distintos según la pantalla.
-              // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-              <img
-                src="/api/branding/logo"
-                alt="Caudall"
-                className="h-14 mix-blend-multiply"
-              />
-            ) : (
-              <span className="text-2xl font-medium text-yale">caudall</span>
-            )}
-          </Link>
+    <div className="min-h-screen lg:flex">
+      <AdminSidebar
+        hasLogo={hasLogo}
+        homeHref={homeHref}
+        roleLabel={roleLabel}
+        tenantLabel={tenantLabel}
+        navGroups={navGroups}
+        logoutLabel={t('logout')}
+      />
 
-          <nav className="flex items-center gap-5 text-xs text-nickel">
-            {admin.profileType === 'ADM' ? (
-              <>
-                <Link href="/admin/configuracion" className="hover:text-yale">
-                  {t('settings')}
-                </Link>
-                <Link href="/admin/contenido" className="hover:text-yale">
-                  {t('content')}
-                </Link>
-                <Link href="/admin/metodologia" className="hover:text-yale">
-                  {t('methodology')}
-                </Link>
-                <Link href="/admin/empresas" className="hover:text-yale">
-                  {t('companies')}
-                </Link>
-                <Link href="/admin/administradores" className="hover:text-yale">
-                  {t('admins')}
-                </Link>
-                <Link href="/admin/empleados" className="hover:text-yale">
-                  {t('employees')}
-                </Link>
-                <Link href="/admin/notificaciones" className="hover:text-yale">
-                  {t('notifications')}
-                </Link>
-              </>
-            ) : null}
-            <LogoutButton label={t('logout')} />
-          </nav>
-        </div>
-      </header>
+      <div className="flex-1 min-w-0 flex flex-col">
+        <AdminMobileNav
+          hasLogo={hasLogo}
+          homeHref={homeHref}
+          navGroups={navGroups}
+          logoutLabel={t('logout')}
+          openLabel={t('openMenu')}
+          closeLabel={t('closeMenu')}
+        />
 
-      <div className="flex-1 flex flex-col">{children}</div>
+        <div className="flex-1 flex flex-col">{children}</div>
 
-      <footer className="border-t border-silver/40 shrink-0 py-2 text-center">
-        <p className="text-[10px] text-silver">
-          {tVersion('label', { sha: shortSha })} · {contextLabel}
-        </p>
-      </footer>
+        <footer className="border-t border-silver/40 shrink-0 py-2 text-center">
+          <p className="text-[10px] text-silver">
+            {tVersion('label', { sha: shortSha })} · {contextLabel}
+          </p>
+        </footer>
+      </div>
     </div>
   );
 }

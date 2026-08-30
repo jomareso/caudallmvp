@@ -181,7 +181,15 @@
       "companies": "Empresas",
       "employees": "Empleados",
       "logout": "Cerrar sesión",
-      "notifications": "Notificaciones"
+      "notifications": "Notificaciones",
+      "groupPlatform": "Plataforma",
+      "groupAccounts": "Cuentas",
+      "openMenu": "Abrir menú",
+      "closeMenu": "Cerrar menú",
+      "platformRole": "ADM",
+      "tenantRole": "RRHH",
+      "functionalRole": "FUNCIONAL",
+      "platformTenantLabel": "Plataforma"
     },
     "viewAs": {
       "banner": "Estás viendo el panel de {tenantName} como administrador de plataforma.",
