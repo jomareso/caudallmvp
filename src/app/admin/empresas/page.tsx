@@ -24,39 +24,129 @@ export default async function EmpresasPage() {
     })
   );
   const tSuspended = t('suspendedBadge');
+  const dateFormat = new Intl.DateTimeFormat('es-DO', {
+    dateStyle: 'medium',
+    timeZone: 'America/Santo_Domingo'
+  });
 
   return (
-    <main className="flex-1 p-6">
-      <div className="w-full max-w-sm">
-        <h1 className="text-lg font-medium text-quartz mb-6">{t('title')}</h1>
+    <main className="flex-1 p-6 lg:p-8">
+      {/* max-w-6xl (no max-w-sm): la tabla de escritorio de abajo necesita
+          más ancho que el resto de las páginas de admin ya migradas
+          (Configuración usa 4xl) — 5 columnas con nombre+badges no caben
+          cómodas en menos. */}
+      <div className="w-full max-w-6xl">
+        <header className="mb-6">
+          <h1 className="text-lg font-medium text-quartz mb-1">{t('title')}</h1>
+          <p className="text-xs text-nickel">{t('companyCount', { count: tenants.length })}</p>
+        </header>
 
-        <CreateTenantForm
-          durationOptions={durationOptions}
-          labels={{
-            nameLabel: t('nameLabel'),
-            namePlaceholder: t('namePlaceholder'),
-            employeeCountLabel: t('employeeCountLabel'),
-            employeeCountPlaceholder: t('employeeCountPlaceholder'),
-            employeeCountHelp: t('employeeCountHelp'),
-            licenseCountLabel: t('licenseCountLabel'),
-            durationLabel: t('durationLabel'),
-            cta: t('createCta'),
-            creating: t('creating'),
-            errorGeneric: t('errorGeneric'),
-            adminEmailsLabel: t('adminEmailsLabel'),
-            adminEmailsPlaceholder: t('adminEmailsPlaceholder'),
-            adminEmailsHelp: t('adminEmailsHelp'),
-            adminResultsTitle: t('adminResultsTitle'),
-            adminCreated: t('adminCreated'),
-            adminWelcomeEmailFailed: t('adminWelcomeEmailFailed'),
-            adminDuplicate: t('adminDuplicate'),
-            adminInvalidFormat: t('adminInvalidFormat'),
-            continueCta: t('continueCta')
-          }}
-        />
+        {/* max-w-2xl (no max-w-md): el formulario ahora reparte sus campos
+            en 2 columnas (ver create-tenant-form.tsx) — Reynoso señaló que
+            max-w-md dejaba mucho espacio en blanco a la derecha de la
+            tarjeta. Sigue sin llegar al 6xl de la página: sus campos no
+            se benefician de tanto ancho. */}
+        <div className="max-w-2xl mb-8">
+          <CreateTenantForm
+            durationOptions={durationOptions}
+            labels={{
+              nameLabel: t('nameLabel'),
+              namePlaceholder: t('namePlaceholder'),
+              employeeCountLabel: t('employeeCountLabel'),
+              employeeCountPlaceholder: t('employeeCountPlaceholder'),
+              employeeCountHelp: t('employeeCountHelp'),
+              licenseCountLabel: t('licenseCountLabel'),
+              durationLabel: t('durationLabel'),
+              cta: t('createCta'),
+              creating: t('creating'),
+              errorGeneric: t('errorGeneric'),
+              adminEmailsLabel: t('adminEmailsLabel'),
+              adminEmailsPlaceholder: t('adminEmailsPlaceholder'),
+              adminEmailsHelp: t('adminEmailsHelp'),
+              adminResultsTitle: t('adminResultsTitle'),
+              adminCreated: t('adminCreated'),
+              adminWelcomeEmailFailed: t('adminWelcomeEmailFailed'),
+              adminDuplicate: t('adminDuplicate'),
+              adminInvalidFormat: t('adminInvalidFormat'),
+              continueCta: t('continueCta')
+            }}
+          />
+        </div>
 
-        <h2 className="text-sm font-medium text-quartz mt-6 mb-2">{t('existingTitle')}</h2>
-        <div className="space-y-2">
+        <h2 className="text-sm font-medium text-quartz mb-2">{t('existingTitle')}</h2>
+
+        {/* Tabla de verdad en escritorio (lg+) — antes era la misma lista
+            vertical de tarjetitas que en móvil, sin usar el ancho
+            disponible (mockup de rediseño, task #47). En móvil se queda
+            la lista de tarjetas de siempre, sin tocar. */}
+        <div className="hidden lg:block bg-white border border-silver/60 rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-silver/60 text-left text-[11px] uppercase tracking-wide text-nickel">
+                <th className="px-4 py-3 font-semibold">{t('tableEmpresaHeader')}</th>
+                <th className="px-4 py-3 font-semibold">{t('tableEstadoHeader')}</th>
+                <th className="px-4 py-3 font-semibold">{t('tableLicenciasHeader')}</th>
+                <th className="px-4 py-3 font-semibold">{t('tableCreadaHeader')}</th>
+                <th className="px-4 py-3" />
+              </tr>
+            </thead>
+            <tbody>
+              {tenants.map((tenant) => {
+                const unused = tenant.licenses.filter((l) => l.status === 'UNUSED').length;
+                const active = tenant.licenses.filter((l) => l.status === 'ACTIVE').length;
+                const expired = tenant.licenses.filter((l) => l.status === 'EXPIRED').length;
+                const initials = tenant.name
+                  .split(/\s+/)
+                  .map((word) => word[0])
+                  .slice(0, 2)
+                  .join('')
+                  .toUpperCase();
+                return (
+                  <tr key={tenant.id} className="border-b border-silver/30 last:border-b-0 hover:bg-silver/10">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-8 h-8 rounded-lg bg-yale/10 text-yale flex items-center justify-center text-xs font-semibold shrink-0">
+                          {initials}
+                        </span>
+                        <span className="text-quartz font-medium">{tenant.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex text-[11px] font-medium px-2 py-0.5 rounded-lg ${
+                          tenant.status === 'SUSPENDED' ? 'bg-bad/10 text-bad' : 'bg-ok/10 text-ok'
+                        }`}
+                      >
+                        {tenant.status === 'SUSPENDED' ? tSuspended : t('activeBadge')}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-3 text-[12px] tabular-nums">
+                        <span className="text-ok font-medium">
+                          {active} {t('licenseActiveShort')}
+                        </span>
+                        <span className="text-nickel">
+                          {unused} {t('licenseUnusedShort')}
+                        </span>
+                        <span className="text-bad">
+                          {expired} {t('licenseExpiredShort')}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-nickel">{dateFormat.format(tenant.createdAt)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <Link href={`/admin/empresas/${tenant.id}`} className="text-yale font-medium hover:underline">
+                        {t('viewCta')}
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="lg:hidden space-y-2">
           {tenants.map((tenant) => {
             const unused = tenant.licenses.filter((l) => l.status === 'UNUSED').length;
             const active = tenant.licenses.filter((l) => l.status === 'ACTIVE').length;
