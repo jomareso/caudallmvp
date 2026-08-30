@@ -27,7 +27,11 @@ const config: Config = {
         // Estados semánticos (éxito/alerta/error), tomados del prototipo visual
         'ok': '#3B6D11',
         'warn': '#854F0B',
-        'bad': '#791F1F'
+        'bad': '#791F1F',
+        // Fondo del sidebar de /admin (ver admin-sidebar.tsx) — no
+        // overridable por tenant (a diferencia de 'yale'): es el panel
+        // interno de Caudall/RRHH, no una pantalla de marca del empleado.
+        'sidebar': '#14213A'
       },
       fontFamily: {
         sans: ['-apple-system', 'BlinkMacSystemFont', 'Helvetica Neue', 'Arial', 'sans-serif']
