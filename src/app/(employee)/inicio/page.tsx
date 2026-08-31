@@ -62,7 +62,14 @@ export default async function InicioPage() {
       <EmployeeTopBar />
       <main className="flex-1 flex flex-col items-center p-6 pt-10">
         <div className="w-full max-w-sm">
-          <p className="text-xs text-nickel mb-4">{t('greeting')}</p>
+          {/* 😊 decorativo (no pasa por next-intl, no es texto de idioma):
+              antes era texto gris chiquito indistinguible del resto de la
+              pantalla — mismo criterio de "menos gris" ya aplicado en la
+              tarjeta de próximo paso de /resultado (ver TIER_META en
+              social-comparison-card.tsx). */}
+          <p className="text-sm font-medium text-yale mb-4">
+            <span aria-hidden="true">😊</span> {t('greeting')}
+          </p>
 
           {showFollowupInvite ? (
             <div className="bg-picton/10 border border-cola/30 rounded-lg p-4 mb-3.5 text-left">
