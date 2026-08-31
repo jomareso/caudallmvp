@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { resolveAccessByEmail, validateEnrollmentCode } from '../actions';
+import { BrandLogo } from '@/lib/brand/logo';
 
 // formTitle/formSubtitle/timeEstimate/privacyGuarantee vienen del panel de
 // contenido (LandingBlock colaborador_form_intro/colaborador_trust) — este
@@ -80,9 +81,12 @@ export function LandingForm({
         {/* Logo real y estático, igual que brand-panel.tsx — no depende del
             logo que se pueda subir en /admin/configuracion (ese mecanismo
             era un reemplazo manual de antes de tener el archivo real; hoy
-            solo generaría inconsistencia de tamaño entre los dos lados). */}
-        {/* eslint-disable-next-line @next/next/no-img-element -- logo estático propio del bundle, no necesita el optimizador de next/image */}
-        <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-8 mx-auto mb-6" />
+            solo generaría inconsistencia de tamaño entre los dos lados).
+            variant="hero": mismo tamaño que el login de admin y el panel
+            de marca de escritorio — antes era h-8, más chico que admin sin
+            que nadie lo hubiera decidido así (ver src/lib/brand/logo.tsx,
+            pedido explícito de Reynoso de estandarizar). */}
+        <BrandLogo variant="hero" className="mx-auto mb-6" />
         {/* Solo en mobile — en lg+ el mismo mensaje ya lo muestra BrandPanel
             a la izquierda, repetirlo acá se vería duplicado. Reemplaza al
             título/subtítulo genérico de abajo en mobile (ver su
