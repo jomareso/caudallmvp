@@ -15,6 +15,18 @@ import type {} from './types';
 // el callback jwt(), que sí necesita el shape de "user" que devuelve
 // authorize() — este archivo no lo necesita).
 export const authConfig = {
+  // NextAuth v5 solo confía en el header Host de la petición
+  // automáticamente en Vercel. En cualquier otro host (Netlify incluido)
+  // hay que decirlo explícito, si no falla con "There was a problem with
+  // the server configuration" aunque todo lo demás esté bien configurado.
+  // Hoy esto se cubre con la variable de entorno AUTH_TRUST_HOST=true en
+  // Netlify (confirmado: así es como el login viene funcionando toda esta
+  // sesión); fijarlo aquí evita depender de que alguien la recuerde en el
+  // próximo entorno (staging, otro hosting, etc.) — y como este archivo lo
+  // usan tanto auth.ts (vía ...authConfig) como middleware.ts directo,
+  // queda cubierto en los dos. Reemplaza al PR #6 (rama de hace más de una
+  // semana, sobre un auth.ts que ya no existe en esta forma).
+  trustHost: true,
   session: { strategy: 'jwt' },
   pages: {
     signIn: '/'
