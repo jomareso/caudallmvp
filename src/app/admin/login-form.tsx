@@ -5,19 +5,19 @@ import { useTranslations } from 'next-intl';
 import { requestAdminMagicLink } from './actions';
 
 function AdminLogo() {
-  // h-8 en mobile: mismo tamaño que el logo "de marca de entrada" del
-  // resto del producto (BrandPanel/landing-form.tsx) — eso sigue siendo
-  // correcto ahí, donde la tarjeta angosta ocupa casi todo el ancho de
-  // pantalla. Pero esta pantalla de admin es de escritorio primero
-  // (Decisión 7) y en un viewport ancho la misma tarjeta centrada queda
-  // flotando en un fondo casi vacío — el logo a h-8 se leía diminuto en
-  // comparación (feedback real de Reynoso, con captura del tamaño de
-  // referencia de landing-form.tsx al lado). lg:h-14 le da presencia
-  // acorde al espacio real que ocupa en escritorio, sin tocar el mobile
-  // que ya estaba bien.
+  // El h-8 original venía de copiar el tamaño de BrandPanel/landing-form.tsx
+  // — pero ahí funciona porque esas pantallas son de borde a borde (panel de
+  // marca + formulario llenando todo el viewport). Esta pantalla de admin
+  // SIEMPRE es una tarjeta angosta centrada sola en un fondo vacío — en
+  // escritorio (PR #90, lg:h-14) y también en un teléfono real, donde el
+  // alto de pantalla sobra igual de vacío arriba y abajo de la tarjeta
+  // (segundo reporte de Reynoso, esta vez desde el celular). Se sube el
+  // tamaño base a h-12 y el de escritorio a h-16, subiendo ambos un
+  // escalón — el problema nunca fue el breakpoint, fue este layout
+  // específico en cualquier tamaño de pantalla.
   return (
     // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-    <img src="/api/branding/logo" alt="Caudall" className="h-8 lg:h-14 mx-auto mb-4 mix-blend-multiply" />
+    <img src="/api/branding/logo" alt="Caudall" className="h-12 lg:h-16 mx-auto mb-4 mix-blend-multiply" />
   );
 }
 
