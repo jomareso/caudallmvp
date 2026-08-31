@@ -1841,22 +1841,21 @@
       },
       "socialComparison": {
         "title": "Tu próximo paso",
-        "statSuperior": "Tu resultado en {dimension} está en el {percentile}% superior entre personas en un contexto similar al tuyo.",
-        "statSimilar": "Tu resultado en {dimension} está en un rango parecido al de personas en un contexto similar al tuyo (percentil {percentile}).",
+        "stat": "Tu resultado en {dimension} es mejor que el de {n} de cada 10 personas en un contexto similar al tuyo.",
         "reinforcement": {
           "LOW": {
-            "SUPERIOR": "En {dimension} ya vas mejor que la mayoría de las personas en un contexto similar al tuyo — es un buen punto de partida. No te confíes: mantenerlo es tan importante como haber llegado hasta acá.",
-            "SIMILAR": "En {dimension} estás en una situación parecida a la de muchas personas con un contexto similar al tuyo. Es un punto de partida normal — y hay una oportunidad clara de mejorar.",
+            "SUPERIOR": "Es un buen punto de partida — no te confíes: mantenerlo es tan importante como haber llegado hasta acá.",
+            "SIMILAR": "Es un punto de partida normal — y hay una oportunidad clara de mejorar.",
             "INFERIOR": "Hay una oportunidad real de mejorar tu {dimension}. No hace falta compararte con nadie para dar el primer paso — solo empezar ya hace diferencia."
           },
           "MID": {
-            "SUPERIOR": "Tu manejo de {dimension} está entre los mejores de personas en un contexto similar al tuyo. Vale la pena sostenerlo, sobre todo cuando algo cambie en tu situación.",
-            "SIMILAR": "En {dimension} vas a un ritmo parecido al de muchas personas con un contexto similar al tuyo. Seguir avanzando un poco más te puede sacar de ese promedio.",
+            "SUPERIOR": "Vale la pena sostenerlo, sobre todo cuando algo cambie en tu situación.",
+            "SIMILAR": "Seguir avanzando un poco más te puede sacar de ese promedio.",
             "INFERIOR": "Tu {dimension} todavía tiene una oportunidad clara de mejora. Ya diste varios pasos en otras áreas — este puede ser el siguiente."
           },
           "HIGH": {
-            "SUPERIOR": "Tu {dimension} está entre las más sólidas de personas en un contexto similar al tuyo. Mantener este nivel, incluso cuando las cosas cambien, es el verdadero logro.",
-            "SIMILAR": "En {dimension} estás a la par de muchas personas con un contexto similar al tuyo que también manejan bien sus finanzas. Todavía queda margen para afinar.",
+            "SUPERIOR": "Mantener este nivel, incluso cuando las cosas cambien, es el verdadero logro.",
+            "SIMILAR": "Todavía queda margen para afinar, aunque ya manejas bien lo esencial.",
             "INFERIOR": "Con todo lo que ya lograste, tu {dimension} sigue siendo un punto por reforzar. Vale la pena cerrarlo para que ninguna área quede atrás."
           }
         },
@@ -1877,6 +1876,7 @@
           "HIGH": "Tu resultado está listo — seguí manteniendo el rumbo"
         },
         "emailCta": "Ver mi resultado completo",
+        "emailCtaAction": "Ver mi próximo paso",
         "generalIndexLabel": "Salud financiera general"
       }
     },

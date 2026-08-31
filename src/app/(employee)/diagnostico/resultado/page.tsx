@@ -7,7 +7,7 @@ import { scoreToDimensionState, scoreToProgressTier } from '@/lib/engines/scorin
 import { getPlatformSettings } from '@/lib/settings/platform-settings';
 import { countContextAnsweredAndTotal } from '@/lib/engines/diagnostic';
 import { buildPostDiagnosticMessagePlan } from '@/lib/engines/post-diagnostic-message';
-import { recordSocialComparisonSnapshot } from '@/lib/engines/social-comparison';
+import { recordSocialComparisonSnapshot, percentileToNaturalFrequency } from '@/lib/engines/social-comparison';
 import { sendDiagnosticResultEmail } from '@/lib/email/send-diagnostic-result';
 import { EmployeeTopBar } from '../../employee-topbar';
 import { BackHomeLink } from '../../back-home-link';
@@ -115,9 +115,9 @@ export default async function ResultadoPage() {
     const comparisonBadge =
       comparison.shown && comparison.includeNumericComparison && comparisonDimensionLabel
         ? {
-            text: tSocial(comparison.position === 'SUPERIOR' ? 'statSuperior' : 'statSimilar', {
+            text: tSocial('stat', {
               dimension: comparisonDimensionLabel,
-              percentile: comparison.percentile
+              n: percentileToNaturalFrequency(comparison.percentile)
             }),
             className:
               comparison.position === 'SUPERIOR' ? 'bg-ok/10 text-ok' : 'bg-picton/10 text-yale'
