@@ -41,7 +41,7 @@ export function QuestionForm({
   // diagnóstico, sigue a /diagnostico/contexto (que decide si hay bloque
   // de contexto pendiente u ofrece ir directo a resultado) — antes iba
   // directo a resultado. 'context': cada respuesta del bloque de
-  // contexto vuelve a /diagnostico/contexto, que sirve la siguiente
+  // contexto se queda en /diagnostico/contexto, que sirve la siguiente
   // pregunta o redirige a resultado cuando ya no queda ninguna — el
   // campo `done` de submitDiagnosticAnswer refleja la parte financiera
   // (ya terminada en este punto), así que no sirve para decidir acá.
@@ -66,11 +66,21 @@ export function QuestionForm({
         return;
       }
       if (mode === 'context') {
-        router.push('/diagnostico/contexto');
+        // Bug real encontrado con el e2e (armando esta corrección): un
+        // router.push() a la URL en la que ya estamos, seguido de
+        // router.refresh(), es un no-op de navegación — Next.js lo trata
+        // como "ya estás ahí" y puede pisar el redirect() real que
+        // /diagnostico/contexto dispara del lado del servidor cuando esta
+        // era la última pregunta de contexto (a /diagnostico/resultado).
+        // El resultado: la pantalla se queda trabada mostrando la última
+        // pregunta de contexto ya respondida, sin avanzar nunca. Sin push
+        // a la misma URL, el propio refresh() sí sigue el redirect() del
+        // servidor de forma confiable.
+        router.refresh();
       } else {
         router.push(result.done ? '/diagnostico/contexto' : '/diagnostico');
+        router.refresh();
       }
-      router.refresh();
     });
   }
 
