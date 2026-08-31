@@ -7,14 +7,22 @@
 // única señal detrás de la próxima acción — reusa priority.ts y
 // next-best-action.ts en vez de redecidir nada.
 //
-// Reemplaza a national-benchmark.ts (benchmark 2021-2024, gateado por la
-// pregunta de consentimiento CTX-07/CTX_COMPARE_OPT_IN). CTX-07 fue
-// retirada del banco activo (status RESERVA) porque el nuevo spec prohíbe
-// explícitamente una segunda pregunta de consentimiento para comparar: la
-// comparación es automática a partir de lo que el empleado ya respondió en
-// el bloque de contexto, o se omite en silencio si no hay datos
-// suficientes. national-benchmark.ts se deja intacto pero sin uso (no se
-// borra código ni datos existentes).
+// Reemplaza a national-benchmark.ts (benchmark 2021-2024). national-benchmark.ts
+// se deja intacto pero sin uso (no se borra código ni datos existentes).
+//
+// CTX-07 (CTX_COMPARE_OPT_IN) reactivada (30 ago, decisión explícita de
+// Reynoso): el diseño original de este motor retiraba CTX-07 porque el
+// spec prohibía una segunda pregunta de consentimiento aparte del bloque
+// de contexto — la comparación debía activarse sola con lo que el
+// empleado ya hubiera respondido. En la práctica, ese bloque era
+// opcional (link "Ahora no") y casi nadie lo completaba, así que nunca
+// había con qué comparar a nadie — el motor SIEMPRE caía en "sin datos
+// de contexto". Se revierte: el bloque de contexto pasa a ser
+// obligatorio (ver (employee)/diagnostico/contexto/, ya no tiene botón
+// de saltar) y CTX-07 vuelve a ser su primera pregunta — un sí/no
+// explícito que gatea si ESTE empleado ve una comparación (reason
+// NO_CONSENT si dice que no), sin afectar si sus datos de contexto
+// igual alimentan el grupo comparable de otros empleados.
 import type { DimensionCode, Prisma } from '@prisma/client';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { getPlatformSettings } from '@/lib/settings/platform-settings';
@@ -48,10 +56,13 @@ const INCOME_BAND_TO_RAW: Record<string, string[]> = {
   INC_200K_PLUS: ['Más de RD$ 202,500']
 };
 
-// Resiliencia queda fuera a propósito: el instrumento del estudio la
-// mezclaba con Ahorro (regla CORE #5, ver también el comentario en el
-// modelo NationalBenchmarkRecord) — no hay score real que aportar ahí,
-// así que el estudio simplemente no participa en esa comparación.
+// Resiliencia no tiene columna propia en el estudio (el instrumento
+// viejo la mezclaba con Ahorro, regla CORE #5) — por eso no aparece acá.
+// Cuando la dimensión prioritaria es Resiliencia, computeSocialComparison
+// cae a comparar el ÍNDICE GENERAL en su lugar (overallScore/cfhiScore,
+// ver isGeneralFallback más abajo) en vez de no mostrar nada — decisión
+// de Reynoso para esta fase, mientras crece la base de empleados reales
+// con datos propios de Resiliencia.
 const DIMENSION_TO_BENCHMARK_FIELD: Partial<Record<DimensionCode, 'controlScore' | 'savingScore' | 'debtScore' | 'planningScore'>> = {
   CONTROL: 'controlScore',
   SAVING: 'savingScore',
@@ -199,16 +210,18 @@ const CTX_TO_BENCHMARK_FIELD: Record<Exclude<CtxKey, 'income'>, 'sex' | 'ageBand
   sex: 'sex'
 };
 
-// Devuelve los scores de la dimensión pedida entre los encuestados del
-// estudio que calzan con el mismo grupo — null si la dimensión no tiene
-// equivalente en el estudio (Resiliencia) o si el ingreso propio no tiene
+// Devuelve los scores del campo pedido entre los encuestados del estudio
+// que calzan con el mismo grupo — vacío si el ingreso propio no tiene
 // banda mapeada (DECLINED, o directamente sin responder). `version` fija
 // el estudio más reciente (por si en el futuro se agrega uno nuevo sin
-// retirar el actual — hoy solo existe "2021-2024").
+// retirar el actual — hoy solo existe "2021-2024"). 'overallScore' es el
+// equivalente al CFHI general — lo usa el fallback de Resiliencia (ver
+// isGeneralFallback en computeSocialComparison), existe para las 4,748
+// encuestas por igual, a diferencia de las 4 dimensiones específicas.
 async function matchingBenchmarkScores(
   levelKeys: readonly CtxKey[],
   ownValues: CtxValues,
-  benchmarkField: 'controlScore' | 'savingScore' | 'debtScore' | 'planningScore',
+  benchmarkField: 'controlScore' | 'savingScore' | 'debtScore' | 'planningScore' | 'overallScore',
   version: string
 ): Promise<number[]> {
   const where: Prisma.NationalBenchmarkRecordWhereInput = { version };
@@ -241,7 +254,11 @@ async function matchingBenchmarkScores(
 export type SocialComparisonResult =
   | {
       shown: false;
-      reason: 'DISABLED' | 'NO_CONTEXT_DATA' | 'INSUFFICIENT_SAMPLE' | 'NO_PRIORITY_DIMENSION';
+      // NO_CONSENT: el empleado respondió CTX-07 con "No, prefiero ver
+      // solo mis resultados" — distinto de DISABLED (el motor está
+      // apagado a nivel plataforma): acá el motor sí funcionaría, pero
+      // este empleado puntual decidió que no.
+      reason: 'DISABLED' | 'NO_CONSENT' | 'NO_CONTEXT_DATA' | 'INSUFFICIENT_SAMPLE' | 'NO_PRIORITY_DIMENSION';
       contextVariablesAnswered: CtxKey[];
       contextVariablesOmitted: CtxKey[];
       cfhiScore: number;
@@ -256,6 +273,15 @@ export type SocialComparisonResult =
       contextVariablesAnswered: CtxKey[];
       contextVariablesOmitted: CtxKey[];
       comparisonDimension: string;
+      // DIMENSION: se comparó comparisonDimension (el caso normal).
+      // GENERAL: fallback de Resiliencia — el número que se compara es
+      // el CFHI/índice general, no comparisonDimension (que sigue
+      // guardando 'RESILIENCE' para auditoría) — quien renderice el
+      // mensaje debe usar una etiqueta genérica ("salud financiera
+      // general"), nunca tDim(comparisonDimension), o el texto quedaría
+      // engañoso (attribuyendo a Resiliencia un percentil que es del
+      // índice general).
+      comparisonScope: 'DIMENSION' | 'GENERAL';
       percentile: number;
       position: SocialComparisonPosition;
       cfhiScore: number;
@@ -318,6 +344,21 @@ export async function computeSocialComparison(employeeId: string): Promise<Socia
     return { shown: false, reason: 'DISABLED', ...baseResult };
   }
 
+  // CTX-07: consentimiento explícito del empleado (ver comentario de
+  // cabecera) — se busca por variable, no está en CTX_VARIABLE_CODES
+  // porque esos 5 son estrictamente de agrupación, nunca de consentimiento.
+  const consentVariable = await prisma.variable.findFirst({ where: { code: 'CTX_COMPARE_OPT_IN' } });
+  const consentState = consentVariable
+    ? (
+        await prisma.variableState.findUnique({
+          where: { employeeId_variableId: { employeeId, variableId: consentVariable.id } }
+        })
+      )?.state
+    : undefined;
+  if (consentState !== 'YES') {
+    return { shown: false, reason: 'NO_CONSENT', ...baseResult };
+  }
+
   // Reusa priority.ts sin redecidirlo (spec: "no re-decide la dimensión
   // prioritaria") — es la dimensión que ya gobierna el próximo paso, así
   // que es la más útil para reforzar con una comparación relevante en vez
@@ -350,21 +391,24 @@ export async function computeSocialComparison(employeeId: string): Promise<Socia
     orderBy: { createdAt: 'desc' }
   });
   const benchmarkField = isDimensionCode(priorityDimension) ? DIMENSION_TO_BENCHMARK_FIELD[priorityDimension] : undefined;
+  // Ver comentario de DIMENSION_TO_BENCHMARK_FIELD: solo Resiliencia no
+  // tiene campo propio en el estudio — dimension ya se confirmó válida
+  // arriba, así que esto solo es true para ese caso.
+  const isGeneralFallback = !benchmarkField;
 
   return runWithTenantContext({ kind: 'platform-admin' }, async () => {
     for (const { level, variables: levelKeys } of levels) {
       const candidateIds = await intersectComparableEmployeeIds(levelKeys, varIdByKey, ownValues);
 
-      const historicalScores =
-        benchmarkField && latestBenchmark
-          ? await matchingBenchmarkScores(levelKeys, ownValues, benchmarkField, latestBenchmark.version)
-          : [];
+      const historicalScores = latestBenchmark
+        ? await matchingBenchmarkScores(levelKeys, ownValues, isGeneralFallback ? 'overallScore' : benchmarkField!, latestBenchmark.version)
+        : [];
 
       const completedStates =
         candidateIds.size > 0
           ? await prisma.financialState.findMany({
               where: { employeeId: { in: [...candidateIds] }, lastDiagnosticCompletedAt: { not: null } },
-              select: { employeeId: true }
+              select: { employeeId: true, cfhiScore: true }
             })
           : [];
       const completedIds = completedStates.map((s) => s.employeeId);
@@ -375,16 +419,23 @@ export async function computeSocialComparison(employeeId: string): Promise<Socia
       // completa; cuando ya alcance sola, esto no cambia nada.
       if (completedIds.length + historicalScores.length < settings.socialComparisonMinN) continue;
 
-      const livePeerScores = (
-        completedIds.length > 0
-          ? await prisma.dimensionScore.findMany({
-              where: { employeeId: { in: completedIds }, dimensionId: dimension.id, state: { not: 'NA' } },
-              select: { employeeId: true, score: true }
-            })
-          : []
-      )
-        .filter((row) => row.employeeId !== employeeId)
-        .map((row) => row.score);
+      // Fallback de Resiliencia: compara financialState.cfhiScore en vez
+      // de dimensionScore (no hay dimensionScore de Resiliencia que
+      // pueda aportar el estudio, así que comparar contra un pool
+      // mayormente del estudio pero con el número de la dimensión sería
+      // engañoso — se compara el mismo tipo de número en ambos lados).
+      const livePeerScores = isGeneralFallback
+        ? completedStates.filter((s) => s.employeeId !== employeeId).map((s) => s.cfhiScore)
+        : (
+            completedIds.length > 0
+              ? await prisma.dimensionScore.findMany({
+                  where: { employeeId: { in: completedIds }, dimensionId: dimension.id, state: { not: 'NA' } },
+                  select: { employeeId: true, score: true }
+                })
+              : []
+          )
+            .filter((row) => row.employeeId !== employeeId)
+            .map((row) => row.score);
 
       const peerScores = [...livePeerScores, ...historicalScores];
 
@@ -393,12 +444,18 @@ export async function computeSocialComparison(employeeId: string): Promise<Socia
       // empleado y los NA de esta dimensión, no quede ningún par real.
       if (peerScores.length === 0) continue;
 
-      const ownDimensionScore = await prisma.dimensionScore.findFirst({
-        where: { employeeId, dimensionId: dimension.id }
-      });
-      if (!ownDimensionScore || ownDimensionScore.state === 'NA') continue;
+      let ownScore: number;
+      if (isGeneralFallback) {
+        ownScore = cfhiScore;
+      } else {
+        const ownDimensionScore = await prisma.dimensionScore.findFirst({
+          where: { employeeId, dimensionId: dimension.id }
+        });
+        if (!ownDimensionScore || ownDimensionScore.state === 'NA') continue;
+        ownScore = ownDimensionScore.score;
+      }
 
-      const percentile = calculatePercentile(ownDimensionScore.score, peerScores);
+      const percentile = calculatePercentile(ownScore, peerScores);
       if (percentile == null) continue;
 
       const position = classifyPosition(percentile, {
@@ -415,6 +472,7 @@ export async function computeSocialComparison(employeeId: string): Promise<Socia
         groupVariablesUsed: [...levelKeys],
         groupN: peerScores.length + 1,
         comparisonDimension: priorityDimension,
+        comparisonScope: isGeneralFallback ? 'GENERAL' : 'DIMENSION',
         percentile,
         position,
         includeNumericComparison: position !== 'INFERIOR',
