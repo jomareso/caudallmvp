@@ -5,6 +5,7 @@ import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import { LogoutButton } from './logout-button';
 import { AdminNavIcon, type AdminNavIconName } from './admin-nav-icons';
+import { BrandLogo } from '@/lib/brand/logo';
 
 export type AdminNavGroup = {
   label: string | null;
@@ -50,9 +51,14 @@ export function AdminSidebar({ homeHref, roleLabel, tenantLabel, navGroups, logo
             en el resto del panel (login-form.tsx, Configuración): una
             chapita blanca de fondo + mix-blend-multiply, que sí tolera un
             logo sin transparencia real. */}
+        {/* variant="nav": el mismo tamaño que el resto de las barras de
+            navegación persistentes del producto (topbar del empleado,
+            header público, AdminMobileNav — ver src/lib/brand/logo.tsx).
+            Antes era h-5, más chico que todas las demás sin ningún motivo
+            documentado — encontrado auditando por qué el logo no se veía
+            consistente entre admin y el resto de la app. */}
         <span className="bg-white rounded-md px-1.5 py-1 inline-flex items-center shrink-0">
-          {/* eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable */}
-          <img src="/api/branding/logo" alt="Caudall" className="h-5 mix-blend-multiply" />
+          <BrandLogo variant="nav" src="/api/branding/logo" className="mix-blend-multiply" />
         </span>
         <span className="w-1 h-1 rounded-full bg-white/30" />
         <span className="text-[11px] text-white/55">{roleLabel}</span>
