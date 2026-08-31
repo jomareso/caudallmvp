@@ -1842,7 +1842,7 @@
       "socialComparison": {
         "title": "Tu próximo paso",
         "statSuperior": "Tu resultado en {dimension} está en el {percentile}% superior entre personas en un contexto similar al tuyo.",
-        "statSimilar": "Tu resultado en {dimension} está en un rango parecido al de personas en un contexto similar al tuyo (percentil {percentile}).",
+        "statSimilar": "Tu resultado en {dimension} está en un rango parecido al de personas en un contexto similar al tuyo.",
         "reinforcement": {
           "LOW": {
             "SUPERIOR": "En {dimension} ya vas mejor que la mayoría de las personas en un contexto similar al tuyo — es un buen punto de partida. No te confíes: mantenerlo es tan importante como haber llegado hasta acá.",
