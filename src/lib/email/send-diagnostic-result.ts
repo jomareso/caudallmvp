@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/db/prisma';
 import { getRequestOrigin } from '@/lib/http/request-origin';
 import type { PostDiagnosticMessagePlan } from '@/lib/engines/post-diagnostic-message';
+import { percentileToNaturalFrequency } from '@/lib/engines/social-comparison';
 import { getResendClient, renderEmailShell } from './send-magic-link';
 
 // Correo post-diagnóstico (spec del Motor de Comparación Social, §21):
@@ -45,20 +46,23 @@ export async function sendDiagnosticResultEmail(params: {
         ? tDim(comparison.priorityDimension)
         : '';
 
+  // Dato primero, refuerzo después (no al revés): "7 de cada 10" ya dice la
+  // comparación, así que el refuerzo (reinforcement.*.SUPERIOR/SIMILAR en
+  // es.json) se recortó para no repetirla — sin el dato (INFERIOR o sin
+  // datos), el refuerzo se queda con el peso visual principal, como antes.
+  const stat =
+    comparison.shown && comparison.includeNumericComparison
+      ? t('stat', { dimension: dimensionLabel, n: percentileToNaturalFrequency(comparison.percentile) })
+      : null;
+
   const reinforcement = comparison.shown
     ? t(`reinforcement.${tier}.${comparison.position}`, { dimension: dimensionLabel })
     : t(`noData.${tier}`, { dimension: dimensionLabel });
-
-  const statLine =
-    comparison.shown && comparison.includeNumericComparison
-      ? t(comparison.position === 'SUPERIOR' ? 'statSuperior' : 'statSimilar', {
-          dimension: dimensionLabel,
-          percentile: comparison.percentile
-        })
-      : null;
+  const reinforcementStyle = stat
+    ? 'font-size:13px;color:#737373;line-height:1.5;margin:0 0 16px'
+    : 'font-size:14px;line-height:1.5;margin:0 0 16px';
 
   const origin = getRequestOrigin();
-  const resultUrl = `${origin}/diagnostico/resultado`;
   const from = process.env.EMAIL_FROM ?? 'Caudall <no-reply@caudall.com>';
 
   const actionHtml = action
@@ -68,6 +72,15 @@ export async function sendDiagnosticResultEmail(params: {
       `
     : '';
 
+  // Si hay una acción sugerida, el CTA manda directo a comprometerse con
+  // ella (/diagnostico/accion) en vez de a /resultado — que solo era una
+  // parada intermedia desde la que igual había que dar otro clic para
+  // llegar ahí. Fricción real de un clic de más, no una técnica conductual
+  // (spec, regla CORE #19: FRICTION → TECHNIQUE, nunca al revés) — sin
+  // acción sugerida, no hay a dónde más llevarlo que al resultado.
+  const ctaUrl = action ? `${origin}/diagnostico/accion` : `${origin}/diagnostico/resultado`;
+  const ctaLabel = action ? t('emailCtaAction') : t('emailCta');
+
   const { error } = await getResendClient().emails.send({
     from,
     to,
@@ -75,14 +88,14 @@ export async function sendDiagnosticResultEmail(params: {
     html: renderEmailShell(
       origin,
       `
-        <p style="font-size:14px;line-height:1.5;margin:0 0 16px">${reinforcement}</p>
-        ${statLine ? `<p style="font-size:13px;color:#737373;line-height:1.5;margin:0 0 16px">${statLine}</p>` : ''}
+        ${stat ? `<p style="font-size:14px;line-height:1.5;margin:0 0 8px">${stat}</p>` : ''}
+        <p style="${reinforcementStyle}">${reinforcement}</p>
         ${actionHtml}
         <p style="margin:0 0 8px">
-          <a href="${resultUrl}" class="cd-btn"
+          <a href="${ctaUrl}" class="cd-btn"
              style="background:#0F5499;color:#fff;padding:12px 20px;border-radius:8px;
                     text-decoration:none;font-size:14px;display:inline-block">
-            ${t('emailCta')}
+            ${ctaLabel}
           </a>
         </p>
       `

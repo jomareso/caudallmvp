@@ -120,6 +120,16 @@ export function calculatePercentile(ownScore: number, peerScores: number[]): num
   return Math.round(rank * 100);
 }
 
+// Frecuencia natural en vez de percentil crudo ("7 de cada 10" en vez de
+// "percentil 70") — mismo dato, pero se entiende sin saber qué es un
+// percentil (comunicación de riesgo con frecuencias naturales, Gigerenzer
+// et al.). Reynoso reportó el correo post-diagnóstico como muy técnico por
+// esto. Acotado a 1-9: "10 de cada 10" o "0 de cada 10" suenan absolutos y
+// no comunican más que "9 de cada 10"/"1 de cada 10".
+export function percentileToNaturalFrequency(percentile: number): number {
+  return Math.min(9, Math.max(1, Math.round(percentile / 10)));
+}
+
 // Cortes simples, configurables, documentados como provisionales (spec
 // §12: "clasificación con cortes simples, configurables, documentados como
 // provisionales"). Editables desde /admin/metodologia/parametros

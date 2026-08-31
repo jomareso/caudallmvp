@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { GROUP_HIERARCHY, calculatePercentile, classifyPosition, selectableLevels, type CtxKey } from './social-comparison';
+import {
+  GROUP_HIERARCHY,
+  calculatePercentile,
+  classifyPosition,
+  percentileToNaturalFrequency,
+  selectableLevels,
+  type CtxKey
+} from './social-comparison';
 
 describe('calculatePercentile', () => {
   it('sin pares, no hay percentil (no se inventa un dato con muestra vacía)', () => {
@@ -21,6 +28,23 @@ describe('calculatePercentile', () => {
   it('a mitad de la distribución, percentil intermedio', () => {
     // 2 de 4 por debajo (50,55), 0 empatados -> 50%
     expect(calculatePercentile(60, [50, 55, 65, 70])).toBe(50);
+  });
+});
+
+describe('percentileToNaturalFrequency', () => {
+  it('redondea al entero más cercano de 10', () => {
+    expect(percentileToNaturalFrequency(41)).toBe(4);
+    expect(percentileToNaturalFrequency(70)).toBe(7);
+  });
+
+  it('nunca baja de 1 (un percentil bajo no es "0 de cada 10")', () => {
+    expect(percentileToNaturalFrequency(0)).toBe(1);
+    expect(percentileToNaturalFrequency(4)).toBe(1);
+  });
+
+  it('nunca sube de 9 (un percentil alto no es "10 de cada 10")', () => {
+    expect(percentileToNaturalFrequency(100)).toBe(9);
+    expect(percentileToNaturalFrequency(96)).toBe(9);
   });
 });
 
