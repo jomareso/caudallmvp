@@ -5,18 +5,21 @@ import { useTranslations } from 'next-intl';
 import { requestAdminMagicLink } from './actions';
 
 function AdminLogo() {
-  // Dos vueltas de "más grande" (PR #90: lg:h-14: PR #95: h-12/lg:h-16) no
-  // resolvían el problema real — el logo técnicamente ya era más grande en
-  // píxeles que el de landing-form.tsx, pero seguía sintiéndose "perdido"
-  // por el espacio vacío alrededor de esta tarjeta centrada sola. Reynoso
-  // pidió, en cambio, un punto de referencia concreto: el mismo tamaño que
-  // el logo de acceso de empleados ((employee)/acceso/landing-form.tsx),
-  // que tampoco varía por breakpoint (h-8, medido con Playwright: 32px de
-  // alto ahí vs 48px que tenía este acá). Se iguala a h-8 sin variante de
-  // escritorio, en vez de seguir escalando por separado.
+  // Historial completo (todas confirmadas insuficientes por Reynoso viendo
+  // el resultado real en su teléfono): PR #90 lg:h-14 → PR #95 h-12/lg:h-16
+  // → intento de igualarlo al logo de acceso de empleados (h-8, 169×32px
+  // medido con Playwright) → seguía viéndose chico. Confirmado
+  // explícitamente: lo quiere más grande que el de empleados, no igual —
+  // esto no es "más grande" arbitrario, es la instrucción directa después
+  // de descartar la equivalencia. Se sube a h-16/lg:h-20 (bastante más que
+  // cualquier intento anterior) con max-w-full de seguridad: sin eso, un
+  // teléfono angosto (~375px, con el p-6 del <main>) podría desbordar el
+  // ancho disponible a esta altura — max-w-full fuerza al navegador a
+  // encoger manteniendo proporción en vez de recortar o causar scroll
+  // horizontal.
   return (
     // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-    <img src="/api/branding/logo" alt="Caudall" className="h-8 mx-auto mb-4 mix-blend-multiply" />
+    <img src="/api/branding/logo" alt="Caudall" className="h-16 lg:h-20 max-w-full mx-auto mb-4 mix-blend-multiply" />
   );
 }
 
