@@ -62,7 +62,15 @@ export function LandingForm({
         setError(result.message);
         return;
       }
-      router.push(`/registro?code=${encodeURIComponent(code.trim().toUpperCase())}`);
+      // Reynoso: no tiene sentido pedir el correo dos veces — ya se
+      // escribió en el paso anterior (el que reveló este campo de código,
+      // ver handleEmailSubmit) para averiguar que esta cuenta era nueva.
+      // Se lleva como query param a /registro, que lo usa solo para
+      // precargar el campo (editable, no de solo lectura) — sigue siendo
+      // el mismo formulario/validación de siempre.
+      const params = new URLSearchParams({ code: code.trim().toUpperCase() });
+      if (email) params.set('email', email);
+      router.push(`/registro?${params.toString()}`);
     });
   }
 

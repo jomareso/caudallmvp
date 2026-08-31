@@ -9,7 +9,8 @@ import { beginGoogleSignIn } from './google-actions';
 export function EmailForm({
   enrollmentCode,
   tenantName,
-  googleErrorMessage
+  googleErrorMessage,
+  initialEmail
 }: {
   enrollmentCode: string;
   tenantName: string;
@@ -18,11 +19,16 @@ export function EmailForm({
   // falla por código/licencia/correo corporativo, en vez de la pantalla
   // genérica de error de Auth.js.
   googleErrorMessage: string | null;
+  // Viene de RegistroPage vía ?email=... cuando se llegó desde /acceso
+  // habiendo ya escrito el correo ahí (ver landing-form.tsx) — precarga el
+  // campo para no pedirlo dos veces. Sigue siendo editable: no es de
+  // solo lectura, por si alguien quiere usar un correo distinto acá.
+  initialEmail?: string;
 }) {
   const t = useTranslations('employee.email');
   const tTrust = useTranslations('employee.trust');
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(initialEmail ?? '');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isGooglePending, startGoogleTransition] = useTransition();

@@ -15,7 +15,7 @@ const GOOGLE_ERROR_KEYS = ['invalidCode', 'licenseExpired', 'useCorporateEmail',
 export default async function RegistroPage({
   searchParams
 }: {
-  searchParams: { code?: string; googleError?: string };
+  searchParams: { code?: string; googleError?: string; email?: string };
 }) {
   const code = searchParams.code?.trim().toUpperCase();
   if (!code) redirect('/acceso');
@@ -38,7 +38,12 @@ export default async function RegistroPage({
   return (
     <main className="min-h-screen lg:grid lg:grid-cols-2">
       <BrandPanel />
-      <EmailForm enrollmentCode={code} tenantName={found.tenant.name} googleErrorMessage={googleErrorMessage} />
+      <EmailForm
+        enrollmentCode={code}
+        tenantName={found.tenant.name}
+        googleErrorMessage={googleErrorMessage}
+        initialEmail={searchParams.email ?? ''}
+      />
     </main>
   );
 }
