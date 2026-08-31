@@ -5,19 +5,21 @@ import { useTranslations } from 'next-intl';
 import { requestAdminMagicLink } from './actions';
 
 function AdminLogo() {
-  // El h-8 original venía de copiar el tamaño de BrandPanel/landing-form.tsx
-  // — pero ahí funciona porque esas pantallas son de borde a borde (panel de
-  // marca + formulario llenando todo el viewport). Esta pantalla de admin
-  // SIEMPRE es una tarjeta angosta centrada sola en un fondo vacío — en
-  // escritorio (PR #90, lg:h-14) y también en un teléfono real, donde el
-  // alto de pantalla sobra igual de vacío arriba y abajo de la tarjeta
-  // (segundo reporte de Reynoso, esta vez desde el celular). Se sube el
-  // tamaño base a h-12 y el de escritorio a h-16, subiendo ambos un
-  // escalón — el problema nunca fue el breakpoint, fue este layout
-  // específico en cualquier tamaño de pantalla.
+  // Historial completo (todas confirmadas insuficientes por Reynoso viendo
+  // el resultado real en su teléfono): PR #90 lg:h-14 → PR #95 h-12/lg:h-16
+  // → intento de igualarlo al logo de acceso de empleados (h-8, 169×32px
+  // medido con Playwright) → seguía viéndose chico. Confirmado
+  // explícitamente: lo quiere más grande que el de empleados, no igual —
+  // esto no es "más grande" arbitrario, es la instrucción directa después
+  // de descartar la equivalencia. Se sube a h-16/lg:h-20 (bastante más que
+  // cualquier intento anterior) con max-w-full de seguridad: sin eso, un
+  // teléfono angosto (~375px, con el p-6 del <main>) podría desbordar el
+  // ancho disponible a esta altura — max-w-full fuerza al navegador a
+  // encoger manteniendo proporción en vez de recortar o causar scroll
+  // horizontal.
   return (
     // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-    <img src="/api/branding/logo" alt="Caudall" className="h-12 lg:h-16 mx-auto mb-4 mix-blend-multiply" />
+    <img src="/api/branding/logo" alt="Caudall" className="h-16 lg:h-20 max-w-full mx-auto mb-4 mix-blend-multiply" />
   );
 }
 
