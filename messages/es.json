@@ -28,6 +28,10 @@
       }
     },
     "landing": {
+      "emailLabel": "Tu correo",
+      "emailPlaceholder": "tucorreo@ejemplo.com",
+      "noAccountFound": "No encontramos una cuenta activa con este correo. Si es tu primera vez, ingresa el código de acceso de tu empresa.",
+      "ctaBackToEmail": "← Usar otro correo",
       "enrollmentCodeLabel": "Tu código de acceso",
       "enrollmentCodePlaceholder": "Código de acceso",
       "ctaContinue": "Continuar",
