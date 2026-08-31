@@ -141,3 +141,75 @@ export async function requestMagicLink(
     return { ok: true, isExisting: existingEmployee !== null };
   });
 }
+
+// Reynoso: no tiene sentido pedirle el código de empresa a alguien que ya
+// tiene cuenta — el código (Decisión 6) solo hace falta para saber a qué
+// empresa pertenece un registro NUEVO. /acceso ahora pide el correo
+// primero (ver landing-form.tsx): si matchea una cuenta activa, el magic
+// link sale directo sin pedir código; si no matchea nada, revela el campo
+// de código y sigue el flujo de siempre (/registro), sin tocarlo.
+//
+// A diferencia de validateEnrollmentCode/requestAdminMagicLink (que nunca
+// revelan si algo existe, para no filtrar datos sensibles), esto SÍ
+// necesita distinguir "ya tienes cuenta" de "no la tienes" — es la base
+// del cambio. No es lo mismo de sensible: no revela a qué empresa
+// pertenece ni ningún dato financiero, solo que ese correo ya usa Caudall
+// en algún lado — mismo patrón que el login de casi cualquier app de
+// consumo (confirmado con Reynoso antes de implementar).
+export async function resolveAccessByEmail(
+  rawEmail: string
+): Promise<{ ok: true; found: boolean } | { ok: false; message: string }> {
+  const [t, tCommon] = await Promise.all([
+    getTranslations('employee.access.errors'),
+    getTranslations('common.errors')
+  ]);
+  const emailSchema = z.string().trim().toLowerCase().email(tCommon('invalidEmail'));
+  const parsed = emailSchema.safeParse(rawEmail);
+  if (!parsed.success) {
+    return { ok: false, message: parsed.error.issues[0]?.message ?? tCommon('invalidEmail') };
+  }
+  const email = parsed.data;
+
+  // Sin tenant conocido todavía — mismo contexto platform-admin que
+  // validateEnrollmentCode arriba. personalEmail es único por tenant, no
+  // global (@@unique([tenantId, personalEmail]) en el schema), así que en
+  // teoría puede haber más de una fila para el mismo correo (la misma
+  // persona con cuenta en dos empresas distintas) — caso ambiguo, sin
+  // forma de saber cuál sin más información. Se trata igual que "no
+  // encontrado": cae al paso de código, que sí sabe resolverlo (usa el
+  // código para saber a qué empresa). Una empresa suspendida recibe el
+  // mismo trato — no se le confirma a nadie que existía una cuenta ahí.
+  return runWithTenantContext({ kind: 'platform-admin' }, async () => {
+    const matches = await prisma.employee.findMany({
+      where: { personalEmail: email },
+      include: { tenant: true, license: true }
+    });
+    const usable = matches.filter((m) => m.tenant.status !== 'SUSPENDED');
+    if (usable.length !== 1) {
+      return { ok: true, found: false };
+    }
+    const employee = usable[0];
+    const license = employee.license;
+
+    if (license?.status === 'EXPIRED' || (license?.expiresAt && license.expiresAt < new Date())) {
+      return { ok: false, message: t('licenseExpired') };
+    }
+
+    const token = await createMagicLinkToken({
+      type: 'employee',
+      tenantId: employee.tenantId,
+      employeeId: employee.id,
+      email
+    });
+    const verifyUrl = `${getRequestOrigin()}/api/auth/verify?token=${encodeURIComponent(token)}`;
+
+    try {
+      await sendMagicLinkEmail({ to: email, verifyUrl, tenantName: employee.tenant.name });
+    } catch (error) {
+      console.error('[resolveAccessByEmail] fallo al enviar correo', error);
+      return { ok: false, message: tCommon('emailSendFailed') };
+    }
+
+    return { ok: true, found: true };
+  });
+}

@@ -23,7 +23,14 @@ const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
   },
   colaborador_form_intro: {
     formTitle: 'Tu espacio privado de salud financiera.',
-    formSubtitle: 'Ingresa el código que te proporcionó tu empresa para comenzar.',
+    // /acceso pide el correo primero, no el código (ver landing-form.tsx,
+    // resolveAccessByEmail) — el código solo aparece si ese correo no
+    // tiene cuenta todavía. Este texto es contenido administrable (no
+    // vuelve a sincronizarse solo si ya existe la fila en producción, ver
+    // comentario de INITIAL_CONTENT arriba) — una instalación en
+    // producción de antes de este cambio necesita editarse a mano desde
+    // /admin/contenido.
+    formSubtitle: 'Ingresa tu correo para comenzar.',
     timeEstimate: 'Toma aproximadamente 5–8 minutos.'
   },
   colaborador_trust: {

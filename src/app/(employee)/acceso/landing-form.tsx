@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { validateEnrollmentCode } from '../actions';
+import { resolveAccessByEmail, validateEnrollmentCode } from '../actions';
 
 // formTitle/formSubtitle/timeEstimate/privacyGuarantee vienen del panel de
 // contenido (LandingBlock colaborador_form_intro/colaborador_trust) — este
@@ -19,11 +19,40 @@ export function LandingForm({
 }) {
   const t = useTranslations('employee.landing');
   const router = useRouter();
+
+  // 'email' primero: si ya existe una cuenta activa con ese correo (en
+  // cualquier empresa — personalEmail es único por tenant, no global), el
+  // magic link sale directo, sin pedir código — el código (Decisión 6)
+  // solo hace falta para saber a qué empresa pertenece un registro NUEVO,
+  // no en cada login (ver resolveAccessByEmail en ../actions.ts). 'code'
+  // es el paso de respaldo cuando el correo no matchea ninguna cuenta —
+  // desde ahí sigue el flujo de registro de siempre (/registro), sin
+  // ningún cambio.
+  const [step, setStep] = useState<'email' | 'code'>('email');
+  const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  function handleSubmit(event: React.FormEvent) {
+  function handleEmailSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+
+    startTransition(async () => {
+      const result = await resolveAccessByEmail(email);
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      if (result.found) {
+        router.push('/registro/enviado?existente=1');
+        return;
+      }
+      setStep('code');
+    });
+  }
+
+  function handleCodeSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
 
@@ -71,31 +100,71 @@ export function LandingForm({
           </div>
         ) : null}
 
-        <form onSubmit={handleSubmit} className="bg-white border border-silver/60 rounded-xl p-6 text-left">
-          <label htmlFor="enrollmentCode" className="block text-xs text-nickel mb-1">
-            {t('enrollmentCodeLabel')}
-          </label>
-          <input
-            id="enrollmentCode"
-            type="text"
-            value={code}
-            onChange={(event) => setCode(event.target.value)}
-            placeholder={t('enrollmentCodePlaceholder')}
-            autoCapitalize="characters"
-            className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz text-center uppercase tracking-wide mb-3 focus:outline-none focus:border-cola"
-          />
+        {step === 'email' ? (
+          <form onSubmit={handleEmailSubmit} className="bg-white border border-silver/60 rounded-xl p-6 text-left">
+            <label htmlFor="employeeEmail" className="block text-xs text-nickel mb-1">
+              {t('emailLabel')}
+            </label>
+            <input
+              id="employeeEmail"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder={t('emailPlaceholder')}
+              className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz mb-3 focus:outline-none focus:border-cola"
+            />
 
-          {error ? <p className="text-xs text-bad mb-3">{error}</p> : null}
+            {error ? <p className="text-xs text-bad mb-3">{error}</p> : null}
 
+            <button
+              type="submit"
+              disabled={isPending}
+              className="w-full bg-yale text-white rounded-lg py-2.5 text-sm disabled:opacity-60"
+            >
+              {isPending ? t('validating') : t('ctaContinue')}
+            </button>
+            {content ? <p className="text-[11px] text-nickel text-center mt-3">{content.timeEstimate}</p> : null}
+          </form>
+        ) : (
+          <form onSubmit={handleCodeSubmit} className="bg-white border border-silver/60 rounded-xl p-6 text-left">
+            <p className="text-xs text-nickel mb-3">{t('noAccountFound')}</p>
+            <label htmlFor="enrollmentCode" className="block text-xs text-nickel mb-1">
+              {t('enrollmentCodeLabel')}
+            </label>
+            <input
+              id="enrollmentCode"
+              type="text"
+              value={code}
+              onChange={(event) => setCode(event.target.value)}
+              placeholder={t('enrollmentCodePlaceholder')}
+              autoCapitalize="characters"
+              className="w-full border border-silver rounded-lg px-3 py-2.5 text-sm text-quartz text-center uppercase tracking-wide mb-3 focus:outline-none focus:border-cola"
+            />
+
+            {error ? <p className="text-xs text-bad mb-3">{error}</p> : null}
+
+            <button
+              type="submit"
+              disabled={isPending}
+              className="w-full bg-yale text-white rounded-lg py-2.5 text-sm disabled:opacity-60"
+            >
+              {isPending ? t('validating') : error ? t('ctaRetry') : t('ctaContinue')}
+            </button>
+          </form>
+        )}
+
+        {step === 'code' ? (
           <button
-            type="submit"
-            disabled={isPending}
-            className="w-full bg-yale text-white rounded-lg py-2.5 text-sm disabled:opacity-60"
+            type="button"
+            onClick={() => {
+              setStep('email');
+              setError(null);
+            }}
+            className="block mx-auto mt-4 text-xs text-nickel underline"
           >
-            {isPending ? t('validating') : error ? t('ctaRetry') : t('ctaContinue')}
+            {t('ctaBackToEmail')}
           </button>
-          {content ? <p className="text-[11px] text-nickel text-center mt-3">{content.timeEstimate}</p> : null}
-        </form>
+        ) : null}
 
         {/* En lg+ el panel de marca (brand-panel.tsx) ya muestra esta misma garantía — repetirla acá se vería duplicado */}
         {content ? <p className="text-[11px] text-nickel mt-4 lg:hidden">{content.privacyGuarantee}</p> : null}
