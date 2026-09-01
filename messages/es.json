@@ -172,9 +172,9 @@
     "aggregationNotice": "Todos los datos son agregados y anónimos. Segmentos con menos de {min} personas no se muestran, para proteger la confidencialidad de tus empleados."
   },
   "landingEmpleador": {
-    "illustrativeLabel": "Ejemplo ilustrativo",
+    "illustrativeLabel": "Ejemplo — ¿así se vería tu equipo?",
     "cfhiOutOf": "de 100",
-    "cfhiVsNational": "+5 vs. promedio nacional",
+    "cfhiVsNational": "-9 vs. promedio nacional",
     "teamDistributionLabel": "Distribución del equipo"
   },
   "admin": {

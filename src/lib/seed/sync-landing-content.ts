@@ -39,7 +39,8 @@ const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
   },
   empleador_hero: {
     headline: 'Convierte la salud financiera de tus colaboradores en **decisiones de bienestar**.',
-    subtitle: 'Identifica brechas, entiende qué grupos necesitan más apoyo y prioriza mejor.',
+    subtitle:
+      'Más de 4,500 diagnósticos reales de República Dominicana dicen que 84% de los empleados está en condición vulnerable o sobreviviendo.',
     ctaLabel: 'Solicitar una demostración',
     // Todavía no hay un mecanismo real de contacto — placeholder hasta
     // que se cargue un enlace real desde /admin/contenido.
@@ -47,13 +48,13 @@ const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
   },
   empleador_reto: {
     title: 'Invertir en bienestar financiero sin datos es intervenir a ciegas.',
-    body: 'Sin una lectura clara de la salud financiera de tus colaboradores, es difícil saber dónde están las principales brechas y qué iniciativas conviene priorizar.'
+    body: 'Sin una lectura clara de la salud financiera de tu equipo, terminas invirtiendo en bienestar por intuición, no por evidencia.'
   },
   empleador_solucion: {
-    title: 'Una visión más completa para decidir mejor.',
+    title: 'Tres capas que casi nadie mira juntas.',
     tags: ['Finanzas', 'Comportamiento', 'Contexto'],
-    body: 'Caudall combina estas tres capas para identificar dónde están las principales brechas, en qué grupos se concentran y dónde conviene enfocar los esfuerzos.',
-    steps: ['Diagnostica', 'Entiende', 'Prioriza', 'Mide']
+    body: 'Caudall cruza estas tres capas para mostrarte en qué grupos se concentran los problemas y dónde conviene intervenir primero.',
+    steps: ['Diagnostica', 'Entiende', 'Actúa', 'Mide']
   },
   empleador_metodologia: {
     eyebrow: 'Respaldo metodológico',
