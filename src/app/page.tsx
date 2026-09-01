@@ -169,30 +169,53 @@ export default async function HomePage() {
               <p className="text-sm text-nickel leading-relaxed">{metodologia.body}</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 relative">
-              <div className="hidden sm:block absolute top-[5px] left-0 right-0 h-px bg-silver/50" />
-              {metodologia.milestones.map((milestone, i) => (
-                <div key={i} className="flex flex-col gap-3.5">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: ['#0F5499', '#0783D9', '#34C1EE'][i % 3] }} />
-                  <div>
-                    <p className="text-xl font-bold">{milestone.year}</p>
-                    <p className="text-[13px] text-nickel">{milestone.title}</p>
-                  </div>
-                  <div className="w-full aspect-[4/3] rounded-lg bg-[#F4F5F7] border border-silver/40 overflow-hidden">
-                    {milestone.mediaAssetId ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-                      <img src={`/api/media/${milestone.mediaAssetId}`} alt={milestone.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-end justify-center gap-1 p-4">
-                        <div className="w-1.5 rounded-[1px]" style={{ height: '18px', background: 'rgba(15,84,153,0.35)' }} />
-                        <div className="w-1.5 rounded-[1px]" style={{ height: '32px', background: 'rgba(7,131,217,0.35)' }} />
-                        <div className="w-1.5 rounded-[1px]" style={{ height: '12px', background: 'rgba(52,193,238,0.35)' }} />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* getVisibleBlockContent no re-valida con zod al leer (solo
+                al guardar) — un bloque guardado antes de este PR no tiene
+                estos dos campos todavía, ?? [] evita que truene en
+                runtime hasta que se actualice desde /admin/contenido. */}
+            <BannerRotator imageIds={(metodologia.bannerImages ?? []).filter((id): id is string => id !== null)} />
+
+            {(metodologia.findings ?? []).length > 0 ? (
+              <div className="flex flex-col gap-px rounded-xl overflow-hidden bg-gradient-to-r from-yale to-cola">
+                {(metodologia.findings ?? []).map((finding, i) => (
+                  <p key={i} className="text-white text-[12.5px] font-medium px-5 py-2.5">
+                    {finding}
+                  </p>
+                ))}
+              </div>
+            ) : null}
+
+            {metodologia.milestones.length > 0 ? (
+              <div className="flex flex-col sm:flex-row gap-2.5">
+                {metodologia.milestones.map((milestone, i) => {
+                  const content = (
+                    <>
+                      <span className="text-sm shrink-0" aria-hidden>
+                        📄
+                      </span>
+                      <span className="text-[12.5px] font-medium flex-1">
+                        {milestone.year} — {milestone.title}
+                      </span>
+                      {milestone.mediaAssetId ? (
+                        <span className="text-[11px] text-yale font-semibold whitespace-nowrap">Ver informe →</span>
+                      ) : null}
+                    </>
+                  );
+                  const className =
+                    'flex-1 flex items-center gap-2.5 rounded-lg border border-silver/40 px-3.5 py-2.5 transition-colors' +
+                    (milestone.mediaAssetId ? ' hover:border-yale/40 hover:bg-[#F4F5F7]' : '');
+                  return milestone.mediaAssetId ? (
+                    <a key={i} href={`/api/media/${milestone.mediaAssetId}`} target="_blank" rel="noopener noreferrer" className={className}>
+                      {content}
+                    </a>
+                  ) : (
+                    <div key={i} className={className}>
+                      {content}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
 
             <p className="text-sm italic text-nickel text-center">{metodologia.closingLine}</p>
           </div>
@@ -297,6 +320,54 @@ function SegmentBar({ label, pct, color }: { label: string; pct: number; color: 
       <span className="flex-1 h-1.5 rounded bg-black/5 overflow-hidden">
         <span className="block h-full rounded" style={{ width: `${pct}%`, background: color }} />
       </span>
+    </div>
+  );
+}
+
+// Banner de fotos genéricas del trabajo de campo, sin atarse a un año
+// (distinto de los milestones/informes, que sí son por año). Se omite
+// del todo si no hay ninguna foto cargada — no muestra un placeholder
+// vacío a un visitante real. Con 1 foto queda estática; con 2 o 3 hace
+// crossfade en CSS puro (sin JS/cliente). Respeta prefers-reduced-motion.
+function BannerRotator({ imageIds }: { imageIds: string[] }) {
+  if (imageIds.length === 0) return null;
+  const n = imageIds.length;
+  const secondsPerSlide = 4;
+  const durationSeconds = n * secondsPerSlide;
+  const slotPct = 100 / n;
+  const fadePct = Math.min(2, slotPct / 4);
+
+  return (
+    <div className="relative w-full rounded-2xl overflow-hidden border border-silver/40" style={{ aspectRatio: '21 / 7' }}>
+      {imageIds.map((id, i) => (
+        // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
+        <img
+          key={id}
+          src={`/api/media/${id}`}
+          alt=""
+          className="caudall-banner-slide absolute inset-0 w-full h-full object-cover"
+          style={
+            n > 1
+              ? { animation: `caudall-banner-fade ${durationSeconds}s infinite`, animationDelay: `${i * secondsPerSlide}s` }
+              : undefined
+          }
+        />
+      ))}
+      {n > 1 ? (
+        <style>{`
+          @keyframes caudall-banner-fade {
+            0% { opacity: 0; }
+            ${fadePct}% { opacity: 1; }
+            ${(slotPct - fadePct).toFixed(2)}% { opacity: 1; }
+            ${slotPct.toFixed(2)}% { opacity: 0; }
+            100% { opacity: 0; }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .caudall-banner-slide { animation: none !important; opacity: 0; }
+            .caudall-banner-slide:first-child { opacity: 1; }
+          }
+        `}</style>
+      ) : null}
     </div>
   );
 }

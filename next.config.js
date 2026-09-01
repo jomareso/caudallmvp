@@ -25,7 +25,15 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   experimental: {
-    typedRoutes: true
+    typedRoutes: true,
+    // Default de Next.js es 1MB para el body de un Server Action — sin
+    // esto, uploadMediaAsset (banco de medios de /admin/contenido)
+    // rechazaría cualquier foto grande o informe PDF real antes de
+    // siquiera llegar a la validación de tamaño propia (MAX_MEDIA_SIZE_BYTES
+    // en admin/contenido/actions.ts). Mismo límite ahí, en un solo lugar.
+    serverActions: {
+      bodySizeLimit: '10mb'
+    }
   },
   // Netlify inyecta COMMIT_REF/CONTEXT como variables de entorno del
   // build, no del runtime de las funciones — `env` acá las "hornea" en
