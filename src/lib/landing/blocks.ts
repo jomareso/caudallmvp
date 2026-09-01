@@ -67,6 +67,13 @@ const contentSchemas = {
     title: z.string().min(1),
     body: z.string().min(1),
     ctaLabel: z.string().min(1)
+  }),
+  // Opcional a propósito: todavía no hay un canal de contacto real
+  // (ver ctaUrl arriba) — el footer se muestra igual sin él, solo con
+  // logo y copyright, en vez de bloquear el bloque entero por un campo
+  // que depende de que Reynoso decida el canal.
+  empleador_footer: z.object({
+    contactEmail: z.string().optional()
   })
 } as const;
 
@@ -82,7 +89,8 @@ export const LANDING_BLOCK_TYPES_BY_SLUG: Record<'EMPLEADOR' | 'COLABORADOR', La
     'empleador_solucion',
     'empleador_metodologia',
     'empleador_privacidad',
-    'empleador_cierre'
+    'empleador_cierre',
+    'empleador_footer'
   ]
 };
 
@@ -151,6 +159,7 @@ export const LANDING_BLOCK_FIELDS: Record<LandingBlockType, LandingFieldDescript
     { key: 'title', kind: 'text', labelKey: 'title' },
     { key: 'body', kind: 'textarea', labelKey: 'body' }
   ],
+  empleador_footer: [{ key: 'contactEmail', kind: 'text', labelKey: 'contactEmail', helpKey: 'contactEmailHelp' }],
   empleador_cierre: [
     { key: 'title', kind: 'textarea', labelKey: 'title' },
     { key: 'body', kind: 'textarea', labelKey: 'body' },

@@ -29,13 +29,14 @@ export const dynamic = 'force-dynamic';
 // Cada sección se omite si el bloque no existe o un admin lo marcó no
 // visible (Decisión 4: catálogo con overrides de activar/desactivar).
 export default async function HomePage() {
-  const [hero, reto, solucion, metodologia, privacidad, cierre] = await Promise.all([
+  const [hero, reto, solucion, metodologia, privacidad, cierre, footer] = await Promise.all([
     getVisibleBlockContent('EMPLEADOR', 'empleador_hero'),
     getVisibleBlockContent('EMPLEADOR', 'empleador_reto'),
     getVisibleBlockContent('EMPLEADOR', 'empleador_solucion'),
     getVisibleBlockContent('EMPLEADOR', 'empleador_metodologia'),
     getVisibleBlockContent('EMPLEADOR', 'empleador_privacidad'),
-    getVisibleBlockContent('EMPLEADOR', 'empleador_cierre')
+    getVisibleBlockContent('EMPLEADOR', 'empleador_cierre'),
+    getVisibleBlockContent('EMPLEADOR', 'empleador_footer')
   ]);
 
   // averageCfhiLabel y tiers ya existen para el dashboard real de RRHH
@@ -46,13 +47,28 @@ export default async function HomePage() {
 
   return (
     <div className="bg-white text-quartz">
-      <header className="border-b border-silver/40">
+      <header className="border-b border-silver/40 bg-white/95 lg:sticky lg:top-0 lg:z-10 lg:backdrop-blur">
         <div className="max-w-6xl mx-auto px-6 lg:px-10 py-6 flex items-center justify-between gap-4">
           {/* h-7: mismo tamaño que el logo en la barra de navegación
               persistente del resto del producto (admin, topbar del
               empleado). */}
           {/* eslint-disable-next-line @next/next/no-img-element -- logo estático propio del bundle, no necesita el optimizador de next/image */}
-          <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-7 w-auto" />
+          <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-7 w-auto shrink-0" />
+          {/* Solo desktop: en móvil no hay espacio para un menú sin
+              competir con el CTA (ver el ancho del botón abajo), y la
+              landing sigue siendo de una sola pantalla larga — no hace
+              falta navegar por secciones ahí. */}
+          <nav className="hidden lg:flex items-center gap-7 text-[13.5px] text-nickel">
+            <a href="#solucion" className="hover:text-yale">
+              Cómo funciona
+            </a>
+            <a href="#metodologia" className="hover:text-yale">
+              Metodología
+            </a>
+            <a href="#privacidad" className="hover:text-yale">
+              Privacidad
+            </a>
+          </nav>
           {hero ? <CtaButton href={hero.ctaUrl} label={hero.ctaLabel} variant="solid" /> : null}
         </div>
       </header>
@@ -145,7 +161,7 @@ export default async function HomePage() {
       ) : null}
 
       {metodologia ? (
-        <section className="border-t border-silver/40">
+        <section id="metodologia" className="border-t border-silver/40 scroll-mt-20">
           <div className="max-w-5xl mx-auto px-6 lg:px-10 py-12 lg:py-14 flex flex-col gap-8">
             <div className="flex flex-col gap-3 max-w-xl">
               <p className="text-xs font-semibold tracking-wide uppercase text-cola">{metodologia.eyebrow}</p>
@@ -184,7 +200,7 @@ export default async function HomePage() {
       ) : null}
 
       {privacidad ? (
-        <section className="border-t border-silver/40">
+        <section id="privacidad" className="border-t border-silver/40 scroll-mt-20">
           <div className="max-w-5xl mx-auto px-6 lg:px-10 py-12 lg:py-14">
             <div className="bg-[#F4F5F7] rounded-2xl p-7 lg:p-9 flex gap-4 items-start">
               <span className="text-lg" aria-hidden>
@@ -212,6 +228,24 @@ export default async function HomePage() {
           </div>
         </section>
       ) : null}
+
+      <footer className="border-t border-silver/40">
+        <div className="max-w-6xl mx-auto px-6 lg:px-10 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            {/* eslint-disable-next-line @next/next/no-img-element -- logo estático propio del bundle, no necesita el optimizador de next/image */}
+            <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-5 w-auto" />
+            <span className="text-nickel text-[12.5px]">© {new Date().getFullYear()} caudall. Todos los derechos reservados.</span>
+          </div>
+          {/* Sin contacto todavía (ver empleador_footer en blocks.ts) —
+              se omite en vez de mostrar un placeholder vacío a un
+              visitante real. */}
+          {footer?.contactEmail ? (
+            <a href={`mailto:${footer.contactEmail}`} className="text-[12.5px] text-yale hover:underline">
+              {footer.contactEmail}
+            </a>
+          ) : null}
+        </div>
+      </footer>
     </div>
   );
 }
@@ -243,7 +277,11 @@ function CtaButton({
   variant: 'solid' | 'inverse';
   size?: 'md' | 'lg';
 }) {
-  const sizeClass = size === 'lg' ? 'px-6 py-3 text-[14.5px]' : 'px-5 py-2.5 text-sm';
+  // md en móvil se achica un poco (padding y tipografía): a 390px de
+  // ancho, el logo + "Solicitar una demostración" a tamaño completo no
+  // cabían en una sola fila y desbordaban horizontalmente — encontrado
+  // verificando la PR anterior con Playwright a 390px.
+  const sizeClass = size === 'lg' ? 'px-6 py-3 text-[14.5px]' : 'px-3.5 py-2 text-[13px] sm:px-5 sm:py-2.5 sm:text-sm';
   const variantClass = variant === 'solid' ? 'bg-yale text-white' : 'bg-white text-yale';
   return (
     <a href={href} className={`inline-flex items-center justify-center rounded-lg font-semibold shrink-0 ${sizeClass} ${variantClass}`}>
