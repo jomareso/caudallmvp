@@ -75,7 +75,9 @@ const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
     title: 'Dale a tu programa de bienestar la información que le falta.',
     body: 'Decide con más claridad dónde enfocar tus iniciativas de bienestar.',
     ctaLabel: 'Solicitar una demostración'
-  }
+  },
+  // contactEmail vacío a propósito — ver el comentario en blocks.ts.
+  empleador_footer: {}
 };
 
 export async function syncLandingContent(prisma: PrismaClient): Promise<{ pagesCreated: number; blocksCreated: number }> {

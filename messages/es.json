@@ -417,6 +417,7 @@
       "highlightHelp": "Envuelve una frase entre ** ** para resaltarla con los colores de la marca.",
       "oneLinePerItem": "Un elemento por línea.",
       "ctaUrlHelp": "El botón \"Solicitar una demostración\" (barra superior, hero y cierre) usa este enlace. Pega la URL real cuando la tengas (Calendly, WhatsApp Business, etc.) — mientras tanto puede quedar en \"#\".",
+      "contactEmailHelp": "Se muestra en el footer de la landing. Déjalo vacío mientras no haya un canal de contacto definido — el footer se ve bien sin él.",
       "milestoneYear": "Año",
       "milestoneTitle": "Título",
       "milestoneDescription": "Descripción",
@@ -441,7 +442,8 @@
         "steps": "Pasos",
         "eyebrow": "Antetítulo",
         "milestones": "Línea de tiempo",
-        "closingLine": "Línea de cierre"
+        "closingLine": "Línea de cierre",
+        "contactEmail": "Correo de contacto"
       },
       "blockTypeLabels": {
         "colaborador_hero": "Encabezado",
@@ -452,7 +454,8 @@
         "empleador_solucion": "La solución",
         "empleador_metodologia": "Respaldo metodológico",
         "empleador_privacidad": "Privacidad",
-        "empleador_cierre": "Cierre"
+        "empleador_cierre": "Cierre",
+        "empleador_footer": "Footer"
       },
       "media": {
         "uploadLabel": "Subir una imagen",
