@@ -58,31 +58,35 @@ export default async function HomePage() {
       </header>
 
       {hero ? (
-        <section className="max-w-3xl mx-auto px-6 py-16 lg:py-20 flex flex-col items-center text-center">
-          <h1 className="text-3xl lg:text-[32px] font-semibold leading-snug text-balance">
-            <Highlighted text={hero.headline} />
-          </h1>
-          <p className="mt-4 text-base lg:text-lg text-nickel max-w-lg">{hero.subtitle}</p>
-          <div className="mt-6">
-            <CtaButton href={hero.ctaUrl} label={hero.ctaLabel} variant="solid" size="lg" />
-          </div>
-
-          <div className="mt-14 w-full max-w-2xl bg-[#F4F5F7] border border-silver/40 rounded-2xl p-5 flex flex-col gap-2">
-            <p className="text-[11px] text-nickel text-left">{t('illustrativeLabel')}</p>
-            <div className="flex flex-col sm:flex-row gap-4 text-left">
-              <div className="flex-1 bg-white border border-silver/50 rounded-xl p-5">
-                <p className="text-[11.5px] text-nickel">{tEmpresa('averageCfhiLabel')}</p>
-                <p className="flex items-baseline gap-2 mt-1">
-                  <span className="text-3xl font-semibold leading-none">61</span>
-                  <span className="text-xs text-nickel">{t('cfhiOutOf')}</span>
-                </p>
-                <p className="text-[11px] text-ok mt-1">{t('cfhiVsNational')}</p>
+        <section className="max-w-5xl mx-auto px-6 py-14 lg:py-16">
+          <div className="flex flex-col items-center text-center gap-10 lg:grid lg:grid-cols-2 lg:items-center lg:text-left lg:gap-12">
+            <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+              <h1 className="text-3xl lg:text-[34px] font-semibold leading-snug text-balance">
+                <Highlighted text={hero.headline} />
+              </h1>
+              <p className="mt-4 text-base lg:text-lg text-nickel max-w-lg">{hero.subtitle}</p>
+              <div className="mt-6">
+                <CtaButton href={hero.ctaUrl} label={hero.ctaLabel} variant="solid" size="lg" />
               </div>
-              <div className="flex-1 bg-white border border-silver/50 rounded-xl p-5 flex flex-col gap-2">
-                <p className="text-[11.5px] text-nickel">{t('teamDistributionLabel')}</p>
-                <SegmentBar label={tEmpresa('tiers.LOW')} pct={28} color="#791F1F" />
-                <SegmentBar label={tEmpresa('tiers.MID')} pct={45} color="#854F0B" />
-                <SegmentBar label={tEmpresa('tiers.HIGH')} pct={27} color="#3B6D11" />
+            </div>
+
+            <div className="w-full max-w-2xl bg-[#F4F5F7] border border-silver/40 rounded-2xl p-5 flex flex-col gap-2">
+              <p className="text-[11px] text-nickel text-left">{t('illustrativeLabel')}</p>
+              <div className="flex flex-col sm:flex-row lg:flex-col gap-4 text-left">
+                <div className="flex-1 bg-white border border-silver/50 rounded-xl p-5">
+                  <p className="text-[11.5px] text-nickel">{tEmpresa('averageCfhiLabel')}</p>
+                  <p className="flex items-baseline gap-2 mt-1">
+                    <span className="text-3xl font-semibold leading-none">47</span>
+                    <span className="text-xs text-nickel">{t('cfhiOutOf')}</span>
+                  </p>
+                  <p className="text-[11px] text-bad mt-1">{t('cfhiVsNational')}</p>
+                </div>
+                <div className="flex-1 bg-white border border-silver/50 rounded-xl p-5 flex flex-col gap-2">
+                  <p className="text-[11.5px] text-nickel">{t('teamDistributionLabel')}</p>
+                  <SegmentBar label={tEmpresa('tiers.LOW')} pct={35} color="#791F1F" />
+                  <SegmentBar label={tEmpresa('tiers.MID')} pct={45} color="#854F0B" />
+                  <SegmentBar label={tEmpresa('tiers.HIGH')} pct={20} color="#3B6D11" />
+                </div>
               </div>
             </div>
           </div>
@@ -91,57 +95,50 @@ export default async function HomePage() {
 
       {reto ? (
         <section className="border-t border-silver/40">
-          <div className="max-w-5xl mx-auto px-6 lg:px-10 py-12 lg:py-14 grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-10 lg:gap-16 items-center">
-            <div className="flex flex-col gap-3">
-              <h2 className="text-xl lg:text-2xl font-semibold">{reto.title}</h2>
-              <p className="text-[15px] text-nickel leading-relaxed max-w-lg">{reto.body}</p>
-            </div>
-            <div className="flex items-end justify-center gap-2.5 h-24">
-              {[38, 64, 26, 52, 44].map((h, i) => (
-                <div key={i} className="w-2.5 rounded-sm bg-silver" style={{ height: `${h}px`, transform: `rotate(${[-6, 4, -3, 7, -8][i]}deg)` }} />
-              ))}
-            </div>
+          <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10 lg:py-12 flex flex-col gap-3">
+            <span className="w-9 h-9 rounded-full bg-[#F4F5F7] flex items-center justify-center text-base" aria-hidden>
+              🧭
+            </span>
+            <h2 className="text-xl lg:text-2xl font-semibold">{reto.title}</h2>
+            <p className="text-[15px] text-nickel leading-relaxed">{reto.body}</p>
           </div>
         </section>
       ) : null}
 
       {solucion ? (
-        <section className="border-t border-silver/40">
-          <div className="max-w-5xl mx-auto px-6 lg:px-10 py-12 lg:py-14 grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-10 lg:gap-16 items-center">
-            <div className="flex flex-col gap-7">
-              <div className="flex flex-col gap-3">
-                <h2 className="text-xl lg:text-2xl font-semibold">{solucion.title}</h2>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {solucion.tags.map((tag, i) => (
-                    <span key={tag} className="flex items-center gap-2">
-                      {i > 0 ? <span className="text-silver text-sm">+</span> : null}
-                      <span
-                        className="text-xs font-bold px-3 py-1.5 rounded-full"
-                        style={{
-                          color: [ '#0F5499', '#0783D9', '#34C1EE'][i % 3],
-                          background: ['rgba(15,84,153,0.08)', 'rgba(7,131,217,0.08)', 'rgba(52,193,238,0.12)'][i % 3]
-                        }}
-                      >
-                        {tag}
-                      </span>
+        <section id="solucion" className="border-t border-silver/40 scroll-mt-20">
+          <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10 lg:py-12 flex flex-col gap-7">
+            <div className="flex flex-col gap-3">
+              <h2 className="text-xl lg:text-2xl font-semibold">{solucion.title}</h2>
+              <div className="flex items-center gap-2 flex-wrap">
+                {solucion.tags.map((tag, i) => (
+                  <span key={tag} className="flex items-center gap-2">
+                    {i > 0 ? <span className="text-silver text-sm">+</span> : null}
+                    <span
+                      className="text-xs font-bold px-3 py-1.5 rounded-full"
+                      style={{
+                        color: [ '#0F5499', '#0783D9', '#34C1EE'][i % 3],
+                        background: ['rgba(15,84,153,0.08)', 'rgba(7,131,217,0.08)', 'rgba(52,193,238,0.12)'][i % 3]
+                      }}
+                    >
+                      {tag}
                     </span>
-                  ))}
-                </div>
-                <p className="text-[15px] text-nickel leading-relaxed max-w-lg">{solucion.body}</p>
-              </div>
-              <div className="flex items-center gap-3.5 flex-wrap">
-                {solucion.steps.map((step, i) => (
-                  <span key={step} className="flex items-center gap-3.5">
-                    {i > 0 ? <span className="text-cola text-sm">→</span> : null}
-                    <span className="text-base font-semibold">{step}</span>
                   </span>
                 ))}
               </div>
+              <p className="text-[15px] text-nickel leading-relaxed">{solucion.body}</p>
             </div>
-            <div className="flex items-end justify-center gap-3 h-32">
-              <div className="w-3.5 rounded" style={{ height: '56px', background: '#0F5499' }} />
-              <div className="w-3.5 rounded" style={{ height: '88px', background: '#0783D9' }} />
-              <div className="w-3.5 rounded" style={{ height: '120px', background: '#34C1EE' }} />
+            {/* Cada paso agrupado con su flecha en un solo span
+                (whitespace-nowrap): si envuelve en mobile, envuelve la
+                unidad completa — evita que una flecha quede huérfana al
+                inicio de línea. */}
+            <div className="flex items-center gap-3.5 flex-wrap text-base font-semibold">
+              {solucion.steps.map((step, i) => (
+                <span key={step} className="whitespace-nowrap">
+                  {i > 0 ? <span className="text-cola text-sm mr-3.5">→</span> : null}
+                  {step}
+                </span>
+              ))}
             </div>
           </div>
         </section>
