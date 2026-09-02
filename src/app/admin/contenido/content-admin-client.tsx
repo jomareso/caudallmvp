@@ -41,6 +41,8 @@ type Labels = {
   highlightHelp: string;
   oneLinePerItem: string;
   ctaUrlHelp: string;
+  contactEmailHelp: string;
+  bannerImagesHelp: string;
   milestoneYear: string;
   milestoneTitle: string;
   milestoneDescription: string;
@@ -48,6 +50,7 @@ type Labels = {
   milestoneImageNone: string;
   addMilestone: string;
   removeMilestone: string;
+  mediaSlotNone: string;
   fields: Record<string, string>;
   blockTypeLabels: Record<string, string>;
   media: Record<string, string>;
@@ -273,7 +276,9 @@ function FieldInput({
   onChange: (next: unknown) => void;
 }) {
   const label = labels.fields[field.labelKey] ?? field.key;
-  const help = field.helpKey ? labels[field.helpKey as 'highlightHelp' | 'oneLinePerItem' | 'ctaUrlHelp'] : undefined;
+  const help = field.helpKey
+    ? labels[field.helpKey as 'highlightHelp' | 'oneLinePerItem' | 'ctaUrlHelp' | 'contactEmailHelp' | 'bannerImagesHelp']
+    : undefined;
 
   if (field.kind === 'text') {
     return (
@@ -324,6 +329,42 @@ function FieldInput({
         />
         {help ? <span className="text-[11px] text-nickel">{help}</span> : null}
       </label>
+    );
+  }
+
+  if (field.kind === 'mediaSlots') {
+    // Longitud fija 3 (ver bannerImages en blocks.ts) — a diferencia de
+    // milestones, no hay agregar/quitar, cada slot puede quedar vacío.
+    const slots = Array.isArray(value) ? (value as (string | null)[]) : [null, null, null];
+
+    function updateSlot(index: number, assetId: string | null) {
+      const next = [...slots];
+      next[index] = assetId;
+      onChange(next);
+    }
+
+    return (
+      <div className="flex flex-col gap-1">
+        <span className="text-xs text-nickel">{label}</span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {[0, 1, 2].map((index) => (
+            <select
+              key={index}
+              value={slots[index] ?? ''}
+              onChange={(event) => updateSlot(index, event.target.value || null)}
+              className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz"
+            >
+              <option value="">{labels.mediaSlotNone}</option>
+              {media.map((asset) => (
+                <option key={asset.id} value={asset.id}>
+                  {asset.filename}
+                </option>
+              ))}
+            </select>
+          ))}
+        </div>
+        {help ? <span className="text-[11px] text-nickel">{help}</span> : null}
+      </div>
     );
   }
 
@@ -444,7 +485,7 @@ function MediaLibrary({ media, labels }: { media: MediaDTO[]; labels: Labels }) 
       <form onSubmit={handleUpload} className="bg-white border border-silver/60 rounded-xl p-4 flex items-end gap-3">
         <label className="flex flex-col gap-1 flex-1">
           <span className="text-xs text-nickel">{labels.media.uploadLabel}</span>
-          <input name="file" type="file" accept="image/png,image/jpeg,image/webp" className="text-sm text-quartz" />
+          <input name="file" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" className="text-sm text-quartz" />
         </label>
         <button
           type="submit"
@@ -462,8 +503,14 @@ function MediaLibrary({ media, labels }: { media: MediaDTO[]; labels: Labels }) 
         <div className="grid grid-cols-3 gap-4">
           {media.map((asset) => (
             <div key={asset.id} className="bg-white border border-silver/60 rounded-xl overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable */}
-              <img src={`/api/media/${asset.id}`} alt={asset.filename} className="w-full aspect-video object-cover bg-silver/20" />
+              {asset.mimeType === 'application/pdf' ? (
+                <div className="w-full aspect-video bg-silver/20 flex items-center justify-center text-2xl" aria-hidden>
+                  📄
+                </div>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
+                <img src={`/api/media/${asset.id}`} alt={asset.filename} className="w-full aspect-video object-cover bg-silver/20" />
+              )}
               <div className="p-3 flex flex-col gap-2">
                 <p className="text-xs text-quartz truncate" title={asset.filename}>
                   {asset.filename}

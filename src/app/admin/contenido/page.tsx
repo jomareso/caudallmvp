@@ -44,6 +44,8 @@ export default async function AdminContenidoPage() {
     highlightHelp: t('highlightHelp'),
     oneLinePerItem: t('oneLinePerItem'),
     ctaUrlHelp: t('ctaUrlHelp'),
+    contactEmailHelp: t('contactEmailHelp'),
+    bannerImagesHelp: t('bannerImagesHelp'),
     milestoneYear: t('milestoneYear'),
     milestoneTitle: t('milestoneTitle'),
     milestoneDescription: t('milestoneDescription'),
@@ -51,6 +53,7 @@ export default async function AdminContenidoPage() {
     milestoneImageNone: t('milestoneImageNone'),
     addMilestone: t('addMilestone'),
     removeMilestone: t('removeMilestone'),
+    mediaSlotNone: t('mediaSlotNone'),
     fields: t.raw('fields') as Record<string, string>,
     blockTypeLabels: t.raw('blockTypeLabels') as Record<string, string>,
     media: t.raw('media') as Record<string, string>

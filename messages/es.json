@@ -421,10 +421,12 @@
       "milestoneYear": "Año",
       "milestoneTitle": "Título",
       "milestoneDescription": "Descripción",
-      "milestoneImage": "Imagen",
-      "milestoneImageNone": "Sin imagen (se muestra el ícono de referencia)",
+      "milestoneImage": "Informe (PDF o imagen)",
+      "milestoneImageNone": "Sin archivo (no se muestra enlace)",
       "addMilestone": "Agregar hito",
       "removeMilestone": "Quitar",
+      "mediaSlotNone": "Sin foto",
+      "bannerImagesHelp": "Hasta 3 fotos genéricas que rotan solas (no van atadas a un año específico) — se omiten las que queden vacías.",
       "fields": {
         "titleLine1": "Línea 1 del título",
         "titleLine2": "Línea 2 del título",
@@ -443,6 +445,8 @@
         "eyebrow": "Antetítulo",
         "milestones": "Línea de tiempo",
         "closingLine": "Línea de cierre",
+        "bannerImages": "Banner rotativo",
+        "findings": "Hallazgos",
         "contactEmail": "Correo de contacto"
       },
       "blockTypeLabels": {

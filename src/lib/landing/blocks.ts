@@ -56,6 +56,19 @@ const contentSchemas = {
     eyebrow: z.string().min(1),
     title: z.string().min(1),
     body: z.string().min(1),
+    // Fotos genéricas del trabajo de campo, sin atarse a un año — banner
+    // rotativo, distinto de milestones (que sí es por año). Longitud fija
+    // 3; cada slot puede quedar sin foto (null) hasta que se suba una.
+    bannerImages: z.tuple([z.string().nullable(), z.string().nullable(), z.string().nullable()]),
+    // Hallazgos reales del benchmark nacional — cintillo estático (no
+    // animado: ver decisión de UX, dos animaciones simultáneas con el
+    // banner de fotos era demasiado). Texto plano, no fórmulas ni
+    // cálculo en vivo — se actualiza a mano si cambia el dataset.
+    findings: z.array(z.string().min(1)),
+    // Cada milestone ahora enlaza a un informe (PDF) en vez de mostrar
+    // una foto — mediaAssetId puede apuntar a cualquier archivo del
+    // banco de medios, imagen o PDF (ver ALLOWED_MEDIA_TYPES en
+    // admin/contenido/actions.ts).
     milestones: z.array(milestoneSchema),
     closingLine: z.string().min(1)
   }),
@@ -111,7 +124,7 @@ export function parseLandingBlockContent<T extends LandingBlockType>(type: T, co
 // archivo, no hay generación automática desde el schema de zod porque los
 // tipos de campo (texto vs. lista vs. hitos) no se pueden inferir de zod
 // solo con `z.string()`/`z.array()`.
-export type LandingFieldKind = 'text' | 'textarea' | 'list' | 'milestones';
+export type LandingFieldKind = 'text' | 'textarea' | 'list' | 'milestones' | 'mediaSlots';
 
 export type LandingFieldDescriptor = {
   key: string;
@@ -152,6 +165,8 @@ export const LANDING_BLOCK_FIELDS: Record<LandingBlockType, LandingFieldDescript
     { key: 'eyebrow', kind: 'text', labelKey: 'eyebrow' },
     { key: 'title', kind: 'text', labelKey: 'title' },
     { key: 'body', kind: 'textarea', labelKey: 'body' },
+    { key: 'bannerImages', kind: 'mediaSlots', labelKey: 'bannerImages', helpKey: 'bannerImagesHelp' },
+    { key: 'findings', kind: 'list', labelKey: 'findings', helpKey: 'oneLinePerItem' },
     { key: 'milestones', kind: 'milestones', labelKey: 'milestones' },
     { key: 'closingLine', kind: 'text', labelKey: 'closingLine' }
   ],

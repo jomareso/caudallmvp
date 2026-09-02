@@ -74,8 +74,13 @@ export async function moveBlock(blockId: string, direction: 'up' | 'down'): Prom
   return { ok: true };
 }
 
-const ALLOWED_MEDIA_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
-const MAX_MEDIA_SIZE_BYTES = 4 * 1024 * 1024;
+// application/pdf: para los informes de metodología (ver milestones en
+// blocks.ts) — antes solo se podían subir imágenes, así que la sección
+// de metodología no podía enlazar los estudios reales.
+const ALLOWED_MEDIA_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'application/pdf']);
+// 10MB: 4MB alcanzaba para fotos pero se quedaba corto para un informe
+// real de varias páginas.
+const MAX_MEDIA_SIZE_BYTES = 10 * 1024 * 1024;
 
 export async function uploadMediaAsset(formData: FormData): Promise<ActionResult> {
   await requireAdm();
