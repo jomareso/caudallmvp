@@ -12,6 +12,15 @@ import { useEffect, useState } from 'react';
 // cliente), pero eso no permite reaccionar a un click. El auto-avance se
 // reinicia cada vez que cambia `index` (manual o automático), así un
 // click no queda "compitiendo" con el timer.
+//
+// object-contain, no object-cover: una foto de evento real (varias
+// personas, banners a los lados) no siempre tiene la proporción 21/7 del
+// marco — recortarla (cover) le cortaba contenido real a algunas fotos
+// (encontrado con una foto de panel: quedaba tan encimada que perdía el
+// logo y la pantalla). contain siempre muestra la foto completa, sin
+// adivinar dónde recortar — el fondo (bg-[#F4F5F7], el mismo gris que ya
+// usa el resto de la landing) rellena el margen cuando la proporción no
+// calza exacto, en vez de dejarlo en blanco.
 export function BannerRotator({ imageIds }: { imageIds: string[] }) {
   const n = imageIds.length;
   const [index, setIndex] = useState(0);
@@ -27,14 +36,17 @@ export function BannerRotator({ imageIds }: { imageIds: string[] }) {
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <div className="relative w-full rounded-2xl overflow-hidden border border-silver/40" style={{ aspectRatio: '21 / 7' }}>
+      <div
+        className="relative w-full rounded-2xl overflow-hidden border border-silver/40 bg-[#F4F5F7]"
+        style={{ aspectRatio: '21 / 7' }}
+      >
         {imageIds.map((id, i) => (
           // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
           <img
             key={id}
             src={`/api/media/${id}`}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-700"
+            className="absolute inset-0 w-full h-full object-contain transition-opacity duration-700"
             style={{ opacity: i === index ? 1 : 0 }}
           />
         ))}
