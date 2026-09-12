@@ -17,6 +17,18 @@ const milestoneSchema = z.object({
 });
 export type LandingMilestone = z.infer<typeof milestoneSchema>;
 
+// Antes `findings` era una sola oración por hallazgo, renderizada como
+// texto corrido — no había forma de que la cifra fuera protagonista
+// visual, solo un **resaltado** dentro de la frase. `value` es la cifra
+// (o palabra clave, cuando el hallazgo no es numérico — ver "ahorro" en
+// el seed) que se muestra grande; `label` es la frase de apoyo, chica,
+// debajo — mismo contrato que un stat tile.
+const findingSchema = z.object({
+  value: z.string().min(1),
+  label: z.string().min(1)
+});
+export type LandingFinding = z.infer<typeof findingSchema>;
+
 const contentSchemas = {
   colaborador_hero: z.object({
     titleLine1: z.string().min(1),
@@ -62,9 +74,9 @@ const contentSchemas = {
     bannerImages: z.tuple([z.string().nullable(), z.string().nullable(), z.string().nullable()]),
     // Hallazgos reales del benchmark nacional — cintillo estático (no
     // animado: ver decisión de UX, dos animaciones simultáneas con el
-    // banner de fotos era demasiado). Texto plano, no fórmulas ni
+    // banner de fotos era demasiado). value/label, no fórmulas ni
     // cálculo en vivo — se actualiza a mano si cambia el dataset.
-    findings: z.array(z.string().min(1)),
+    findings: z.array(findingSchema),
     // Cada milestone ahora enlaza a un informe (PDF) en vez de mostrar
     // una foto — mediaAssetId puede apuntar a cualquier archivo del
     // banco de medios, imagen o PDF (ver ALLOWED_MEDIA_TYPES en
@@ -124,7 +136,7 @@ export function parseLandingBlockContent<T extends LandingBlockType>(type: T, co
 // archivo, no hay generación automática desde el schema de zod porque los
 // tipos de campo (texto vs. lista vs. hitos) no se pueden inferir de zod
 // solo con `z.string()`/`z.array()`.
-export type LandingFieldKind = 'text' | 'textarea' | 'list' | 'milestones' | 'mediaSlots';
+export type LandingFieldKind = 'text' | 'textarea' | 'list' | 'milestones' | 'mediaSlots' | 'findings';
 
 export type LandingFieldDescriptor = {
   key: string;
@@ -166,7 +178,7 @@ export const LANDING_BLOCK_FIELDS: Record<LandingBlockType, LandingFieldDescript
     { key: 'title', kind: 'text', labelKey: 'title' },
     { key: 'body', kind: 'textarea', labelKey: 'body' },
     { key: 'bannerImages', kind: 'mediaSlots', labelKey: 'bannerImages', helpKey: 'bannerImagesHelp' },
-    { key: 'findings', kind: 'list', labelKey: 'findings', helpKey: 'oneLinePerItem' },
+    { key: 'findings', kind: 'findings', labelKey: 'findings', helpKey: 'findingsHelp' },
     { key: 'milestones', kind: 'milestones', labelKey: 'milestones' },
     { key: 'closingLine', kind: 'text', labelKey: 'closingLine' }
   ],

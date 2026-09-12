@@ -7,7 +7,8 @@ import {
   isLandingBlockType,
   type LandingBlockType,
   type LandingFieldDescriptor,
-  type LandingMilestone
+  type LandingMilestone,
+  type LandingFinding
 } from '@/lib/landing/blocks';
 import { updateBlockContent, toggleBlockVisible, moveBlock, uploadMediaAsset, deleteMediaAsset } from './actions';
 
@@ -43,6 +44,7 @@ type Labels = {
   ctaUrlHelp: string;
   contactEmailHelp: string;
   bannerImagesHelp: string;
+  findingsHelp: string;
   milestoneYear: string;
   milestoneTitle: string;
   milestoneDescription: string;
@@ -51,6 +53,10 @@ type Labels = {
   addMilestone: string;
   removeMilestone: string;
   mediaSlotNone: string;
+  findingValue: string;
+  findingLabel: string;
+  addFinding: string;
+  removeFinding: string;
   fields: Record<string, string>;
   blockTypeLabels: Record<string, string>;
   media: Record<string, string>;
@@ -277,7 +283,7 @@ function FieldInput({
 }) {
   const label = labels.fields[field.labelKey] ?? field.key;
   const help = field.helpKey
-    ? labels[field.helpKey as 'highlightHelp' | 'oneLinePerItem' | 'ctaUrlHelp' | 'contactEmailHelp' | 'bannerImagesHelp']
+    ? labels[field.helpKey as 'highlightHelp' | 'oneLinePerItem' | 'ctaUrlHelp' | 'contactEmailHelp' | 'bannerImagesHelp' | 'findingsHelp']
     : undefined;
 
   if (field.kind === 'text') {
@@ -362,6 +368,60 @@ function FieldInput({
               ))}
             </select>
           ))}
+        </div>
+        {help ? <span className="text-[11px] text-nickel">{help}</span> : null}
+      </div>
+    );
+  }
+
+  if (field.kind === 'findings') {
+    const findings = Array.isArray(value) ? (value as LandingFinding[]) : [];
+
+    function updateFinding(index: number, patch: Partial<LandingFinding>) {
+      const next = findings.map((f, i) => (i === index ? { ...f, ...patch } : f));
+      onChange(next);
+    }
+
+    function removeFinding(index: number) {
+      onChange(findings.filter((_, i) => i !== index));
+    }
+
+    function addFinding() {
+      onChange([...findings, { value: '', label: '' }]);
+    }
+
+    return (
+      <div className="flex flex-col gap-1">
+        <span className="text-xs text-nickel">{label}</span>
+        <div className="flex flex-col gap-3">
+          {findings.map((finding, index) => (
+            <div key={index} className="border border-silver/60 rounded-lg p-3 flex flex-col gap-2 bg-white">
+              <input
+                type="text"
+                placeholder={labels.findingValue}
+                value={finding.value}
+                onChange={(event) => updateFinding(index, { value: event.target.value })}
+                className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz font-medium"
+              />
+              <input
+                type="text"
+                placeholder={labels.findingLabel}
+                value={finding.label}
+                onChange={(event) => updateFinding(index, { label: event.target.value })}
+                className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz"
+              />
+              <button
+                type="button"
+                onClick={() => removeFinding(index)}
+                className="text-xs text-bad self-start hover:underline"
+              >
+                {labels.removeFinding}
+              </button>
+            </div>
+          ))}
+          <button type="button" onClick={addFinding} className="text-xs text-yale font-medium self-start hover:underline">
+            + {labels.addFinding}
+          </button>
         </div>
         {help ? <span className="text-[11px] text-nickel">{help}</span> : null}
       </div>

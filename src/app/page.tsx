@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { getVisibleBlockContent } from '@/lib/landing/get-landing-content';
 import { splitHighlightMarkup } from '@/lib/landing/blocks';
+import { BannerRotator } from './banner-rotator';
 
 export const metadata: Metadata = {
   title: 'Caudall para empresas — Bienestar financiero con datos reales'
@@ -175,12 +176,21 @@ export default async function HomePage() {
                 runtime hasta que se actualice desde /admin/contenido. */}
             <BannerRotator imageIds={(metodologia.bannerImages ?? []).filter((id): id is string => id !== null)} />
 
+            {/* Cintillo de hallazgos como fila de stat tiles: la cifra
+                (value) es lo primero que se lee — grande, en el gradiente
+                de marca — con la frase de apoyo (label) chica debajo. Antes
+                era una sola oración por hallazgo (texto corrido con un
+                **resaltado** en el medio); así el número nunca era
+                protagonista, solo una palabra más dentro del párrafo. */}
             {(metodologia.findings ?? []).length > 0 ? (
-              <div className="flex flex-col gap-px rounded-xl overflow-hidden bg-gradient-to-r from-yale to-cola">
+              <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-silver/50 rounded-xl border border-silver/50 bg-[#FAFAFC] overflow-hidden">
                 {(metodologia.findings ?? []).map((finding, i) => (
-                  <p key={i} className="text-white text-[12.5px] font-medium px-5 py-2.5">
-                    {finding}
-                  </p>
+                  <div key={i} className="flex flex-col gap-1.5 px-6 py-6">
+                    <p className="text-[28px] leading-none font-semibold bg-gradient-to-r from-yale to-cola bg-clip-text text-transparent text-balance">
+                      {finding.value}
+                    </p>
+                    <p className="text-[12.5px] text-nickel leading-snug">{finding.label}</p>
+                  </div>
                 ))}
               </div>
             ) : null}
@@ -320,54 +330,6 @@ function SegmentBar({ label, pct, color }: { label: string; pct: number; color: 
       <span className="flex-1 h-1.5 rounded bg-black/5 overflow-hidden">
         <span className="block h-full rounded" style={{ width: `${pct}%`, background: color }} />
       </span>
-    </div>
-  );
-}
-
-// Banner de fotos genéricas del trabajo de campo, sin atarse a un año
-// (distinto de los milestones/informes, que sí son por año). Se omite
-// del todo si no hay ninguna foto cargada — no muestra un placeholder
-// vacío a un visitante real. Con 1 foto queda estática; con 2 o 3 hace
-// crossfade en CSS puro (sin JS/cliente). Respeta prefers-reduced-motion.
-function BannerRotator({ imageIds }: { imageIds: string[] }) {
-  if (imageIds.length === 0) return null;
-  const n = imageIds.length;
-  const secondsPerSlide = 4;
-  const durationSeconds = n * secondsPerSlide;
-  const slotPct = 100 / n;
-  const fadePct = Math.min(2, slotPct / 4);
-
-  return (
-    <div className="relative w-full rounded-2xl overflow-hidden border border-silver/40" style={{ aspectRatio: '21 / 7' }}>
-      {imageIds.map((id, i) => (
-        // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-        <img
-          key={id}
-          src={`/api/media/${id}`}
-          alt=""
-          className="caudall-banner-slide absolute inset-0 w-full h-full object-cover"
-          style={
-            n > 1
-              ? { animation: `caudall-banner-fade ${durationSeconds}s infinite`, animationDelay: `${i * secondsPerSlide}s` }
-              : undefined
-          }
-        />
-      ))}
-      {n > 1 ? (
-        <style>{`
-          @keyframes caudall-banner-fade {
-            0% { opacity: 0; }
-            ${fadePct}% { opacity: 1; }
-            ${(slotPct - fadePct).toFixed(2)}% { opacity: 1; }
-            ${slotPct.toFixed(2)}% { opacity: 0; }
-            100% { opacity: 0; }
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .caudall-banner-slide { animation: none !important; opacity: 0; }
-            .caudall-banner-slide:first-child { opacity: 1; }
-          }
-        `}</style>
-      ) : null}
     </div>
   );
 }
