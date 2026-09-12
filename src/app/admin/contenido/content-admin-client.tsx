@@ -8,7 +8,8 @@ import {
   type LandingBlockType,
   type LandingFieldDescriptor,
   type LandingMilestone,
-  type LandingFinding
+  type LandingFinding,
+  type LandingBannerSlot
 } from '@/lib/landing/blocks';
 import { updateBlockContent, toggleBlockVisible, moveBlock, uploadMediaAsset, deleteMediaAsset } from './actions';
 
@@ -53,6 +54,9 @@ type Labels = {
   addMilestone: string;
   removeMilestone: string;
   mediaSlotNone: string;
+  focalTop: string;
+  focalCenter: string;
+  focalBottom: string;
   findingValue: string;
   findingLabel: string;
   addFinding: string;
@@ -341,32 +345,57 @@ function FieldInput({
   if (field.kind === 'mediaSlots') {
     // Longitud fija 3 (ver bannerImages en blocks.ts) — a diferencia de
     // milestones, no hay agregar/quitar, cada slot puede quedar vacío.
-    const slots = Array.isArray(value) ? (value as (string | null)[]) : [null, null, null];
+    // focalY: no hay un único punto de recorte que funcione para
+    // cualquier foto (una necesita "arriba" para no perder cabezas, otra
+    // "centro" para no perder el escenario) — se elige por foto.
+    const rawSlots = Array.isArray(value) ? (value as LandingBannerSlot[]) : [];
+    const slots: LandingBannerSlot[] = [0, 1, 2].map((i) => rawSlots[i] ?? { assetId: null, focalY: 'center' });
 
-    function updateSlot(index: number, assetId: string | null) {
-      const next = [...slots];
-      next[index] = assetId;
+    function updateSlot(index: number, patch: Partial<LandingBannerSlot>) {
+      const next = slots.map((slot, i) => (i === index ? { ...slot, ...patch } : slot));
       onChange(next);
     }
+
+    const focalOptions: Array<{ value: LandingBannerSlot['focalY']; labelKey: 'focalTop' | 'focalCenter' | 'focalBottom' }> = [
+      { value: 'top', labelKey: 'focalTop' },
+      { value: 'center', labelKey: 'focalCenter' },
+      { value: 'bottom', labelKey: 'focalBottom' }
+    ];
 
     return (
       <div className="flex flex-col gap-1">
         <span className="text-xs text-nickel">{label}</span>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          {[0, 1, 2].map((index) => (
-            <select
-              key={index}
-              value={slots[index] ?? ''}
-              onChange={(event) => updateSlot(index, event.target.value || null)}
-              className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz"
-            >
-              <option value="">{labels.mediaSlotNone}</option>
-              {media.map((asset) => (
-                <option key={asset.id} value={asset.id}>
-                  {asset.filename}
-                </option>
-              ))}
-            </select>
+          {slots.map((slot, index) => (
+            <div key={index} className="flex flex-col gap-1.5">
+              <select
+                value={slot.assetId ?? ''}
+                onChange={(event) => updateSlot(index, { assetId: event.target.value || null })}
+                className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz"
+              >
+                <option value="">{labels.mediaSlotNone}</option>
+                {media.map((asset) => (
+                  <option key={asset.id} value={asset.id}>
+                    {asset.filename}
+                  </option>
+                ))}
+              </select>
+              <div className="flex border border-silver rounded-lg overflow-hidden">
+                {focalOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    disabled={!slot.assetId}
+                    onClick={() => updateSlot(index, { focalY: opt.value })}
+                    className={`flex-1 text-[11px] py-1 disabled:opacity-40 disabled:cursor-not-allowed ${
+                      slot.focalY === opt.value ? 'bg-yale text-white' : 'bg-white text-nickel'
+                    }`}
+                  >
+                    {labels[opt.labelKey]}
+                  </button>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
         {help ? <span className="text-[11px] text-nickel">{help}</span> : null}

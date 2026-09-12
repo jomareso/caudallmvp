@@ -431,7 +431,10 @@
       "addMilestone": "Agregar hito",
       "removeMilestone": "Quitar",
       "mediaSlotNone": "Sin foto",
-      "bannerImagesHelp": "Hasta 3 fotos genéricas que rotan solas (no van atadas a un año específico) — se omiten las que queden vacías.",
+      "bannerImagesHelp": "Hasta 3 fotos genéricas que rotan solas (no van atadas a un año específico) — se omiten las que queden vacías. El encuadre decide qué parte de la foto se ve al recortarla al ancho del banner.",
+      "focalTop": "Arriba",
+      "focalCenter": "Centro",
+      "focalBottom": "Abajo",
       "fields": {
         "titleLine1": "Línea 1 del título",
         "titleLine2": "Línea 2 del título",
