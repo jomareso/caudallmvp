@@ -18,9 +18,14 @@ import { useEffect, useState } from 'react';
 // marco — recortarla (cover) le cortaba contenido real a algunas fotos
 // (encontrado con una foto de panel: quedaba tan encimada que perdía el
 // logo y la pantalla). contain siempre muestra la foto completa, sin
-// adivinar dónde recortar — el fondo (bg-[#F4F5F7], el mismo gris que ya
-// usa el resto de la landing) rellena el margen cuando la proporción no
-// calza exacto, en vez de dejarlo en blanco.
+// adivinar dónde recortar.
+//
+// El margen que deja contain (foto vertical en un marco 21/7 bien ancho)
+// no se rellena con un color plano — se ve a medio hacer, como si algo
+// faltara. En vez de eso, atrás va la misma foto ampliada y desenfocada
+// (mismo patrón que carátulas de Spotify/Apple TV que no calzan con su
+// marco): dos <img> por slide, la de atrás en object-cover + blur, la de
+// adelante en object-contain nítida encima.
 export function BannerRotator({ imageIds }: { imageIds: string[] }) {
   const n = imageIds.length;
   const [index, setIndex] = useState(0);
@@ -41,14 +46,17 @@ export function BannerRotator({ imageIds }: { imageIds: string[] }) {
         style={{ aspectRatio: '21 / 7' }}
       >
         {imageIds.map((id, i) => (
-          // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-          <img
-            key={id}
-            src={`/api/media/${id}`}
-            alt=""
-            className="absolute inset-0 w-full h-full object-contain transition-opacity duration-700"
-            style={{ opacity: i === index ? 1 : 0 }}
-          />
+          <div key={id} className="absolute inset-0 transition-opacity duration-700" style={{ opacity: i === index ? 1 : 0 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable */}
+            <img
+              src={`/api/media/${id}`}
+              alt=""
+              aria-hidden
+              className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl brightness-75 saturate-150"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable */}
+            <img src={`/api/media/${id}`} alt="" className="absolute inset-0 w-full h-full object-contain" />
+          </div>
         ))}
       </div>
       {n > 1 ? (
