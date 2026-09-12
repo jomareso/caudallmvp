@@ -66,10 +66,12 @@ const contentSchemas = {
     ctaUrl: z.string().min(1)
   }),
   empleador_reto: z.object({
+    eyebrow: z.string().min(1),
     title: z.string().min(1),
     body: z.string().min(1)
   }),
   empleador_solucion: z.object({
+    eyebrow: z.string().min(1),
     title: z.string().min(1),
     tags: z.array(z.string().min(1)),
     body: z.string().min(1),
@@ -176,10 +178,12 @@ export const LANDING_BLOCK_FIELDS: Record<LandingBlockType, LandingFieldDescript
     { key: 'ctaUrl', kind: 'text', labelKey: 'ctaUrl', helpKey: 'ctaUrlHelp' }
   ],
   empleador_reto: [
+    { key: 'eyebrow', kind: 'text', labelKey: 'eyebrow' },
     { key: 'title', kind: 'textarea', labelKey: 'title' },
     { key: 'body', kind: 'textarea', labelKey: 'body' }
   ],
   empleador_solucion: [
+    { key: 'eyebrow', kind: 'text', labelKey: 'eyebrow' },
     { key: 'title', kind: 'text', labelKey: 'title' },
     { key: 'tags', kind: 'list', labelKey: 'tags', helpKey: 'oneLinePerItem' },
     { key: 'body', kind: 'textarea', labelKey: 'body' },
