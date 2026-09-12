@@ -55,6 +55,10 @@ export default async function AdminContenidoPage() {
     addMilestone: t('addMilestone'),
     removeMilestone: t('removeMilestone'),
     mediaSlotNone: t('mediaSlotNone'),
+    findingValue: t('findingValue'),
+    findingLabel: t('findingLabel'),
+    addFinding: t('addFinding'),
+    removeFinding: t('removeFinding'),
     fields: t.raw('fields') as Record<string, string>,
     blockTypeLabels: t.raw('blockTypeLabels') as Record<string, string>,
     media: t.raw('media') as Record<string, string>

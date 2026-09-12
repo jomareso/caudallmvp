@@ -175,19 +175,21 @@ export default async function HomePage() {
                 runtime hasta que se actualice desde /admin/contenido. */}
             <BannerRotator imageIds={(metodologia.bannerImages ?? []).filter((id): id is string => id !== null)} />
 
-            {/* Cintillo de hallazgos: antes era un bloque sólido con los 3
-                textos apilados — leía como un mensaje, no como datos. Ahora
-                va en columnas lado a lado (como una fila de KPIs) sobre
-                fondo claro, con las cifras propias resaltadas en el
-                gradiente de marca (misma convención **texto** que el
-                headline del hero, ver Highlighted) para que el número, no
-                el bloque de color, sea lo que llama la atención. */}
+            {/* Cintillo de hallazgos como fila de stat tiles: la cifra
+                (value) es lo primero que se lee — grande, en el gradiente
+                de marca — con la frase de apoyo (label) chica debajo. Antes
+                era una sola oración por hallazgo (texto corrido con un
+                **resaltado** en el medio); así el número nunca era
+                protagonista, solo una palabra más dentro del párrafo. */}
             {(metodologia.findings ?? []).length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-silver/50 rounded-xl border border-silver/50 bg-[#FAFAFC] overflow-hidden">
                 {(metodologia.findings ?? []).map((finding, i) => (
-                  <p key={i} className="text-[13px] text-quartz leading-relaxed font-medium px-5 py-4">
-                    <Highlighted text={finding} />
-                  </p>
+                  <div key={i} className="flex flex-col gap-1.5 px-6 py-6">
+                    <p className="text-[28px] leading-none font-semibold bg-gradient-to-r from-yale to-cola bg-clip-text text-transparent text-balance">
+                      {finding.value}
+                    </p>
+                    <p className="text-[12.5px] text-nickel leading-snug">{finding.label}</p>
+                  </div>
                 ))}
               </div>
             ) : null}

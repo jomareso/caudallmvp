@@ -65,14 +65,14 @@ const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
     // (4,508 registros "Nacional" de los 3 estudios) — no son cifras
     // inventadas. Si el dataset cambia, hay que recalcular y actualizar
     // a mano (no hay cálculo en vivo, ver comentario en blocks.ts).
-    // **cifra** resalta con el gradiente de marca (misma convención que
-    // hero.headline, ver Highlighted en page.tsx) — el cintillo de
-    // hallazgos funciona como fila de datos solo si la cifra propia
-    // destaca del resto del texto.
+    // value es la cifra (o palabra clave, cuando el hallazgo no es
+    // numérico — caso "Ahorro") que se muestra grande; label es la frase
+    // de apoyo, chica, debajo — el cintillo funciona como fila de datos
+    // solo si la cifra es lo primero que se lee, no el texto corrido.
     findings: [
-      'El **ahorro** es la dimensión más débil del país, por debajo de deuda y planificación',
-      'El puntaje promedio nacional subió de **53.7 a 60.4** entre 2021 y 2024',
-      'Solo **15%** de la población alcanza el nivel "Saludable"'
+      { value: 'Ahorro', label: 'la dimensión financiera más débil del país, por debajo de deuda y planificación' },
+      { value: '53.7 → 60.4', label: 'puntaje promedio nacional entre 2021 y 2024' },
+      { value: '15%', label: 'de la población alcanza el nivel "Saludable"' }
     ],
     milestones: [
       { year: '2021', title: 'Estudio base', description: 'Estudio base', mediaAssetId: null },
