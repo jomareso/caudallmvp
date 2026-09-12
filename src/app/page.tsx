@@ -164,7 +164,13 @@ export default async function HomePage() {
       {metodologia ? (
         <section id="metodologia" className="border-t border-silver/40 scroll-mt-20">
           <div className="max-w-5xl mx-auto px-6 lg:px-10 py-12 lg:py-14 flex flex-col gap-8">
-            <div className="flex flex-col gap-3 max-w-xl">
+            {/* max-w-2xl, no max-w-xl: esta sección (a diferencia de "el
+                reto"/"la solución") usa un contenedor ancho (max-w-5xl,
+                para que el banner tenga lugar) — con max-w-xl el título
+                quedaba encajonado en poco más de la mitad del ancho,
+                dejando un carril vacío grande a la derecha antes del
+                banner. */}
+            <div className="flex flex-col gap-3 max-w-2xl">
               <p className="text-xs font-semibold tracking-wide uppercase text-cola">{metodologia.eyebrow}</p>
               <h2 className="text-xl lg:text-2xl font-semibold">{metodologia.title}</h2>
               <p className="text-sm text-nickel leading-relaxed">{metodologia.body}</p>
