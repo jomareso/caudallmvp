@@ -47,10 +47,12 @@ const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
     ctaUrl: '#'
   },
   empleador_reto: {
+    eyebrow: 'El problema',
     title: 'Invertir en bienestar financiero sin datos es intervenir a ciegas.',
     body: 'Sin una lectura clara de la salud financiera de tu equipo, terminas invirtiendo en bienestar por intuición, no por evidencia.'
   },
   empleador_solucion: {
+    eyebrow: 'Cómo funciona',
     title: 'Tres capas que casi nadie mira juntas.',
     tags: ['Finanzas', 'Comportamiento', 'Contexto'],
     body: 'Caudall cruza estas tres capas para mostrarte en qué grupos se concentran los problemas y dónde conviene intervenir primero.',

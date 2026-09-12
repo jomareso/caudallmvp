@@ -116,6 +116,7 @@ export default async function HomePage() {
             <span className="w-9 h-9 rounded-full bg-[#F4F5F7] flex items-center justify-center text-base" aria-hidden>
               🧭
             </span>
+            <p className="text-xs font-semibold tracking-wide uppercase text-cola">{reto.eyebrow}</p>
             <h2 className="text-xl lg:text-2xl font-semibold">{reto.title}</h2>
             <p className="text-[15px] text-nickel leading-relaxed">{reto.body}</p>
           </div>
@@ -132,6 +133,7 @@ export default async function HomePage() {
               <span className="w-9 h-9 rounded-full bg-[#F4F5F7] flex items-center justify-center text-base" aria-hidden>
                 🧩
               </span>
+              <p className="text-xs font-semibold tracking-wide uppercase text-cola">{solucion.eyebrow}</p>
               <h2 className="text-xl lg:text-2xl font-semibold">{solucion.title}</h2>
               <div className="flex items-center gap-2 flex-wrap">
                 {solucion.tags.map((tag, i) => (
