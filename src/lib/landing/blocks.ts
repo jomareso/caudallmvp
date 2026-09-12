@@ -166,7 +166,7 @@ export const LANDING_BLOCK_FIELDS: Record<LandingBlockType, LandingFieldDescript
     { key: 'title', kind: 'text', labelKey: 'title' },
     { key: 'body', kind: 'textarea', labelKey: 'body' },
     { key: 'bannerImages', kind: 'mediaSlots', labelKey: 'bannerImages', helpKey: 'bannerImagesHelp' },
-    { key: 'findings', kind: 'list', labelKey: 'findings', helpKey: 'oneLinePerItem' },
+    { key: 'findings', kind: 'list', labelKey: 'findings', helpKey: 'findingsHelp' },
     { key: 'milestones', kind: 'milestones', labelKey: 'milestones' },
     { key: 'closingLine', kind: 'text', labelKey: 'closingLine' }
   ],

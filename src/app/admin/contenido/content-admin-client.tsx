@@ -43,6 +43,7 @@ type Labels = {
   ctaUrlHelp: string;
   contactEmailHelp: string;
   bannerImagesHelp: string;
+  findingsHelp: string;
   milestoneYear: string;
   milestoneTitle: string;
   milestoneDescription: string;
@@ -277,7 +278,7 @@ function FieldInput({
 }) {
   const label = labels.fields[field.labelKey] ?? field.key;
   const help = field.helpKey
-    ? labels[field.helpKey as 'highlightHelp' | 'oneLinePerItem' | 'ctaUrlHelp' | 'contactEmailHelp' | 'bannerImagesHelp']
+    ? labels[field.helpKey as 'highlightHelp' | 'oneLinePerItem' | 'ctaUrlHelp' | 'contactEmailHelp' | 'bannerImagesHelp' | 'findingsHelp']
     : undefined;
 
   if (field.kind === 'text') {

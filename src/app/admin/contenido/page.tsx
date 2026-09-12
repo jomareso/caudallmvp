@@ -45,6 +45,7 @@ export default async function AdminContenidoPage() {
     oneLinePerItem: t('oneLinePerItem'),
     ctaUrlHelp: t('ctaUrlHelp'),
     contactEmailHelp: t('contactEmailHelp'),
+    findingsHelp: t('findingsHelp'),
     bannerImagesHelp: t('bannerImagesHelp'),
     milestoneYear: t('milestoneYear'),
     milestoneTitle: t('milestoneTitle'),

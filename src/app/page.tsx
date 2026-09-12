@@ -175,11 +175,18 @@ export default async function HomePage() {
                 runtime hasta que se actualice desde /admin/contenido. */}
             <BannerRotator imageIds={(metodologia.bannerImages ?? []).filter((id): id is string => id !== null)} />
 
+            {/* Cintillo de hallazgos: antes era un bloque sólido con los 3
+                textos apilados — leía como un mensaje, no como datos. Ahora
+                va en columnas lado a lado (como una fila de KPIs) sobre
+                fondo claro, con las cifras propias resaltadas en el
+                gradiente de marca (misma convención **texto** que el
+                headline del hero, ver Highlighted) para que el número, no
+                el bloque de color, sea lo que llama la atención. */}
             {(metodologia.findings ?? []).length > 0 ? (
-              <div className="flex flex-col gap-px rounded-xl overflow-hidden bg-gradient-to-r from-yale to-cola">
+              <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-silver/50 rounded-xl border border-silver/50 bg-[#FAFAFC] overflow-hidden">
                 {(metodologia.findings ?? []).map((finding, i) => (
-                  <p key={i} className="text-white text-[12.5px] font-medium px-5 py-2.5">
-                    {finding}
+                  <p key={i} className="text-[13px] text-quartz leading-relaxed font-medium px-5 py-4">
+                    <Highlighted text={finding} />
                   </p>
                 ))}
               </div>

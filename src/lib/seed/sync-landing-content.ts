@@ -65,10 +65,14 @@ const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
     // (4,508 registros "Nacional" de los 3 estudios) — no son cifras
     // inventadas. Si el dataset cambia, hay que recalcular y actualizar
     // a mano (no hay cálculo en vivo, ver comentario en blocks.ts).
+    // **cifra** resalta con el gradiente de marca (misma convención que
+    // hero.headline, ver Highlighted en page.tsx) — el cintillo de
+    // hallazgos funciona como fila de datos solo si la cifra propia
+    // destaca del resto del texto.
     findings: [
-      'El ahorro es la dimensión más débil del país, por debajo de deuda y planificación',
-      'El puntaje promedio nacional subió de 53.7 a 60.4 entre 2021 y 2024',
-      'Solo 15% de la población alcanza el nivel "Saludable"'
+      'El **ahorro** es la dimensión más débil del país, por debajo de deuda y planificación',
+      'El puntaje promedio nacional subió de **53.7 a 60.4** entre 2021 y 2024',
+      'Solo **15%** de la población alcanza el nivel "Saludable"'
     ],
     milestones: [
       { year: '2021', title: 'Estudio base', description: 'Estudio base', mediaAssetId: null },
