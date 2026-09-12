@@ -26,14 +26,24 @@ const OBJECT_POSITION: Record<LandingBannerSlot['focalY'], string> = {
 // desde /admin/contenido, ver bannerSlotSchema en blocks.ts). No hay un
 // único punto de recorte que funcione para cualquier foto de evento —
 // una necesita "arriba" para no perder cabezas, otra "centro" para no
-// perder el escenario. Antes probamos object-contain (foto completa,
-// pero con margen vacío) y después ese margen relleno con un fondo
-// desenfocado — ninguno de los dos daba la sensación de foto "llena"
-// que se buscaba; dejar elegir el encuadre por foto es lo que la resuelve
-// sin volver a perder contenido real (como pasaba con un recorte fijo).
+// perder el escenario.
 export function BannerRotator({ slots }: { slots: BannerSlot[] }) {
   const n = slots.length;
   const [index, setIndex] = useState(0);
+  // `shown` es la foto realmente renderizada en el único <img> — puede
+  // ir un paso atrás de `index` mientras dura el fade-out. Un <img> por
+  // slot con crossfade (cruzar opacidades) mostraba dos fotos
+  // superpuestas durante toda la transición — muy notorio entre fotos
+  // del mismo evento con la gente en poses parecidas, se veía como
+  // doble exposición. Un solo <img>: se apaga del todo (fadedOut) y
+  // recién cuando esa transición termina (onTransitionEnd, no un
+  // timeout adivinado) se cambia el src y se prende de nuevo.
+  const [shown, setShown] = useState(0);
+  const [fadedOut, setFadedOut] = useState(false);
+
+  useEffect(() => {
+    if (index !== shown) setFadedOut(true);
+  }, [index, shown]);
 
   useEffect(() => {
     if (n <= 1) return;
@@ -43,26 +53,29 @@ export function BannerRotator({ slots }: { slots: BannerSlot[] }) {
   }, [n, index]);
 
   if (n === 0) return null;
+  const slot = slots[shown];
 
   return (
     <div className="flex flex-col items-center gap-3">
       <div className="relative w-full rounded-2xl overflow-hidden border border-silver/40 bg-[#F4F5F7]" style={{ aspectRatio: '21 / 7' }}>
-        {slots.map((slot, i) => (
-          // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-          <img
-            key={slot.assetId}
-            src={`/api/media/${slot.assetId}`}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-            style={{ opacity: i === index ? 1 : 0, objectPosition: OBJECT_POSITION[slot.focalY] }}
-          />
-        ))}
+        {/* eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable */}
+        <img
+          src={`/api/media/${slot.assetId}`}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+          style={{ opacity: fadedOut ? 0 : 1, objectPosition: OBJECT_POSITION[slot.focalY] }}
+          onTransitionEnd={() => {
+            if (!fadedOut) return;
+            setShown(index);
+            setFadedOut(false);
+          }}
+        />
       </div>
       {n > 1 ? (
         <div className="flex items-center gap-2" role="tablist" aria-label="Fotos del banner">
-          {slots.map((slot, i) => (
+          {slots.map((s, i) => (
             <button
-              key={slot.assetId}
+              key={s.assetId}
               type="button"
               role="tab"
               aria-selected={i === index}
