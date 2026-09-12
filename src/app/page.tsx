@@ -126,6 +126,12 @@ export default async function HomePage() {
         <section id="solucion" className="border-t border-silver/40 scroll-mt-20">
           <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10 lg:py-12 flex flex-col gap-7">
             <div className="flex flex-col gap-3">
+              {/* Mismo tratamiento que el ícono de "el reto" arriba (círculo
+                  gris claro, mismo tamaño) — antes esta sección no tenía
+                  ícono y rompía el ritmo entre las dos. */}
+              <span className="w-9 h-9 rounded-full bg-[#F4F5F7] flex items-center justify-center text-base" aria-hidden>
+                🧩
+              </span>
               <h2 className="text-xl lg:text-2xl font-semibold">{solucion.title}</h2>
               <div className="flex items-center gap-2 flex-wrap">
                 {solucion.tags.map((tag, i) => (
