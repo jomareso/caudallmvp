@@ -345,7 +345,7 @@ function BannerRotator({ imageIds }: { imageIds: string[] }) {
           key={id}
           src={`/api/media/${id}`}
           alt=""
-          className="caudall-banner-slide absolute inset-0 w-full h-full object-cover"
+          className="caudall-banner-slide absolute inset-0 w-full h-full object-cover object-top"
           style={
             n > 1
               ? { animation: `caudall-banner-fade ${durationSeconds}s infinite`, animationDelay: `${i * secondsPerSlide}s` }
