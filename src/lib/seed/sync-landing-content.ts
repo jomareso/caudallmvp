@@ -60,7 +60,11 @@ const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
     eyebrow: 'Respaldo metodológico',
     title: 'Metodología respaldada por evidencia real',
     body: 'Construida sobre tres Estudios de Salud Financiera (2021, 2022, 2024), con muestra representativa a nivel nacional.',
-    bannerImages: [null, null, null],
+    bannerImages: [
+      { assetId: null, focalY: 'center' },
+      { assetId: null, focalY: 'center' },
+      { assetId: null, focalY: 'center' }
+    ],
     // Calculados directo de prisma/seed-data/national-benchmark.json
     // (4,508 registros "Nacional" de los 3 estudios) — no son cifras
     // inventadas. Si el dataset cambia, hay que recalcular y actualizar

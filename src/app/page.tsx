@@ -171,10 +171,16 @@ export default async function HomePage() {
             </div>
 
             {/* getVisibleBlockContent no re-valida con zod al leer (solo
-                al guardar) — un bloque guardado antes de este PR no tiene
-                estos dos campos todavía, ?? [] evita que truene en
-                runtime hasta que se actualice desde /admin/contenido. */}
-            <BannerRotator imageIds={(metodologia.bannerImages ?? []).filter((id): id is string => id !== null)} />
+                al guardar) — un bloque guardado antes de este PR (o antes
+                de que bannerImages/findings existieran) no tiene estos
+                campos, o los tiene con la forma vieja; ?? [] evita que
+                truene en runtime hasta que se actualice desde
+                /admin/contenido. */}
+            <BannerRotator
+              slots={(metodologia.bannerImages ?? [])
+                .filter((slot) => slot.assetId !== null)
+                .map((slot) => ({ assetId: slot.assetId as string, focalY: slot.focalY }))}
+            />
 
             {/* Cintillo de hallazgos como fila de stat tiles: la cifra
                 (value) es lo primero que se lee — grande, en el gradiente

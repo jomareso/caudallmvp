@@ -29,6 +29,17 @@ const findingSchema = z.object({
 });
 export type LandingFinding = z.infer<typeof findingSchema>;
 
+// Antes bannerImages era solo el id del asset — object-cover recortaba
+// siempre desde el mismo punto (arriba) para las 3 fotos, y no hay un
+// único punto que funcione para cualquier foto (una necesita el recorte
+// arriba para no perder cabezas, otra necesita centro para no perder el
+// escenario). focalY deja elegir, por foto, desde dónde se recorta.
+const bannerSlotSchema = z.object({
+  assetId: z.string().nullable(),
+  focalY: z.enum(['top', 'center', 'bottom'])
+});
+export type LandingBannerSlot = z.infer<typeof bannerSlotSchema>;
+
 const contentSchemas = {
   colaborador_hero: z.object({
     titleLine1: z.string().min(1),
@@ -70,8 +81,9 @@ const contentSchemas = {
     body: z.string().min(1),
     // Fotos genéricas del trabajo de campo, sin atarse a un año — banner
     // rotativo, distinto de milestones (que sí es por año). Longitud fija
-    // 3; cada slot puede quedar sin foto (null) hasta que se suba una.
-    bannerImages: z.tuple([z.string().nullable(), z.string().nullable(), z.string().nullable()]),
+    // 3; cada slot puede quedar sin foto (assetId null) hasta que se suba
+    // una. Ver bannerSlotSchema sobre focalY.
+    bannerImages: z.tuple([bannerSlotSchema, bannerSlotSchema, bannerSlotSchema]),
     // Hallazgos reales del benchmark nacional — cintillo estático (no
     // animado: ver decisión de UX, dos animaciones simultáneas con el
     // banner de fotos era demasiado). value/label, no fórmulas ni
