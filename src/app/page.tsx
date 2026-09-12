@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { getVisibleBlockContent } from '@/lib/landing/get-landing-content';
 import { splitHighlightMarkup } from '@/lib/landing/blocks';
+import { BannerRotator } from './banner-rotator';
 
 export const metadata: Metadata = {
   title: 'Caudall para empresas — Bienestar financiero con datos reales'
@@ -329,54 +330,6 @@ function SegmentBar({ label, pct, color }: { label: string; pct: number; color: 
       <span className="flex-1 h-1.5 rounded bg-black/5 overflow-hidden">
         <span className="block h-full rounded" style={{ width: `${pct}%`, background: color }} />
       </span>
-    </div>
-  );
-}
-
-// Banner de fotos genéricas del trabajo de campo, sin atarse a un año
-// (distinto de los milestones/informes, que sí son por año). Se omite
-// del todo si no hay ninguna foto cargada — no muestra un placeholder
-// vacío a un visitante real. Con 1 foto queda estática; con 2 o 3 hace
-// crossfade en CSS puro (sin JS/cliente). Respeta prefers-reduced-motion.
-function BannerRotator({ imageIds }: { imageIds: string[] }) {
-  if (imageIds.length === 0) return null;
-  const n = imageIds.length;
-  const secondsPerSlide = 4;
-  const durationSeconds = n * secondsPerSlide;
-  const slotPct = 100 / n;
-  const fadePct = Math.min(2, slotPct / 4);
-
-  return (
-    <div className="relative w-full rounded-2xl overflow-hidden border border-silver/40" style={{ aspectRatio: '21 / 7' }}>
-      {imageIds.map((id, i) => (
-        // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-        <img
-          key={id}
-          src={`/api/media/${id}`}
-          alt=""
-          className="caudall-banner-slide absolute inset-0 w-full h-full object-cover object-top"
-          style={
-            n > 1
-              ? { animation: `caudall-banner-fade ${durationSeconds}s infinite`, animationDelay: `${i * secondsPerSlide}s` }
-              : undefined
-          }
-        />
-      ))}
-      {n > 1 ? (
-        <style>{`
-          @keyframes caudall-banner-fade {
-            0% { opacity: 0; }
-            ${fadePct}% { opacity: 1; }
-            ${(slotPct - fadePct).toFixed(2)}% { opacity: 1; }
-            ${slotPct.toFixed(2)}% { opacity: 0; }
-            100% { opacity: 0; }
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .caudall-banner-slide { animation: none !important; opacity: 0; }
-            .caudall-banner-slide:first-child { opacity: 1; }
-          }
-        `}</style>
-      ) : null}
     </div>
   );
 }
