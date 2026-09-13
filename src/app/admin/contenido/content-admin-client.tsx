@@ -474,6 +474,9 @@ function FieldInput({
 
   if (field.kind === 'institutions') {
     const institutions = Array.isArray(value) ? (value as LandingInstitution[]) : [];
+    // El carrusel renderiza el logo como <img> — un PDF no se puede mostrar
+    // así (a diferencia de milestones, que lo enlaza como "Ver informe").
+    const logoOptions = media.filter((asset) => asset.mimeType.startsWith('image/'));
 
     function updateInstitution(index: number, patch: Partial<LandingInstitution>) {
       const next = institutions.map((inst, i) => (i === index ? { ...inst, ...patch } : inst));
@@ -507,7 +510,7 @@ function FieldInput({
                 className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz"
               >
                 <option value="">{labels.institutionLogoNone}</option>
-                {media.map((asset) => (
+                {logoOptions.map((asset) => (
                   <option key={asset.id} value={asset.id}>
                     {asset.filename}
                   </option>
@@ -648,7 +651,7 @@ function MediaLibrary({ media, labels }: { media: MediaDTO[]; labels: Labels }) 
       <form onSubmit={handleUpload} className="bg-white border border-silver/60 rounded-xl p-4 flex items-end gap-3">
         <label className="flex flex-col gap-1 flex-1">
           <span className="text-xs text-nickel">{labels.media.uploadLabel}</span>
-          <input name="file" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" className="text-sm text-quartz" />
+          <input name="file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" className="text-sm text-quartz" />
         </label>
         <button
           type="submit"

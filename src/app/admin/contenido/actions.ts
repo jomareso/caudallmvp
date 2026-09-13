@@ -77,7 +77,8 @@ export async function moveBlock(blockId: string, direction: 'up' | 'down'): Prom
 // application/pdf: para los informes de metodología (ver milestones en
 // blocks.ts) — antes solo se podían subir imágenes, así que la sección
 // de metodología no podía enlazar los estudios reales.
-const ALLOWED_MEDIA_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'application/pdf']);
+// image/gif: logos de instituciones a veces llegan solo en ese formato.
+const ALLOWED_MEDIA_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'application/pdf']);
 // 10MB: 4MB alcanzaba para fotos pero se quedaba corto para un informe
 // real de varias páginas.
 const MAX_MEDIA_SIZE_BYTES = 10 * 1024 * 1024;
