@@ -435,6 +435,11 @@
       "focalTop": "Arriba",
       "focalCenter": "Centro",
       "focalBottom": "Abajo",
+      "institutionsHelp": "Logos que respaldaron un estudio o evento puntual de Caudall — no implica que la institución respalde a Caudall en general (ver el aviso que se muestra debajo del carrusel). Se omite todo el carrusel mientras no haya ningún logo cargado.",
+      "institutionName": "Nombre de la institución",
+      "institutionLogoNone": "Sin logo",
+      "addInstitution": "Agregar institución",
+      "removeInstitution": "Quitar",
       "fields": {
         "titleLine1": "Línea 1 del título",
         "titleLine2": "Línea 2 del título",
@@ -455,7 +460,11 @@
         "closingLine": "Línea de cierre",
         "bannerImages": "Banner rotativo",
         "findings": "Hallazgos",
-        "contactEmail": "Correo de contacto"
+        "contactEmail": "Correo de contacto",
+        "eventsTitle": "Título del banner de fotos",
+        "eventsBody": "Texto del banner de fotos",
+        "institutions": "Logos",
+        "disclaimer": "Aviso debajo del carrusel"
       },
       "blockTypeLabels": {
         "colaborador_hero": "Encabezado",
@@ -465,6 +474,7 @@
         "empleador_reto": "El reto",
         "empleador_solucion": "La solución",
         "empleador_metodologia": "Respaldo metodológico",
+        "empleador_instituciones": "Carrusel de instituciones",
         "empleador_privacidad": "Privacidad",
         "empleador_cierre": "Cierre",
         "empleador_footer": "Footer"

@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { getVisibleBlockContent } from '@/lib/landing/get-landing-content';
 import { splitHighlightMarkup } from '@/lib/landing/blocks';
 import { BannerRotator } from './banner-rotator';
+import { InstitutionsCarousel } from './institutions-carousel';
 
 export const metadata: Metadata = {
   title: 'Caudall para empresas — Bienestar financiero con datos reales'
@@ -30,11 +31,12 @@ export const dynamic = 'force-dynamic';
 // Cada sección se omite si el bloque no existe o un admin lo marcó no
 // visible (Decisión 4: catálogo con overrides de activar/desactivar).
 export default async function HomePage() {
-  const [hero, reto, solucion, metodologia, privacidad, cierre, footer] = await Promise.all([
+  const [hero, reto, solucion, metodologia, instituciones, privacidad, cierre, footer] = await Promise.all([
     getVisibleBlockContent('EMPLEADOR', 'empleador_hero'),
     getVisibleBlockContent('EMPLEADOR', 'empleador_reto'),
     getVisibleBlockContent('EMPLEADOR', 'empleador_solucion'),
     getVisibleBlockContent('EMPLEADOR', 'empleador_metodologia'),
+    getVisibleBlockContent('EMPLEADOR', 'empleador_instituciones'),
     getVisibleBlockContent('EMPLEADOR', 'empleador_privacidad'),
     getVisibleBlockContent('EMPLEADOR', 'empleador_cierre'),
     getVisibleBlockContent('EMPLEADOR', 'empleador_footer')
@@ -125,24 +127,14 @@ export default async function HomePage() {
               <p className="text-sm text-nickel leading-relaxed">{metodologia.body}</p>
             </div>
 
-            {/* getVisibleBlockContent no re-valida con zod al leer (solo
-                al guardar) — un bloque guardado antes de este PR (o antes
-                de que bannerImages/findings existieran) no tiene estos
-                campos, o los tiene con la forma vieja; ?? [] evita que
-                truene en runtime hasta que se actualice desde
-                /admin/contenido. */}
-            <BannerRotator
-              slots={(metodologia.bannerImages ?? [])
-                .filter((slot) => slot.assetId !== null)
-                .map((slot) => ({ assetId: slot.assetId as string, focalY: slot.focalY }))}
-            />
-
             {/* Cintillo de hallazgos como fila de stat tiles: la cifra
                 (value) es lo primero que se lee — grande, en el gradiente
                 de marca — con la frase de apoyo (label) chica debajo. Antes
                 era una sola oración por hallazgo (texto corrido con un
                 **resaltado** en el medio); así el número nunca era
-                protagonista, solo una palabra más dentro del párrafo. */}
+                protagonista, solo una palabra más dentro del párrafo. Va
+                antes del banner de fotos a propósito (jerarquía pedida:
+                primero la evidencia/datos, después las fotos del evento). */}
             {(metodologia.findings ?? []).length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-silver/50 rounded-xl border border-silver/50 bg-[#FAFAFC] overflow-hidden">
                 {(metodologia.findings ?? []).map((finding, i) => (
@@ -155,6 +147,26 @@ export default async function HomePage() {
                 ))}
               </div>
             ) : null}
+
+            {/* getVisibleBlockContent no re-valida con zod al leer (solo
+                al guardar) — un bloque guardado antes de este PR (o antes
+                de que estos campos existieran) no los tiene, o los tiene
+                con la forma vieja; ?? evita que truene en runtime hasta
+                que se actualice desde /admin/contenido. Encabezado propio
+                (eventsTitle/eventsBody), distinto del eyebrow/title de
+                arriba (que son de hallazgos/metodología en general) —
+                fotos reales de estudios y eventos, no ilustrativas. */}
+            {metodologia.eventsTitle ? (
+              <div className="flex flex-col gap-3">
+                <h3 className="text-lg lg:text-xl font-semibold">{metodologia.eventsTitle}</h3>
+                {metodologia.eventsBody ? <p className="text-sm text-nickel leading-relaxed max-w-2xl">{metodologia.eventsBody}</p> : null}
+              </div>
+            ) : null}
+            <BannerRotator
+              slots={(metodologia.bannerImages ?? [])
+                .filter((slot) => slot.assetId !== null)
+                .map((slot) => ({ assetId: slot.assetId as string, focalY: slot.focalY }))}
+            />
 
             {metodologia.milestones.length > 0 ? (
               <div className="flex flex-col sm:flex-row gap-2.5">
@@ -189,6 +201,24 @@ export default async function HomePage() {
             ) : null}
 
             <p className="text-sm italic text-nickel text-center">{metodologia.closingLine}</p>
+          </div>
+        </section>
+      ) : null}
+
+      {/* Carrusel de logos: respaldo a estudios/eventos puntuales, nunca
+          "clientes" de Caudall (ver Decisión 2 — el journey del empleado
+          no incluye productos financieros, y esta sección tampoco debe
+          leerse como una lista de partners/clientes). El disclaimer va
+          siempre pegado al carrusel, nunca solo, y con menos peso visual
+          que el título — perfectamente legible, pero no el foco. Sección
+          chica a propósito (py más chico que el resto): aporta
+          credibilidad, no debe competir con la propuesta de valor. */}
+      {instituciones && instituciones.institutions.length > 0 ? (
+        <section className="border-t border-silver/40">
+          <div className="max-w-5xl mx-auto px-6 lg:px-10 py-8 flex flex-col gap-4">
+            <p className="text-xs font-semibold tracking-wide uppercase text-nickel text-center">{instituciones.title}</p>
+            <InstitutionsCarousel institutions={instituciones.institutions} />
+            <p className="text-[11px] text-silver text-center max-w-2xl mx-auto leading-relaxed">{instituciones.disclaimer}</p>
           </div>
         </section>
       ) : null}

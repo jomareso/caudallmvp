@@ -9,7 +9,8 @@ import {
   type LandingFieldDescriptor,
   type LandingMilestone,
   type LandingFinding,
-  type LandingBannerSlot
+  type LandingBannerSlot,
+  type LandingInstitution
 } from '@/lib/landing/blocks';
 import { updateBlockContent, toggleBlockVisible, moveBlock, uploadMediaAsset, deleteMediaAsset } from './actions';
 
@@ -61,6 +62,11 @@ type Labels = {
   findingLabel: string;
   addFinding: string;
   removeFinding: string;
+  institutionsHelp: string;
+  institutionName: string;
+  institutionLogoNone: string;
+  addInstitution: string;
+  removeInstitution: string;
   fields: Record<string, string>;
   blockTypeLabels: Record<string, string>;
   media: Record<string, string>;
@@ -287,7 +293,16 @@ function FieldInput({
 }) {
   const label = labels.fields[field.labelKey] ?? field.key;
   const help = field.helpKey
-    ? labels[field.helpKey as 'highlightHelp' | 'oneLinePerItem' | 'ctaUrlHelp' | 'contactEmailHelp' | 'bannerImagesHelp' | 'findingsHelp']
+    ? labels[
+        field.helpKey as
+          | 'highlightHelp'
+          | 'oneLinePerItem'
+          | 'ctaUrlHelp'
+          | 'contactEmailHelp'
+          | 'bannerImagesHelp'
+          | 'findingsHelp'
+          | 'institutionsHelp'
+      ]
     : undefined;
 
   if (field.kind === 'text') {
@@ -450,6 +465,65 @@ function FieldInput({
           ))}
           <button type="button" onClick={addFinding} className="text-xs text-yale font-medium self-start hover:underline">
             + {labels.addFinding}
+          </button>
+        </div>
+        {help ? <span className="text-[11px] text-nickel">{help}</span> : null}
+      </div>
+    );
+  }
+
+  if (field.kind === 'institutions') {
+    const institutions = Array.isArray(value) ? (value as LandingInstitution[]) : [];
+
+    function updateInstitution(index: number, patch: Partial<LandingInstitution>) {
+      const next = institutions.map((inst, i) => (i === index ? { ...inst, ...patch } : inst));
+      onChange(next);
+    }
+
+    function removeInstitution(index: number) {
+      onChange(institutions.filter((_, i) => i !== index));
+    }
+
+    function addInstitution() {
+      onChange([...institutions, { assetId: '', name: '' }]);
+    }
+
+    return (
+      <div className="flex flex-col gap-1">
+        <span className="text-xs text-nickel">{label}</span>
+        <div className="flex flex-col gap-3">
+          {institutions.map((institution, index) => (
+            <div key={index} className="border border-silver/60 rounded-lg p-3 flex flex-col gap-2 bg-white">
+              <input
+                type="text"
+                placeholder={labels.institutionName}
+                value={institution.name}
+                onChange={(event) => updateInstitution(index, { name: event.target.value })}
+                className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz"
+              />
+              <select
+                value={institution.assetId}
+                onChange={(event) => updateInstitution(index, { assetId: event.target.value })}
+                className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz"
+              >
+                <option value="">{labels.institutionLogoNone}</option>
+                {media.map((asset) => (
+                  <option key={asset.id} value={asset.id}>
+                    {asset.filename}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => removeInstitution(index)}
+                className="text-xs text-bad self-start hover:underline"
+              >
+                {labels.removeInstitution}
+              </button>
+            </div>
+          ))}
+          <button type="button" onClick={addInstitution} className="text-xs text-yale font-medium self-start hover:underline">
+            + {labels.addInstitution}
           </button>
         </div>
         {help ? <span className="text-[11px] text-nickel">{help}</span> : null}

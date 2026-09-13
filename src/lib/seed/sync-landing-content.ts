@@ -62,6 +62,9 @@ const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
     eyebrow: 'Respaldo metodológico',
     title: 'Metodología respaldada por evidencia real',
     body: 'Construida sobre tres Estudios de Salud Financiera (2021, 2022, 2024), con muestra representativa a nivel nacional.',
+    eventsTitle: 'Una conversación que venimos construyendo',
+    eventsBody:
+      'Estudios, encuentros y conversaciones que nos han permitido entender mejor los desafíos de la salud financiera en República Dominicana.',
     bannerImages: [
       { assetId: null, focalY: 'center' },
       { assetId: null, focalY: 'center' },
@@ -86,6 +89,14 @@ const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
       { year: '2024', title: 'Actualización de evidencia', description: 'Actualización de evidencia', mediaAssetId: null }
     ],
     closingLine: 'Tres momentos de estudio. Una metodología que sigue aprendiendo.'
+  },
+  // institutions vacío a propósito — carrusel se omite hasta que se suban
+  // logos reales desde /admin/contenido (ver comentario en blocks.ts).
+  empleador_instituciones: {
+    title: 'Instituciones que han respaldado nuestros estudios o eventos',
+    disclaimer:
+      'El respaldo o participación en estudios o eventos específicos no implica necesariamente respaldo institucional a Caudall.',
+    institutions: []
   },
   empleador_privacidad: {
     title: 'Datos agregados. Personas protegidas.',

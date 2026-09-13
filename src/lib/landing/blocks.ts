@@ -40,6 +40,15 @@ const bannerSlotSchema = z.object({
 });
 export type LandingBannerSlot = z.infer<typeof bannerSlotSchema>;
 
+// Logo de una institución en el carrusel de empleador_instituciones —
+// ver comentario en ese bloque más abajo sobre qué representa (respaldo
+// a un estudio/evento puntual, no a Caudall).
+const institutionSchema = z.object({
+  assetId: z.string().min(1),
+  name: z.string().min(1)
+});
+export type LandingInstitution = z.infer<typeof institutionSchema>;
+
 const contentSchemas = {
   colaborador_hero: z.object({
     titleLine1: z.string().min(1),
@@ -81,6 +90,13 @@ const contentSchemas = {
     eyebrow: z.string().min(1),
     title: z.string().min(1),
     body: z.string().min(1),
+    // Encabezado propio del banner de fotos (evento/estudio real, no
+    // ilustrativo) — distinto del eyebrow/title de arriba, que son del
+    // bloque de hallazgos/metodología en general. Vive en este mismo
+    // bloque en vez de uno nuevo para no duplicar el componente del
+    // banner ni la config de bannerImages/focalY.
+    eventsTitle: z.string().min(1),
+    eventsBody: z.string().min(1),
     // Fotos genéricas del trabajo de campo, sin atarse a un año — banner
     // rotativo, distinto de milestones (que sí es por año). Longitud fija
     // 3; cada slot puede quedar sin foto (assetId null) hasta que se suba
@@ -97,6 +113,17 @@ const contentSchemas = {
     // admin/contenido/actions.ts).
     milestones: z.array(milestoneSchema),
     closingLine: z.string().min(1)
+  }),
+  // Carrusel de logos — respaldo a estudios/eventos puntuales de Caudall,
+  // NO instituciones "clientes" ni un respaldo institucional general (de
+  // ahí el disclaimer obligatorio debajo del carrusel). `institutions`
+  // arranca vacío hasta que se suban logos reales desde /admin/contenido
+  // — el bloque entero se omite mientras esté vacío (mismo criterio que
+  // bannerImages: nunca mostrar un carrusel vacío a un visitante real).
+  empleador_instituciones: z.object({
+    title: z.string().min(1),
+    disclaimer: z.string().min(1),
+    institutions: z.array(institutionSchema)
   }),
   empleador_privacidad: z.object({
     title: z.string().min(1),
@@ -127,6 +154,7 @@ export const LANDING_BLOCK_TYPES_BY_SLUG: Record<'EMPLEADOR' | 'COLABORADOR', La
     'empleador_reto',
     'empleador_solucion',
     'empleador_metodologia',
+    'empleador_instituciones',
     'empleador_privacidad',
     'empleador_cierre',
     'empleador_footer'
@@ -150,7 +178,7 @@ export function parseLandingBlockContent<T extends LandingBlockType>(type: T, co
 // archivo, no hay generación automática desde el schema de zod porque los
 // tipos de campo (texto vs. lista vs. hitos) no se pueden inferir de zod
 // solo con `z.string()`/`z.array()`.
-export type LandingFieldKind = 'text' | 'textarea' | 'list' | 'milestones' | 'mediaSlots' | 'findings';
+export type LandingFieldKind = 'text' | 'textarea' | 'list' | 'milestones' | 'mediaSlots' | 'findings' | 'institutions';
 
 export type LandingFieldDescriptor = {
   key: string;
@@ -193,10 +221,17 @@ export const LANDING_BLOCK_FIELDS: Record<LandingBlockType, LandingFieldDescript
     { key: 'eyebrow', kind: 'text', labelKey: 'eyebrow' },
     { key: 'title', kind: 'text', labelKey: 'title' },
     { key: 'body', kind: 'textarea', labelKey: 'body' },
-    { key: 'bannerImages', kind: 'mediaSlots', labelKey: 'bannerImages', helpKey: 'bannerImagesHelp' },
     { key: 'findings', kind: 'findings', labelKey: 'findings', helpKey: 'findingsHelp' },
+    { key: 'eventsTitle', kind: 'text', labelKey: 'eventsTitle' },
+    { key: 'eventsBody', kind: 'textarea', labelKey: 'eventsBody' },
+    { key: 'bannerImages', kind: 'mediaSlots', labelKey: 'bannerImages', helpKey: 'bannerImagesHelp' },
     { key: 'milestones', kind: 'milestones', labelKey: 'milestones' },
     { key: 'closingLine', kind: 'text', labelKey: 'closingLine' }
+  ],
+  empleador_instituciones: [
+    { key: 'title', kind: 'text', labelKey: 'title' },
+    { key: 'institutions', kind: 'institutions', labelKey: 'institutions', helpKey: 'institutionsHelp' },
+    { key: 'disclaimer', kind: 'textarea', labelKey: 'disclaimer' }
   ],
   empleador_privacidad: [
     { key: 'title', kind: 'text', labelKey: 'title' },
