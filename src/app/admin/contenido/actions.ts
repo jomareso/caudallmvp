@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { getTranslations } from 'next-intl/server';
 import type { Prisma } from '@prisma/client';
+import { MediaCategory } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireAdm } from '@/lib/auth/admin-context';
 import { isLandingBlockType, parseLandingBlockContent } from '@/lib/landing/blocks';
@@ -74,8 +75,14 @@ export async function moveBlock(blockId: string, direction: 'up' | 'down'): Prom
   return { ok: true };
 }
 
-const ALLOWED_MEDIA_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
-const MAX_MEDIA_SIZE_BYTES = 4 * 1024 * 1024;
+// application/pdf: para los informes de metodología (ver milestones en
+// blocks.ts) — antes solo se podían subir imágenes, así que la sección
+// de metodología no podía enlazar los estudios reales.
+// image/gif: logos de instituciones a veces llegan solo en ese formato.
+const ALLOWED_MEDIA_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'application/pdf']);
+// 10MB: 4MB alcanzaba para fotos pero se quedaba corto para un informe
+// real de varias páginas.
+const MAX_MEDIA_SIZE_BYTES = 10 * 1024 * 1024;
 
 export async function uploadMediaAsset(formData: FormData): Promise<ActionResult> {
   await requireAdm();
@@ -86,11 +93,31 @@ export async function uploadMediaAsset(formData: FormData): Promise<ActionResult
   if (!ALLOWED_MEDIA_TYPES.has(file.type)) return { ok: false, message: t('uploadErrorType') };
   if (file.size > MAX_MEDIA_SIZE_BYTES) return { ok: false, message: t('uploadErrorSize') };
 
+  const category = formData.get('category');
+  if (typeof category !== 'string' || !(category in MediaCategory)) {
+    return { ok: false, message: t('uploadErrorCategory') };
+  }
+
   const bytes = Buffer.from(await file.arrayBuffer());
   await prisma.mediaAsset.create({
-    data: { filename: file.name, mimeType: file.type, data: bytes, size: file.size }
+    data: { filename: file.name, mimeType: file.type, data: bytes, size: file.size, category: category as MediaCategory }
   });
 
+  revalidatePath('/admin/contenido');
+  return { ok: true };
+}
+
+// Reclasificar un archivo ya subido — el banco de medios existía antes de
+// tener categorías (ver migración media_asset_category), así que los
+// archivos viejos necesitan poder asignarse desde la UI, no solo al
+// volver a subirlos.
+export async function updateMediaAssetCategory(id: string, category: string): Promise<ActionResult> {
+  await requireAdm();
+  const t = await getTranslations('admin.content.media');
+
+  if (!(category in MediaCategory)) return { ok: false, message: t('uploadErrorCategory') };
+
+  await prisma.mediaAsset.update({ where: { id }, data: { category: category as MediaCategory } }).catch(() => null);
   revalidatePath('/admin/contenido');
   return { ok: true };
 }

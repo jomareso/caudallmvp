@@ -39,32 +39,64 @@ const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
   },
   empleador_hero: {
     headline: 'Convierte la salud financiera de tus colaboradores en **decisiones de bienestar**.',
-    subtitle: 'Identifica brechas, entiende qué grupos necesitan más apoyo y prioriza mejor.',
+    subtitle:
+      'Más de 4,500 diagnósticos reales de República Dominicana dicen que 84% de los empleados está en condición vulnerable o sobreviviendo.',
     ctaLabel: 'Solicitar una demostración',
     // Todavía no hay un mecanismo real de contacto — placeholder hasta
     // que se cargue un enlace real desde /admin/contenido.
     ctaUrl: '#'
   },
   empleador_reto: {
+    eyebrow: 'El problema',
     title: 'Invertir en bienestar financiero sin datos es intervenir a ciegas.',
-    body: 'Sin una lectura clara de la salud financiera de tus colaboradores, es difícil saber dónde están las principales brechas y qué iniciativas conviene priorizar.'
+    body: 'Sin una lectura clara de la salud financiera de tu equipo, terminas invirtiendo en bienestar por intuición, no por evidencia.'
   },
   empleador_solucion: {
-    title: 'Una visión más completa para decidir mejor.',
+    eyebrow: 'Cómo funciona',
+    title: 'Tres capas que casi nadie mira juntas.',
     tags: ['Finanzas', 'Comportamiento', 'Contexto'],
-    body: 'Caudall combina estas tres capas para identificar dónde están las principales brechas, en qué grupos se concentran y dónde conviene enfocar los esfuerzos.',
-    steps: ['Diagnostica', 'Entiende', 'Prioriza', 'Mide']
+    body: 'Caudall cruza estas tres capas para mostrarte en qué grupos se concentran los problemas y dónde conviene intervenir primero.',
+    steps: ['Diagnostica', 'Entiende', 'Actúa', 'Mide']
   },
   empleador_metodologia: {
     eyebrow: 'Respaldo metodológico',
     title: 'Metodología respaldada por evidencia real',
-    body: 'Caudall se construye sobre evidencia real, con estudios realizados en 2021, 2022 y 2024 bajo criterios de rigor estadístico, diseño muestral y representatividad.',
+    body: 'Construida sobre tres Estudios de Salud Financiera (2021, 2022, 2024), con muestra representativa a nivel nacional.',
+    eventsTitle: 'Una conversación que venimos construyendo',
+    eventsBody:
+      'Estudios, encuentros y conversaciones que nos han permitido entender mejor los desafíos de la salud financiera en República Dominicana.',
+    bannerImages: [
+      { assetId: null, focalY: 'center' },
+      { assetId: null, focalY: 'center' },
+      { assetId: null, focalY: 'center' }
+    ],
+    // Calculados directo de prisma/seed-data/national-benchmark.json
+    // (4,508 registros "Nacional" de los 3 estudios) — no son cifras
+    // inventadas. Si el dataset cambia, hay que recalcular y actualizar
+    // a mano (no hay cálculo en vivo, ver comentario en blocks.ts).
+    // value es la cifra (o palabra clave, cuando el hallazgo no es
+    // numérico — caso "Ahorro") que se muestra grande; label es la frase
+    // de apoyo, chica, debajo — el cintillo funciona como fila de datos
+    // solo si la cifra es lo primero que se lee, no el texto corrido.
+    findings: [
+      { value: 'Ahorro', label: 'la dimensión financiera más débil del país, por debajo de deuda y planificación' },
+      { value: '53.7 → 60.4', label: 'puntaje promedio nacional entre 2021 y 2024' },
+      { value: '15%', label: 'de la población alcanza el nivel "Saludable"' }
+    ],
     milestones: [
       { year: '2021', title: 'Estudio base', description: 'Estudio base', mediaAssetId: null },
       { year: '2022', title: 'Profundización de hallazgos', description: 'Profundización de hallazgos', mediaAssetId: null },
       { year: '2024', title: 'Actualización de evidencia', description: 'Actualización de evidencia', mediaAssetId: null }
     ],
     closingLine: 'Tres momentos de estudio. Una metodología que sigue aprendiendo.'
+  },
+  // institutions vacío a propósito — carrusel se omite hasta que se suban
+  // logos reales desde /admin/contenido (ver comentario en blocks.ts).
+  empleador_instituciones: {
+    title: 'Instituciones que han respaldado nuestros estudios o eventos',
+    disclaimer:
+      'El respaldo o participación en estudios o eventos específicos no implica necesariamente respaldo institucional a Caudall.',
+    institutions: []
   },
   empleador_privacidad: {
     title: 'Datos agregados. Personas protegidas.',
@@ -74,7 +106,9 @@ const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
     title: 'Dale a tu programa de bienestar la información que le falta.',
     body: 'Decide con más claridad dónde enfocar tus iniciativas de bienestar.',
     ctaLabel: 'Solicitar una demostración'
-  }
+  },
+  // contactEmail vacío a propósito — ver el comentario en blocks.ts.
+  empleador_footer: {}
 };
 
 export async function syncLandingContent(prisma: PrismaClient): Promise<{ pagesCreated: number; blocksCreated: number }> {

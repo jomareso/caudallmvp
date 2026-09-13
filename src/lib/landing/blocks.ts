@@ -17,6 +17,38 @@ const milestoneSchema = z.object({
 });
 export type LandingMilestone = z.infer<typeof milestoneSchema>;
 
+// Antes `findings` era una sola oración por hallazgo, renderizada como
+// texto corrido — no había forma de que la cifra fuera protagonista
+// visual, solo un **resaltado** dentro de la frase. `value` es la cifra
+// (o palabra clave, cuando el hallazgo no es numérico — ver "ahorro" en
+// el seed) que se muestra grande; `label` es la frase de apoyo, chica,
+// debajo — mismo contrato que un stat tile.
+const findingSchema = z.object({
+  value: z.string().min(1),
+  label: z.string().min(1)
+});
+export type LandingFinding = z.infer<typeof findingSchema>;
+
+// Antes bannerImages era solo el id del asset — object-cover recortaba
+// siempre desde el mismo punto (arriba) para las 3 fotos, y no hay un
+// único punto que funcione para cualquier foto (una necesita el recorte
+// arriba para no perder cabezas, otra necesita centro para no perder el
+// escenario). focalY deja elegir, por foto, desde dónde se recorta.
+const bannerSlotSchema = z.object({
+  assetId: z.string().nullable(),
+  focalY: z.enum(['top', 'center', 'bottom'])
+});
+export type LandingBannerSlot = z.infer<typeof bannerSlotSchema>;
+
+// Logo de una institución en el carrusel de empleador_instituciones —
+// ver comentario en ese bloque más abajo sobre qué representa (respaldo
+// a un estudio/evento puntual, no a Caudall).
+const institutionSchema = z.object({
+  assetId: z.string().min(1),
+  name: z.string().min(1)
+});
+export type LandingInstitution = z.infer<typeof institutionSchema>;
+
 const contentSchemas = {
   colaborador_hero: z.object({
     titleLine1: z.string().min(1),
@@ -43,10 +75,12 @@ const contentSchemas = {
     ctaUrl: z.string().min(1)
   }),
   empleador_reto: z.object({
+    eyebrow: z.string().min(1),
     title: z.string().min(1),
     body: z.string().min(1)
   }),
   empleador_solucion: z.object({
+    eyebrow: z.string().min(1),
     title: z.string().min(1),
     tags: z.array(z.string().min(1)),
     body: z.string().min(1),
@@ -56,8 +90,40 @@ const contentSchemas = {
     eyebrow: z.string().min(1),
     title: z.string().min(1),
     body: z.string().min(1),
+    // Encabezado propio del banner de fotos (evento/estudio real, no
+    // ilustrativo) — distinto del eyebrow/title de arriba, que son del
+    // bloque de hallazgos/metodología en general. Vive en este mismo
+    // bloque en vez de uno nuevo para no duplicar el componente del
+    // banner ni la config de bannerImages/focalY.
+    eventsTitle: z.string().min(1),
+    eventsBody: z.string().min(1),
+    // Fotos genéricas del trabajo de campo, sin atarse a un año — banner
+    // rotativo, distinto de milestones (que sí es por año). Longitud fija
+    // 3; cada slot puede quedar sin foto (assetId null) hasta que se suba
+    // una. Ver bannerSlotSchema sobre focalY.
+    bannerImages: z.tuple([bannerSlotSchema, bannerSlotSchema, bannerSlotSchema]),
+    // Hallazgos reales del benchmark nacional — cintillo estático (no
+    // animado: ver decisión de UX, dos animaciones simultáneas con el
+    // banner de fotos era demasiado). value/label, no fórmulas ni
+    // cálculo en vivo — se actualiza a mano si cambia el dataset.
+    findings: z.array(findingSchema),
+    // Cada milestone ahora enlaza a un informe (PDF) en vez de mostrar
+    // una foto — mediaAssetId puede apuntar a cualquier archivo del
+    // banco de medios, imagen o PDF (ver ALLOWED_MEDIA_TYPES en
+    // admin/contenido/actions.ts).
     milestones: z.array(milestoneSchema),
     closingLine: z.string().min(1)
+  }),
+  // Carrusel de logos — respaldo a estudios/eventos puntuales de Caudall,
+  // NO instituciones "clientes" ni un respaldo institucional general (de
+  // ahí el disclaimer obligatorio debajo del carrusel). `institutions`
+  // arranca vacío hasta que se suban logos reales desde /admin/contenido
+  // — el bloque entero se omite mientras esté vacío (mismo criterio que
+  // bannerImages: nunca mostrar un carrusel vacío a un visitante real).
+  empleador_instituciones: z.object({
+    title: z.string().min(1),
+    disclaimer: z.string().min(1),
+    institutions: z.array(institutionSchema)
   }),
   empleador_privacidad: z.object({
     title: z.string().min(1),
@@ -67,6 +133,13 @@ const contentSchemas = {
     title: z.string().min(1),
     body: z.string().min(1),
     ctaLabel: z.string().min(1)
+  }),
+  // Opcional a propósito: todavía no hay un canal de contacto real
+  // (ver ctaUrl arriba) — el footer se muestra igual sin él, solo con
+  // logo y copyright, en vez de bloquear el bloque entero por un campo
+  // que depende de que Reynoso decida el canal.
+  empleador_footer: z.object({
+    contactEmail: z.string().optional()
   })
 } as const;
 
@@ -81,8 +154,10 @@ export const LANDING_BLOCK_TYPES_BY_SLUG: Record<'EMPLEADOR' | 'COLABORADOR', La
     'empleador_reto',
     'empleador_solucion',
     'empleador_metodologia',
+    'empleador_instituciones',
     'empleador_privacidad',
-    'empleador_cierre'
+    'empleador_cierre',
+    'empleador_footer'
   ]
 };
 
@@ -103,7 +178,7 @@ export function parseLandingBlockContent<T extends LandingBlockType>(type: T, co
 // archivo, no hay generación automática desde el schema de zod porque los
 // tipos de campo (texto vs. lista vs. hitos) no se pueden inferir de zod
 // solo con `z.string()`/`z.array()`.
-export type LandingFieldKind = 'text' | 'textarea' | 'list' | 'milestones';
+export type LandingFieldKind = 'text' | 'textarea' | 'list' | 'milestones' | 'mediaSlots' | 'findings' | 'institutions';
 
 export type LandingFieldDescriptor = {
   key: string;
@@ -131,10 +206,12 @@ export const LANDING_BLOCK_FIELDS: Record<LandingBlockType, LandingFieldDescript
     { key: 'ctaUrl', kind: 'text', labelKey: 'ctaUrl', helpKey: 'ctaUrlHelp' }
   ],
   empleador_reto: [
+    { key: 'eyebrow', kind: 'text', labelKey: 'eyebrow' },
     { key: 'title', kind: 'textarea', labelKey: 'title' },
     { key: 'body', kind: 'textarea', labelKey: 'body' }
   ],
   empleador_solucion: [
+    { key: 'eyebrow', kind: 'text', labelKey: 'eyebrow' },
     { key: 'title', kind: 'text', labelKey: 'title' },
     { key: 'tags', kind: 'list', labelKey: 'tags', helpKey: 'oneLinePerItem' },
     { key: 'body', kind: 'textarea', labelKey: 'body' },
@@ -144,13 +221,23 @@ export const LANDING_BLOCK_FIELDS: Record<LandingBlockType, LandingFieldDescript
     { key: 'eyebrow', kind: 'text', labelKey: 'eyebrow' },
     { key: 'title', kind: 'text', labelKey: 'title' },
     { key: 'body', kind: 'textarea', labelKey: 'body' },
+    { key: 'findings', kind: 'findings', labelKey: 'findings', helpKey: 'findingsHelp' },
+    { key: 'eventsTitle', kind: 'text', labelKey: 'eventsTitle' },
+    { key: 'eventsBody', kind: 'textarea', labelKey: 'eventsBody' },
+    { key: 'bannerImages', kind: 'mediaSlots', labelKey: 'bannerImages', helpKey: 'bannerImagesHelp' },
     { key: 'milestones', kind: 'milestones', labelKey: 'milestones' },
     { key: 'closingLine', kind: 'text', labelKey: 'closingLine' }
+  ],
+  empleador_instituciones: [
+    { key: 'title', kind: 'text', labelKey: 'title' },
+    { key: 'institutions', kind: 'institutions', labelKey: 'institutions', helpKey: 'institutionsHelp' },
+    { key: 'disclaimer', kind: 'textarea', labelKey: 'disclaimer' }
   ],
   empleador_privacidad: [
     { key: 'title', kind: 'text', labelKey: 'title' },
     { key: 'body', kind: 'textarea', labelKey: 'body' }
   ],
+  empleador_footer: [{ key: 'contactEmail', kind: 'text', labelKey: 'contactEmail', helpKey: 'contactEmailHelp' }],
   empleador_cierre: [
     { key: 'title', kind: 'textarea', labelKey: 'title' },
     { key: 'body', kind: 'textarea', labelKey: 'body' },
