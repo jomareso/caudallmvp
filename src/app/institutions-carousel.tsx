@@ -57,7 +57,7 @@ export function InstitutionsCarousel({ institutions }: { institutions: Instituti
     >
       <div
         ref={trackRef}
-        className="caudall-institutions-track flex items-center gap-10 w-max py-1 hover:[animation-play-state:paused] focus-within:[animation-play-state:paused]"
+        className="caudall-institutions-track flex items-center gap-12 w-max py-2 hover:[animation-play-state:paused] focus-within:[animation-play-state:paused]"
       >
         {loop.map((institution, i) => (
           // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
@@ -67,7 +67,7 @@ export function InstitutionsCarousel({ institutions }: { institutions: Instituti
             alt={institution.name}
             title={institution.name}
             aria-hidden={i >= institutions.length}
-            className="h-8 md:h-9 w-auto object-contain shrink-0 grayscale opacity-60 transition hover:opacity-100 hover:grayscale-0"
+            className="h-11 md:h-14 w-auto object-contain shrink-0"
           />
         ))}
       </div>
