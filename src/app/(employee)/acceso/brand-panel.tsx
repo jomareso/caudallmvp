@@ -1,5 +1,6 @@
 import { getVisibleBlockContent } from '@/lib/landing/get-landing-content';
 import { splitHighlightMarkup } from '@/lib/landing/blocks';
+import { BrandLogo } from '@/lib/brand/logo';
 
 // Panel de marca para el lado izquierdo de las pantallas cortas del
 // empleado en escritorio (Decisión 7: "se diseña primero para móvil y se
@@ -18,8 +19,10 @@ export async function BrandPanel() {
 
   return (
     <div className="hidden lg:flex lg:flex-col lg:justify-center bg-gradient-to-br from-yale to-cola text-white px-16 py-16">
-      {/* eslint-disable-next-line @next/next/no-img-element -- logo estático propio del bundle, no necesita el optimizador de next/image */}
-      <img src="/brand/caudall-logo-white.png" alt="Caudall" className="h-8 w-auto self-start mb-8" />
+      {/* variant="hero": mismo tamaño que el login de admin y el acceso de
+          empleado en mobile — antes era h-8, un tamaño propio que nadie
+          había decidido a propósito (ver src/lib/brand/logo.tsx). */}
+      <BrandLogo variant="hero" src="/brand/caudall-logo-white.png" className="self-start mb-8" />
       {hero ? (
         <>
           {/* text-2xl (no text-4xl): a 36px "Entiende tu salud financiera."

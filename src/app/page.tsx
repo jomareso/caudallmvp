@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { getVisibleBlockContent } from '@/lib/landing/get-landing-content';
 import { splitHighlightMarkup } from '@/lib/landing/blocks';
+import { BrandLogo } from '@/lib/brand/logo';
 import { BannerRotator } from './banner-rotator';
 import { InstitutionsCarousel } from './institutions-carousel';
 
@@ -52,11 +53,10 @@ export default async function HomePage() {
     <div className="bg-white text-quartz">
       <header className="border-b border-silver/40 bg-white/95 lg:sticky lg:top-0 lg:z-10 lg:backdrop-blur">
         <div className="max-w-6xl mx-auto px-6 lg:px-10 py-6 flex items-center justify-between gap-4">
-          {/* h-7: mismo tamaño que el logo en la barra de navegación
-              persistente del resto del producto (admin, topbar del
-              empleado). */}
-          {/* eslint-disable-next-line @next/next/no-img-element -- logo estático propio del bundle, no necesita el optimizador de next/image */}
-          <img src="/brand/caudall-logo-color.png" alt="Caudall" className="h-7 w-auto shrink-0" />
+          {/* variant="nav": mismo tamaño que el logo en el resto de las
+              barras de navegación persistentes del producto (admin,
+              topbar del empleado — ver src/lib/brand/logo.tsx). */}
+          <BrandLogo variant="nav" className="shrink-0" />
           {/* Solo desktop: en móvil no hay espacio para un menú sin
               competir con el CTA (ver el ancho del botón abajo), y la
               landing sigue siendo de una sola pantalla larga — no hace
