@@ -63,7 +63,7 @@ export function InstitutionsCarousel({ institutions }: { institutions: Instituti
           // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
           <img
             key={`${institution.assetId}-${i}`}
-            src={`/api/media/${institution.assetId}`}
+            src={`/api/media/${institution.assetId}?trim=1`}
             alt={institution.name}
             title={institution.name}
             aria-hidden={i >= institutions.length}
