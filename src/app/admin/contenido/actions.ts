@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { getTranslations } from 'next-intl/server';
 import type { Prisma } from '@prisma/client';
+import { MediaCategory } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireAdm } from '@/lib/auth/admin-context';
 import { isLandingBlockType, parseLandingBlockContent } from '@/lib/landing/blocks';
@@ -92,11 +93,31 @@ export async function uploadMediaAsset(formData: FormData): Promise<ActionResult
   if (!ALLOWED_MEDIA_TYPES.has(file.type)) return { ok: false, message: t('uploadErrorType') };
   if (file.size > MAX_MEDIA_SIZE_BYTES) return { ok: false, message: t('uploadErrorSize') };
 
+  const category = formData.get('category');
+  if (typeof category !== 'string' || !(category in MediaCategory)) {
+    return { ok: false, message: t('uploadErrorCategory') };
+  }
+
   const bytes = Buffer.from(await file.arrayBuffer());
   await prisma.mediaAsset.create({
-    data: { filename: file.name, mimeType: file.type, data: bytes, size: file.size }
+    data: { filename: file.name, mimeType: file.type, data: bytes, size: file.size, category: category as MediaCategory }
   });
 
+  revalidatePath('/admin/contenido');
+  return { ok: true };
+}
+
+// Reclasificar un archivo ya subido — el banco de medios existía antes de
+// tener categorías (ver migración media_asset_category), así que los
+// archivos viejos necesitan poder asignarse desde la UI, no solo al
+// volver a subirlos.
+export async function updateMediaAssetCategory(id: string, category: string): Promise<ActionResult> {
+  await requireAdm();
+  const t = await getTranslations('admin.content.media');
+
+  if (!(category in MediaCategory)) return { ok: false, message: t('uploadErrorCategory') };
+
+  await prisma.mediaAsset.update({ where: { id }, data: { category: category as MediaCategory } }).catch(() => null);
   revalidatePath('/admin/contenido');
   return { ok: true };
 }

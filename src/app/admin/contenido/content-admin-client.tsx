@@ -12,7 +12,14 @@ import {
   type LandingBannerSlot,
   type LandingInstitution
 } from '@/lib/landing/blocks';
-import { updateBlockContent, toggleBlockVisible, moveBlock, uploadMediaAsset, deleteMediaAsset } from './actions';
+import {
+  updateBlockContent,
+  toggleBlockVisible,
+  moveBlock,
+  uploadMediaAsset,
+  updateMediaAssetCategory,
+  deleteMediaAsset
+} from './actions';
 
 type BlockDTO = {
   id: string;
@@ -24,7 +31,22 @@ type BlockDTO = {
   content: Record<string, unknown>;
 };
 
-type MediaDTO = { id: string; filename: string; mimeType: string; size: number; createdAt: string };
+type MediaCategoryValue = 'LOGO_INSTITUCION' | 'FOTO_EVENTO' | 'INFORME' | 'OTRO';
+type MediaDTO = {
+  id: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+  category: MediaCategoryValue | null;
+  createdAt: string;
+};
+
+// Mismo orden en el formulario de subida, en el select de reclasificar, y
+// en las secciones del banco — así no hay que recordar un orden distinto
+// en cada lugar. `null` (sin categorizar) siempre va al final: son
+// archivos de antes de esta migración, no la categoría por defecto de
+// nada nuevo.
+const MEDIA_CATEGORY_ORDER: MediaCategoryValue[] = ['LOGO_INSTITUCION', 'FOTO_EVENTO', 'INFORME', 'OTRO'];
 
 type Labels = {
   title: string;
@@ -646,12 +668,50 @@ function MediaLibrary({ media, labels }: { media: MediaDTO[]; labels: Labels }) 
     void navigator.clipboard.writeText(url);
   }
 
+  function handleCategoryChange(id: string, category: string) {
+    startTransition(async () => {
+      await updateMediaAssetCategory(id, category);
+      router.refresh();
+    });
+  }
+
+  function categoryLabel(category: MediaCategoryValue | null) {
+    if (category === null) return labels.media.categoryUncategorized;
+    const labelByCategory: Record<MediaCategoryValue, string> = {
+      LOGO_INSTITUCION: labels.media.categoryLogoInstitucion,
+      FOTO_EVENTO: labels.media.categoryFotoEvento,
+      INFORME: labels.media.categoryInforme,
+      OTRO: labels.media.categoryOtro
+    };
+    return labelByCategory[category];
+  }
+
+  // Agrupa en el orden fijo de categorías + "Sin categorizar" al final —
+  // solo se listan grupos que realmente tienen archivos.
+  const groups: { category: MediaCategoryValue | null; items: MediaDTO[] }[] = [
+    ...MEDIA_CATEGORY_ORDER.map((category) => ({ category, items: media.filter((m) => m.category === category) })),
+    { category: null, items: media.filter((m) => m.category === null) }
+  ].filter((group) => group.items.length > 0);
+
   return (
     <div className="flex flex-col gap-6">
-      <form onSubmit={handleUpload} className="bg-white border border-silver/60 rounded-xl p-4 flex items-end gap-3">
-        <label className="flex flex-col gap-1 flex-1">
+      <form onSubmit={handleUpload} className="bg-white border border-silver/60 rounded-xl p-4 flex items-end gap-3 flex-wrap">
+        <label className="flex flex-col gap-1 flex-1 min-w-[180px]">
           <span className="text-xs text-nickel">{labels.media.uploadLabel}</span>
           <input name="file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" className="text-sm text-quartz" />
+        </label>
+        <label className="flex flex-col gap-1 min-w-[180px]">
+          <span className="text-xs text-nickel">{labels.media.categoryLabel}</span>
+          <select name="category" required defaultValue="" className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz">
+            <option value="" disabled>
+              {labels.media.categoryPlaceholder}
+            </option>
+            {MEDIA_CATEGORY_ORDER.map((category) => (
+              <option key={category} value={category}>
+                {categoryLabel(category)}
+              </option>
+            ))}
+          </select>
         </label>
         <button
           type="submit"
@@ -666,29 +726,50 @@ function MediaLibrary({ media, labels }: { media: MediaDTO[]; labels: Labels }) 
       {media.length === 0 ? (
         <p className="text-xs text-nickel">{labels.media.empty}</p>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
-          {media.map((asset) => (
-            <div key={asset.id} className="bg-white border border-silver/60 rounded-xl overflow-hidden">
-              {asset.mimeType === 'application/pdf' ? (
-                <div className="w-full aspect-video bg-silver/20 flex items-center justify-center text-2xl" aria-hidden>
-                  📄
-                </div>
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-                <img src={`/api/media/${asset.id}`} alt={asset.filename} className="w-full aspect-video object-cover bg-silver/20" />
-              )}
-              <div className="p-3 flex flex-col gap-2">
-                <p className="text-xs text-quartz truncate" title={asset.filename}>
-                  {asset.filename}
-                </p>
-                <div className="flex items-center gap-3">
-                  <button type="button" onClick={() => handleCopyUrl(asset.id)} className="text-[11px] text-yale hover:underline">
-                    {labels.media.copyUrl}
-                  </button>
-                  <button type="button" onClick={() => handleDelete(asset.id)} className="text-[11px] text-bad hover:underline">
-                    {labels.media.delete}
-                  </button>
-                </div>
+        <div className="flex flex-col gap-6">
+          {groups.map((group) => (
+            <div key={group.category ?? 'uncategorized'} className="flex flex-col gap-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-nickel">{categoryLabel(group.category)}</h3>
+              <div className="grid grid-cols-3 gap-4">
+                {group.items.map((asset) => (
+                  <div key={asset.id} className="bg-white border border-silver/60 rounded-xl overflow-hidden">
+                    {asset.mimeType === 'application/pdf' ? (
+                      <div className="w-full aspect-video bg-silver/20 flex items-center justify-center text-2xl" aria-hidden>
+                        📄
+                      </div>
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
+                      <img src={`/api/media/${asset.id}`} alt={asset.filename} className="w-full aspect-video object-cover bg-silver/20" />
+                    )}
+                    <div className="p-3 flex flex-col gap-2">
+                      <p className="text-xs text-quartz truncate" title={asset.filename}>
+                        {asset.filename}
+                      </p>
+                      <select
+                        value={asset.category ?? ''}
+                        onChange={(event) => handleCategoryChange(asset.id, event.target.value)}
+                        className="border border-silver rounded-lg px-2 py-1 text-[11px] text-quartz"
+                      >
+                        <option value="" disabled>
+                          {labels.media.categoryPlaceholder}
+                        </option>
+                        {MEDIA_CATEGORY_ORDER.map((category) => (
+                          <option key={category} value={category}>
+                            {categoryLabel(category)}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="flex items-center gap-3">
+                        <button type="button" onClick={() => handleCopyUrl(asset.id)} className="text-[11px] text-yale hover:underline">
+                          {labels.media.copyUrl}
+                        </button>
+                        <button type="button" onClick={() => handleDelete(asset.id)} className="text-[11px] text-bad hover:underline">
+                          {labels.media.delete}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
