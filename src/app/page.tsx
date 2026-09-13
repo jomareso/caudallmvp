@@ -60,11 +60,11 @@ export default async function HomePage() {
               landing sigue siendo de una sola pantalla larga — no hace
               falta navegar por secciones ahí. */}
           <nav className="hidden lg:flex items-center gap-7 text-[13.5px] text-nickel">
-            <a href="#solucion" className="hover:text-yale">
-              Cómo funciona
-            </a>
             <a href="#metodologia" className="hover:text-yale">
               Metodología
+            </a>
+            <a href="#solucion" className="hover:text-yale">
+              Cómo funciona
             </a>
             <a href="#privacidad" className="hover:text-yale">
               Privacidad
@@ -105,65 +105,6 @@ export default async function HomePage() {
                   <SegmentBar label={tEmpresa('tiers.HIGH')} pct={20} color="#3B6D11" />
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {reto ? (
-        <section className="border-t border-silver/40">
-          <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10 lg:py-12 flex flex-col gap-3">
-            <span className="w-9 h-9 rounded-full bg-[#F4F5F7] flex items-center justify-center text-base" aria-hidden>
-              🧭
-            </span>
-            <p className="text-xs font-semibold tracking-wide uppercase text-cola">{reto.eyebrow}</p>
-            <h2 className="text-xl lg:text-2xl font-semibold">{reto.title}</h2>
-            <p className="text-[15px] text-nickel leading-relaxed">{reto.body}</p>
-          </div>
-        </section>
-      ) : null}
-
-      {solucion ? (
-        <section id="solucion" className="border-t border-silver/40 scroll-mt-20">
-          <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10 lg:py-12 flex flex-col gap-7">
-            <div className="flex flex-col gap-3">
-              {/* Mismo tratamiento que el ícono de "el reto" arriba (círculo
-                  gris claro, mismo tamaño) — antes esta sección no tenía
-                  ícono y rompía el ritmo entre las dos. */}
-              <span className="w-9 h-9 rounded-full bg-[#F4F5F7] flex items-center justify-center text-base" aria-hidden>
-                🧩
-              </span>
-              <p className="text-xs font-semibold tracking-wide uppercase text-cola">{solucion.eyebrow}</p>
-              <h2 className="text-xl lg:text-2xl font-semibold">{solucion.title}</h2>
-              <div className="flex items-center gap-2 flex-wrap">
-                {solucion.tags.map((tag, i) => (
-                  <span key={tag} className="flex items-center gap-2">
-                    {i > 0 ? <span className="text-silver text-sm">+</span> : null}
-                    <span
-                      className="text-xs font-bold px-3 py-1.5 rounded-full"
-                      style={{
-                        color: [ '#0F5499', '#0783D9', '#34C1EE'][i % 3],
-                        background: ['rgba(15,84,153,0.08)', 'rgba(7,131,217,0.08)', 'rgba(52,193,238,0.12)'][i % 3]
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  </span>
-                ))}
-              </div>
-              <p className="text-[15px] text-nickel leading-relaxed">{solucion.body}</p>
-            </div>
-            {/* Cada paso agrupado con su flecha en un solo span
-                (whitespace-nowrap): si envuelve en mobile, envuelve la
-                unidad completa — evita que una flecha quede huérfana al
-                inicio de línea. */}
-            <div className="flex items-center gap-3.5 flex-wrap text-base font-semibold">
-              {solucion.steps.map((step, i) => (
-                <span key={step} className="whitespace-nowrap">
-                  {i > 0 ? <span className="text-cola text-sm mr-3.5">→</span> : null}
-                  {step}
-                </span>
-              ))}
             </div>
           </div>
         </section>
@@ -248,6 +189,65 @@ export default async function HomePage() {
             ) : null}
 
             <p className="text-sm italic text-nickel text-center">{metodologia.closingLine}</p>
+          </div>
+        </section>
+      ) : null}
+
+      {reto ? (
+        <section className="border-t border-silver/40">
+          <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10 lg:py-12 flex flex-col gap-3">
+            <span className="w-9 h-9 rounded-full bg-[#F4F5F7] flex items-center justify-center text-base" aria-hidden>
+              🧭
+            </span>
+            <p className="text-xs font-semibold tracking-wide uppercase text-cola">{reto.eyebrow}</p>
+            <h2 className="text-xl lg:text-2xl font-semibold">{reto.title}</h2>
+            <p className="text-[15px] text-nickel leading-relaxed">{reto.body}</p>
+          </div>
+        </section>
+      ) : null}
+
+      {solucion ? (
+        <section id="solucion" className="border-t border-silver/40 scroll-mt-20">
+          <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10 lg:py-12 flex flex-col gap-7">
+            <div className="flex flex-col gap-3">
+              {/* Mismo tratamiento que el ícono de "el reto" arriba (círculo
+                  gris claro, mismo tamaño) — antes esta sección no tenía
+                  ícono y rompía el ritmo entre las dos. */}
+              <span className="w-9 h-9 rounded-full bg-[#F4F5F7] flex items-center justify-center text-base" aria-hidden>
+                🧩
+              </span>
+              <p className="text-xs font-semibold tracking-wide uppercase text-cola">{solucion.eyebrow}</p>
+              <h2 className="text-xl lg:text-2xl font-semibold">{solucion.title}</h2>
+              <div className="flex items-center gap-2 flex-wrap">
+                {solucion.tags.map((tag, i) => (
+                  <span key={tag} className="flex items-center gap-2">
+                    {i > 0 ? <span className="text-silver text-sm">+</span> : null}
+                    <span
+                      className="text-xs font-bold px-3 py-1.5 rounded-full"
+                      style={{
+                        color: [ '#0F5499', '#0783D9', '#34C1EE'][i % 3],
+                        background: ['rgba(15,84,153,0.08)', 'rgba(7,131,217,0.08)', 'rgba(52,193,238,0.12)'][i % 3]
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  </span>
+                ))}
+              </div>
+              <p className="text-[15px] text-nickel leading-relaxed">{solucion.body}</p>
+            </div>
+            {/* Cada paso agrupado con su flecha en un solo span
+                (whitespace-nowrap): si envuelve en mobile, envuelve la
+                unidad completa — evita que una flecha quede huérfana al
+                inicio de línea. */}
+            <div className="flex items-center gap-3.5 flex-wrap text-base font-semibold">
+              {solucion.steps.map((step, i) => (
+                <span key={step} className="whitespace-nowrap">
+                  {i > 0 ? <span className="text-cola text-sm mr-3.5">→</span> : null}
+                  {step}
+                </span>
+              ))}
+            </div>
           </div>
         </section>
       ) : null}
