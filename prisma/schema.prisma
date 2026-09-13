@@ -1146,13 +1146,26 @@ model LandingBlock {
 // la sección de metodología). Netlify no tiene storage persistente, así
 // que igual que PlatformSettings.logoData, los bytes se guardan directo
 // en la base de datos.
+// Refleja dónde se usa cada archivo en la landing, no una taxonomía
+// libre — coincide 1:1 con los bloques que ya lo consumen (carrusel de
+// instituciones, banner de fotos de Metodología, milestones). NULL en
+// archivos que ya existían antes de esta migración ("Sin categorizar")
+// hasta que un admin los reclasifique desde /admin/contenido.
+enum MediaCategory {
+  LOGO_INSTITUCION
+  FOTO_EVENTO
+  INFORME
+  OTRO
+}
+
 model MediaAsset {
-  id        String   @id @default(cuid())
+  id        String         @id @default(cuid())
   filename  String
   mimeType  String
   data      Bytes
   size      Int
-  createdAt DateTime @default(now())
+  category  MediaCategory?
+  createdAt DateTime       @default(now())
 
   @@map("media_assets")
 }

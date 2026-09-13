@@ -21,7 +21,7 @@ export default async function AdminContenidoPage() {
     prisma.landingPage.findUnique({ where: { slug: 'COLABORADOR' }, include: { blocks: { orderBy: { order: 'asc' } } } }),
     prisma.mediaAsset.findMany({
       orderBy: { createdAt: 'desc' },
-      select: { id: true, filename: true, mimeType: true, size: true, createdAt: true }
+      select: { id: true, filename: true, mimeType: true, size: true, category: true, createdAt: true }
     })
   ]);
 
