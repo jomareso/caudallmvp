@@ -62,6 +62,11 @@ export default async function AdminContenidoPage() {
     findingLabel: t('findingLabel'),
     addFinding: t('addFinding'),
     removeFinding: t('removeFinding'),
+    institutionsHelp: t('institutionsHelp'),
+    institutionName: t('institutionName'),
+    institutionLogoNone: t('institutionLogoNone'),
+    addInstitution: t('addInstitution'),
+    removeInstitution: t('removeInstitution'),
     fields: t.raw('fields') as Record<string, string>,
     blockTypeLabels: t.raw('blockTypeLabels') as Record<string, string>,
     media: t.raw('media') as Record<string, string>
