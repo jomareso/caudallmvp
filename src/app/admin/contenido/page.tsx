@@ -21,7 +21,7 @@ export default async function AdminContenidoPage() {
     prisma.landingPage.findUnique({ where: { slug: 'COLABORADOR' }, include: { blocks: { orderBy: { order: 'asc' } } } }),
     prisma.mediaAsset.findMany({
       orderBy: { createdAt: 'desc' },
-      select: { id: true, filename: true, mimeType: true, size: true, createdAt: true }
+      select: { id: true, filename: true, mimeType: true, size: true, category: true, createdAt: true }
     })
   ]);
 
@@ -44,6 +44,9 @@ export default async function AdminContenidoPage() {
     highlightHelp: t('highlightHelp'),
     oneLinePerItem: t('oneLinePerItem'),
     ctaUrlHelp: t('ctaUrlHelp'),
+    contactEmailHelp: t('contactEmailHelp'),
+    findingsHelp: t('findingsHelp'),
+    bannerImagesHelp: t('bannerImagesHelp'),
     milestoneYear: t('milestoneYear'),
     milestoneTitle: t('milestoneTitle'),
     milestoneDescription: t('milestoneDescription'),
@@ -51,6 +54,19 @@ export default async function AdminContenidoPage() {
     milestoneImageNone: t('milestoneImageNone'),
     addMilestone: t('addMilestone'),
     removeMilestone: t('removeMilestone'),
+    mediaSlotNone: t('mediaSlotNone'),
+    focalTop: t('focalTop'),
+    focalCenter: t('focalCenter'),
+    focalBottom: t('focalBottom'),
+    findingValue: t('findingValue'),
+    findingLabel: t('findingLabel'),
+    addFinding: t('addFinding'),
+    removeFinding: t('removeFinding'),
+    institutionsHelp: t('institutionsHelp'),
+    institutionName: t('institutionName'),
+    institutionLogoNone: t('institutionLogoNone'),
+    addInstitution: t('addInstitution'),
+    removeInstitution: t('removeInstitution'),
     fields: t.raw('fields') as Record<string, string>,
     blockTypeLabels: t.raw('blockTypeLabels') as Record<string, string>,
     media: t.raw('media') as Record<string, string>

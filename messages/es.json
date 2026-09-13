@@ -172,9 +172,9 @@
     "aggregationNotice": "Todos los datos son agregados y anónimos. Segmentos con menos de {min} personas no se muestran, para proteger la confidencialidad de tus empleados."
   },
   "landingEmpleador": {
-    "illustrativeLabel": "Ejemplo ilustrativo",
+    "illustrativeLabel": "Ejemplo — ¿así se vería tu equipo?",
     "cfhiOutOf": "de 100",
-    "cfhiVsNational": "+5 vs. promedio nacional",
+    "cfhiVsNational": "-9 vs. promedio nacional",
     "teamDistributionLabel": "Distribución del equipo"
   },
   "admin": {
@@ -416,14 +416,30 @@
       "invalidContent": "Contenido inválido — revisa que ningún campo esté vacío.",
       "highlightHelp": "Envuelve una frase entre ** ** para resaltarla con los colores de la marca.",
       "oneLinePerItem": "Un elemento por línea.",
+      "findingsHelp": "Cada hallazgo tiene una cifra (o palabra clave, si no hay número) que se muestra grande, y una frase de apoyo chica debajo — la cifra es lo primero que se lee.",
+      "findingValue": "Cifra",
+      "findingLabel": "Frase de apoyo",
+      "addFinding": "Agregar hallazgo",
+      "removeFinding": "Quitar",
       "ctaUrlHelp": "El botón \"Solicitar una demostración\" (barra superior, hero y cierre) usa este enlace. Pega la URL real cuando la tengas (Calendly, WhatsApp Business, etc.) — mientras tanto puede quedar en \"#\".",
+      "contactEmailHelp": "Se muestra en el footer de la landing. Déjalo vacío mientras no haya un canal de contacto definido — el footer se ve bien sin él.",
       "milestoneYear": "Año",
       "milestoneTitle": "Título",
       "milestoneDescription": "Descripción",
-      "milestoneImage": "Imagen",
-      "milestoneImageNone": "Sin imagen (se muestra el ícono de referencia)",
+      "milestoneImage": "Informe (PDF o imagen)",
+      "milestoneImageNone": "Sin archivo (no se muestra enlace)",
       "addMilestone": "Agregar hito",
       "removeMilestone": "Quitar",
+      "mediaSlotNone": "Sin foto",
+      "bannerImagesHelp": "Hasta 3 fotos genéricas que rotan solas (no van atadas a un año específico) — se omiten las que queden vacías. El encuadre decide qué parte de la foto se ve al recortarla al ancho del banner.",
+      "focalTop": "Arriba",
+      "focalCenter": "Centro",
+      "focalBottom": "Abajo",
+      "institutionsHelp": "Logos que respaldaron un estudio o evento puntual de Caudall — no implica que la institución respalde a Caudall en general (ver el aviso que se muestra debajo del carrusel). Se omite todo el carrusel mientras no haya ningún logo cargado.",
+      "institutionName": "Nombre de la institución",
+      "institutionLogoNone": "Sin logo",
+      "addInstitution": "Agregar institución",
+      "removeInstitution": "Quitar",
       "fields": {
         "titleLine1": "Línea 1 del título",
         "titleLine2": "Línea 2 del título",
@@ -441,7 +457,14 @@
         "steps": "Pasos",
         "eyebrow": "Antetítulo",
         "milestones": "Línea de tiempo",
-        "closingLine": "Línea de cierre"
+        "closingLine": "Línea de cierre",
+        "bannerImages": "Banner rotativo",
+        "findings": "Hallazgos",
+        "contactEmail": "Correo de contacto",
+        "eventsTitle": "Título del banner de fotos",
+        "eventsBody": "Texto del banner de fotos",
+        "institutions": "Logos",
+        "disclaimer": "Aviso debajo del carrusel"
       },
       "blockTypeLabels": {
         "colaborador_hero": "Encabezado",
@@ -451,8 +474,10 @@
         "empleador_reto": "El reto",
         "empleador_solucion": "La solución",
         "empleador_metodologia": "Respaldo metodológico",
+        "empleador_instituciones": "Carrusel de instituciones",
         "empleador_privacidad": "Privacidad",
-        "empleador_cierre": "Cierre"
+        "empleador_cierre": "Cierre",
+        "empleador_footer": "Footer"
       },
       "media": {
         "uploadLabel": "Subir una imagen",
@@ -461,11 +486,19 @@
         "uploadSuccess": "Imagen subida.",
         "uploadErrorType": "El archivo debe ser una imagen (PNG, JPG o WEBP).",
         "uploadErrorSize": "El archivo es muy grande — el máximo es 4 MB.",
+        "uploadErrorCategory": "Elegí una categoría para el archivo.",
         "empty": "Todavía no hay imágenes en el banco.",
         "delete": "Borrar",
         "deleteConfirm": "¿Borrar esta imagen? Los bloques que la estén usando no se actualizan automáticamente.",
         "copyUrl": "Copiar URL",
-        "urlCopied": "URL copiada."
+        "urlCopied": "URL copiada.",
+        "categoryLabel": "Categoría",
+        "categoryPlaceholder": "Elegí una categoría",
+        "categoryLogoInstitucion": "Logos de instituciones",
+        "categoryFotoEvento": "Fotos de estudios/eventos",
+        "categoryInforme": "Informes y documentos",
+        "categoryOtro": "Otros",
+        "categoryUncategorized": "Sin categorizar"
       }
     },
     "empresas": {

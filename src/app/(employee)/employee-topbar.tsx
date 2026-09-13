@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { prisma, runWithTenantContext } from '@/lib/db/prisma';
 import { requireEmployee, employeeTenantContext } from '@/lib/auth/employee-context';
+import { TopBarLogoLink } from './topbar-logo-link';
 
 // Opción C del mockup de marca (28 ago, aprobada por el founder): barra
 // delgada con el logo, igual en móvil y escritorio — para las pantallas del
@@ -29,7 +30,7 @@ export async function EmployeeTopBar({ showProfile = true }: { showProfile?: boo
         {/* ADR-003: "el header siempre muestra caudall + [logo empresa],
             nunca solo la marca de la empresa" — el logo del tenant se
             agrega junto al de Caudall, nunca lo reemplaza. */}
-        <div className="justify-self-center flex items-center gap-2">
+        <TopBarLogoLink>
           {/* h-7: mismo tamaño que el logo en el resto de las barras de
               navegación persistentes del producto (sidebar/topbar de
               admin, header de la landing pública). El logo del tenant
@@ -46,7 +47,7 @@ export async function EmployeeTopBar({ showProfile = true }: { showProfile?: boo
               <img src={tenant.logoUrl} alt={tenant.name} className="h-7 w-auto max-w-[96px] object-contain" />
             </>
           ) : null}
-        </div>
+        </TopBarLogoLink>
         {showProfile ? (
           <Link
             href="/perfil"

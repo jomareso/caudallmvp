@@ -7,9 +7,19 @@ import {
   isLandingBlockType,
   type LandingBlockType,
   type LandingFieldDescriptor,
-  type LandingMilestone
+  type LandingMilestone,
+  type LandingFinding,
+  type LandingBannerSlot,
+  type LandingInstitution
 } from '@/lib/landing/blocks';
-import { updateBlockContent, toggleBlockVisible, moveBlock, uploadMediaAsset, deleteMediaAsset } from './actions';
+import {
+  updateBlockContent,
+  toggleBlockVisible,
+  moveBlock,
+  uploadMediaAsset,
+  updateMediaAssetCategory,
+  deleteMediaAsset
+} from './actions';
 
 type BlockDTO = {
   id: string;
@@ -21,7 +31,22 @@ type BlockDTO = {
   content: Record<string, unknown>;
 };
 
-type MediaDTO = { id: string; filename: string; mimeType: string; size: number; createdAt: string };
+type MediaCategoryValue = 'LOGO_INSTITUCION' | 'FOTO_EVENTO' | 'INFORME' | 'OTRO';
+type MediaDTO = {
+  id: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+  category: MediaCategoryValue | null;
+  createdAt: string;
+};
+
+// Mismo orden en el formulario de subida, en el select de reclasificar, y
+// en las secciones del banco — así no hay que recordar un orden distinto
+// en cada lugar. `null` (sin categorizar) siempre va al final: son
+// archivos de antes de esta migración, no la categoría por defecto de
+// nada nuevo.
+const MEDIA_CATEGORY_ORDER: MediaCategoryValue[] = ['LOGO_INSTITUCION', 'FOTO_EVENTO', 'INFORME', 'OTRO'];
 
 type Labels = {
   title: string;
@@ -41,6 +66,9 @@ type Labels = {
   highlightHelp: string;
   oneLinePerItem: string;
   ctaUrlHelp: string;
+  contactEmailHelp: string;
+  bannerImagesHelp: string;
+  findingsHelp: string;
   milestoneYear: string;
   milestoneTitle: string;
   milestoneDescription: string;
@@ -48,6 +76,19 @@ type Labels = {
   milestoneImageNone: string;
   addMilestone: string;
   removeMilestone: string;
+  mediaSlotNone: string;
+  focalTop: string;
+  focalCenter: string;
+  focalBottom: string;
+  findingValue: string;
+  findingLabel: string;
+  addFinding: string;
+  removeFinding: string;
+  institutionsHelp: string;
+  institutionName: string;
+  institutionLogoNone: string;
+  addInstitution: string;
+  removeInstitution: string;
   fields: Record<string, string>;
   blockTypeLabels: Record<string, string>;
   media: Record<string, string>;
@@ -273,7 +314,18 @@ function FieldInput({
   onChange: (next: unknown) => void;
 }) {
   const label = labels.fields[field.labelKey] ?? field.key;
-  const help = field.helpKey ? labels[field.helpKey as 'highlightHelp' | 'oneLinePerItem' | 'ctaUrlHelp'] : undefined;
+  const help = field.helpKey
+    ? labels[
+        field.helpKey as
+          | 'highlightHelp'
+          | 'oneLinePerItem'
+          | 'ctaUrlHelp'
+          | 'contactEmailHelp'
+          | 'bannerImagesHelp'
+          | 'findingsHelp'
+          | 'institutionsHelp'
+      ]
+    : undefined;
 
   if (field.kind === 'text') {
     return (
@@ -324,6 +376,183 @@ function FieldInput({
         />
         {help ? <span className="text-[11px] text-nickel">{help}</span> : null}
       </label>
+    );
+  }
+
+  if (field.kind === 'mediaSlots') {
+    // Longitud fija 3 (ver bannerImages en blocks.ts) — a diferencia de
+    // milestones, no hay agregar/quitar, cada slot puede quedar vacío.
+    // focalY: no hay un único punto de recorte que funcione para
+    // cualquier foto (una necesita "arriba" para no perder cabezas, otra
+    // "centro" para no perder el escenario) — se elige por foto.
+    const rawSlots = Array.isArray(value) ? (value as LandingBannerSlot[]) : [];
+    const slots: LandingBannerSlot[] = [0, 1, 2].map((i) => rawSlots[i] ?? { assetId: null, focalY: 'center' });
+
+    function updateSlot(index: number, patch: Partial<LandingBannerSlot>) {
+      const next = slots.map((slot, i) => (i === index ? { ...slot, ...patch } : slot));
+      onChange(next);
+    }
+
+    const focalOptions: Array<{ value: LandingBannerSlot['focalY']; labelKey: 'focalTop' | 'focalCenter' | 'focalBottom' }> = [
+      { value: 'top', labelKey: 'focalTop' },
+      { value: 'center', labelKey: 'focalCenter' },
+      { value: 'bottom', labelKey: 'focalBottom' }
+    ];
+
+    return (
+      <div className="flex flex-col gap-1">
+        <span className="text-xs text-nickel">{label}</span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {slots.map((slot, index) => (
+            <div key={index} className="flex flex-col gap-1.5">
+              <select
+                value={slot.assetId ?? ''}
+                onChange={(event) => updateSlot(index, { assetId: event.target.value || null })}
+                className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz"
+              >
+                <option value="">{labels.mediaSlotNone}</option>
+                {media.map((asset) => (
+                  <option key={asset.id} value={asset.id}>
+                    {asset.filename}
+                  </option>
+                ))}
+              </select>
+              <div className="flex border border-silver rounded-lg overflow-hidden">
+                {focalOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    disabled={!slot.assetId}
+                    onClick={() => updateSlot(index, { focalY: opt.value })}
+                    className={`flex-1 text-[11px] py-1 disabled:opacity-40 disabled:cursor-not-allowed ${
+                      slot.focalY === opt.value ? 'bg-yale text-white' : 'bg-white text-nickel'
+                    }`}
+                  >
+                    {labels[opt.labelKey]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        {help ? <span className="text-[11px] text-nickel">{help}</span> : null}
+      </div>
+    );
+  }
+
+  if (field.kind === 'findings') {
+    const findings = Array.isArray(value) ? (value as LandingFinding[]) : [];
+
+    function updateFinding(index: number, patch: Partial<LandingFinding>) {
+      const next = findings.map((f, i) => (i === index ? { ...f, ...patch } : f));
+      onChange(next);
+    }
+
+    function removeFinding(index: number) {
+      onChange(findings.filter((_, i) => i !== index));
+    }
+
+    function addFinding() {
+      onChange([...findings, { value: '', label: '' }]);
+    }
+
+    return (
+      <div className="flex flex-col gap-1">
+        <span className="text-xs text-nickel">{label}</span>
+        <div className="flex flex-col gap-3">
+          {findings.map((finding, index) => (
+            <div key={index} className="border border-silver/60 rounded-lg p-3 flex flex-col gap-2 bg-white">
+              <input
+                type="text"
+                placeholder={labels.findingValue}
+                value={finding.value}
+                onChange={(event) => updateFinding(index, { value: event.target.value })}
+                className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz font-medium"
+              />
+              <input
+                type="text"
+                placeholder={labels.findingLabel}
+                value={finding.label}
+                onChange={(event) => updateFinding(index, { label: event.target.value })}
+                className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz"
+              />
+              <button
+                type="button"
+                onClick={() => removeFinding(index)}
+                className="text-xs text-bad self-start hover:underline"
+              >
+                {labels.removeFinding}
+              </button>
+            </div>
+          ))}
+          <button type="button" onClick={addFinding} className="text-xs text-yale font-medium self-start hover:underline">
+            + {labels.addFinding}
+          </button>
+        </div>
+        {help ? <span className="text-[11px] text-nickel">{help}</span> : null}
+      </div>
+    );
+  }
+
+  if (field.kind === 'institutions') {
+    const institutions = Array.isArray(value) ? (value as LandingInstitution[]) : [];
+    // El carrusel renderiza el logo como <img> — un PDF no se puede mostrar
+    // así (a diferencia de milestones, que lo enlaza como "Ver informe").
+    const logoOptions = media.filter((asset) => asset.mimeType.startsWith('image/'));
+
+    function updateInstitution(index: number, patch: Partial<LandingInstitution>) {
+      const next = institutions.map((inst, i) => (i === index ? { ...inst, ...patch } : inst));
+      onChange(next);
+    }
+
+    function removeInstitution(index: number) {
+      onChange(institutions.filter((_, i) => i !== index));
+    }
+
+    function addInstitution() {
+      onChange([...institutions, { assetId: '', name: '' }]);
+    }
+
+    return (
+      <div className="flex flex-col gap-1">
+        <span className="text-xs text-nickel">{label}</span>
+        <div className="flex flex-col gap-3">
+          {institutions.map((institution, index) => (
+            <div key={index} className="border border-silver/60 rounded-lg p-3 flex flex-col gap-2 bg-white">
+              <input
+                type="text"
+                placeholder={labels.institutionName}
+                value={institution.name}
+                onChange={(event) => updateInstitution(index, { name: event.target.value })}
+                className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz"
+              />
+              <select
+                value={institution.assetId}
+                onChange={(event) => updateInstitution(index, { assetId: event.target.value })}
+                className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz"
+              >
+                <option value="">{labels.institutionLogoNone}</option>
+                {logoOptions.map((asset) => (
+                  <option key={asset.id} value={asset.id}>
+                    {asset.filename}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => removeInstitution(index)}
+                className="text-xs text-bad self-start hover:underline"
+              >
+                {labels.removeInstitution}
+              </button>
+            </div>
+          ))}
+          <button type="button" onClick={addInstitution} className="text-xs text-yale font-medium self-start hover:underline">
+            + {labels.addInstitution}
+          </button>
+        </div>
+        {help ? <span className="text-[11px] text-nickel">{help}</span> : null}
+      </div>
     );
   }
 
@@ -439,12 +668,50 @@ function MediaLibrary({ media, labels }: { media: MediaDTO[]; labels: Labels }) 
     void navigator.clipboard.writeText(url);
   }
 
+  function handleCategoryChange(id: string, category: string) {
+    startTransition(async () => {
+      await updateMediaAssetCategory(id, category);
+      router.refresh();
+    });
+  }
+
+  function categoryLabel(category: MediaCategoryValue | null) {
+    if (category === null) return labels.media.categoryUncategorized;
+    const labelByCategory: Record<MediaCategoryValue, string> = {
+      LOGO_INSTITUCION: labels.media.categoryLogoInstitucion,
+      FOTO_EVENTO: labels.media.categoryFotoEvento,
+      INFORME: labels.media.categoryInforme,
+      OTRO: labels.media.categoryOtro
+    };
+    return labelByCategory[category];
+  }
+
+  // Agrupa en el orden fijo de categorías + "Sin categorizar" al final —
+  // solo se listan grupos que realmente tienen archivos.
+  const groups: { category: MediaCategoryValue | null; items: MediaDTO[] }[] = [
+    ...MEDIA_CATEGORY_ORDER.map((category) => ({ category, items: media.filter((m) => m.category === category) })),
+    { category: null, items: media.filter((m) => m.category === null) }
+  ].filter((group) => group.items.length > 0);
+
   return (
     <div className="flex flex-col gap-6">
-      <form onSubmit={handleUpload} className="bg-white border border-silver/60 rounded-xl p-4 flex items-end gap-3">
-        <label className="flex flex-col gap-1 flex-1">
+      <form onSubmit={handleUpload} className="bg-white border border-silver/60 rounded-xl p-4 flex items-end gap-3 flex-wrap">
+        <label className="flex flex-col gap-1 flex-1 min-w-[180px]">
           <span className="text-xs text-nickel">{labels.media.uploadLabel}</span>
-          <input name="file" type="file" accept="image/png,image/jpeg,image/webp" className="text-sm text-quartz" />
+          <input name="file" type="file" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" className="text-sm text-quartz" />
+        </label>
+        <label className="flex flex-col gap-1 min-w-[180px]">
+          <span className="text-xs text-nickel">{labels.media.categoryLabel}</span>
+          <select name="category" required defaultValue="" className="border border-silver rounded-lg px-2.5 py-1.5 text-sm text-quartz">
+            <option value="" disabled>
+              {labels.media.categoryPlaceholder}
+            </option>
+            {MEDIA_CATEGORY_ORDER.map((category) => (
+              <option key={category} value={category}>
+                {categoryLabel(category)}
+              </option>
+            ))}
+          </select>
         </label>
         <button
           type="submit"
@@ -459,23 +726,50 @@ function MediaLibrary({ media, labels }: { media: MediaDTO[]; labels: Labels }) 
       {media.length === 0 ? (
         <p className="text-xs text-nickel">{labels.media.empty}</p>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
-          {media.map((asset) => (
-            <div key={asset.id} className="bg-white border border-silver/60 rounded-xl overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable */}
-              <img src={`/api/media/${asset.id}`} alt={asset.filename} className="w-full aspect-video object-cover bg-silver/20" />
-              <div className="p-3 flex flex-col gap-2">
-                <p className="text-xs text-quartz truncate" title={asset.filename}>
-                  {asset.filename}
-                </p>
-                <div className="flex items-center gap-3">
-                  <button type="button" onClick={() => handleCopyUrl(asset.id)} className="text-[11px] text-yale hover:underline">
-                    {labels.media.copyUrl}
-                  </button>
-                  <button type="button" onClick={() => handleDelete(asset.id)} className="text-[11px] text-bad hover:underline">
-                    {labels.media.delete}
-                  </button>
-                </div>
+        <div className="flex flex-col gap-6">
+          {groups.map((group) => (
+            <div key={group.category ?? 'uncategorized'} className="flex flex-col gap-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-nickel">{categoryLabel(group.category)}</h3>
+              <div className="grid grid-cols-3 gap-4">
+                {group.items.map((asset) => (
+                  <div key={asset.id} className="bg-white border border-silver/60 rounded-xl overflow-hidden">
+                    {asset.mimeType === 'application/pdf' ? (
+                      <div className="w-full aspect-video bg-silver/20 flex items-center justify-center text-2xl" aria-hidden>
+                        📄
+                      </div>
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
+                      <img src={`/api/media/${asset.id}`} alt={asset.filename} className="w-full aspect-video object-cover bg-silver/20" />
+                    )}
+                    <div className="p-3 flex flex-col gap-2">
+                      <p className="text-xs text-quartz truncate" title={asset.filename}>
+                        {asset.filename}
+                      </p>
+                      <select
+                        value={asset.category ?? ''}
+                        onChange={(event) => handleCategoryChange(asset.id, event.target.value)}
+                        className="border border-silver rounded-lg px-2 py-1 text-[11px] text-quartz"
+                      >
+                        <option value="" disabled>
+                          {labels.media.categoryPlaceholder}
+                        </option>
+                        {MEDIA_CATEGORY_ORDER.map((category) => (
+                          <option key={category} value={category}>
+                            {categoryLabel(category)}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="flex items-center gap-3">
+                        <button type="button" onClick={() => handleCopyUrl(asset.id)} className="text-[11px] text-yale hover:underline">
+                          {labels.media.copyUrl}
+                        </button>
+                        <button type="button" onClick={() => handleDelete(asset.id)} className="text-[11px] text-bad hover:underline">
+                          {labels.media.delete}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ))}

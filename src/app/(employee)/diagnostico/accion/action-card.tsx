@@ -23,7 +23,7 @@ function getYouTubeEmbedUrl(url: string): string | null {
   let videoId: string | null = null;
   if (parsed.hostname === 'youtu.be') {
     videoId = parsed.pathname.slice(1);
-  } else if (parsed.hostname.endsWith('youtube.com')) {
+  } else if (parsed.hostname === 'youtube.com' || parsed.hostname.endsWith('.youtube.com')) {
     if (parsed.pathname === '/watch') {
       videoId = parsed.searchParams.get('v');
     } else if (parsed.pathname.startsWith('/embed/')) {
