@@ -277,6 +277,13 @@ export default async function HomePage() {
                   {step}
                 </span>
               ))}
+              {/* Cierra el ciclo de vuelta al primer paso — no es una
+                  secuencia lineal que termina, se repite. */}
+              {solucion.steps.length > 1 ? (
+                <span className="text-cola text-sm ml-0.5" aria-hidden>
+                  ↻
+                </span>
+              ) : null}
             </div>
           </div>
         </section>
