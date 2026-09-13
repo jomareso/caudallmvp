@@ -3,6 +3,13 @@ name: E2E
 on:
   pull_request:
 
+# Mínimo necesario: el job solo hace checkout, build y sube un artifact
+# de reporte en caso de falla — ninguno de esos pasos necesita más que
+# lectura del repo (actions/upload-artifact no usa GITHUB_TOKEN, corre
+# con el token de runtime de Actions aparte).
+permissions:
+  contents: read
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
