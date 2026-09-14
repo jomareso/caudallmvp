@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { LogoutButton } from './logout-button';
 import type { AdminNavGroup } from './admin-sidebar';
 import { AdminNavIcon } from './admin-nav-icons';
+import { BrandLogo } from '@/lib/brand/logo';
 
 type AdminMobileNavProps = {
   homeHref: Route;
@@ -36,10 +37,10 @@ export function AdminMobileNav({ homeHref, navGroups, logoutLabel, openLabel, cl
     <div className="lg:hidden border-b border-silver/60">
       <div className="px-4 py-3 flex items-center justify-between">
         <Link href={homeHref} className="flex items-center">
-          {/* h-7: mismo tamaño que AdminSidebar (misma marca, mismo rol de
-              navegación persistente, solo en mobile en vez de escritorio). */}
-          {/* eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable */}
-          <img src="/api/branding/logo" alt="Caudall" className="h-7 mix-blend-multiply" />
+          {/* variant="nav": mismo tamaño que AdminSidebar y el resto de las
+              barras de navegación del producto (ver src/lib/brand/logo.tsx)
+              — misma marca, mismo rol, solo en mobile en vez de escritorio. */}
+          <BrandLogo variant="nav" src="/api/branding/logo" className="mix-blend-multiply" />
         </Link>
         <button
           type="button"

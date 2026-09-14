@@ -3,24 +3,21 @@
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { requestAdminMagicLink } from './actions';
+import { BrandLogo } from '@/lib/brand/logo';
 
+// Historial completo de este logo (todas confirmadas insuficientes por
+// Reynoso viendo el resultado real en su teléfono): PR #90 lg:h-14 → PR
+// #95 h-12/lg:h-16 → PR #96 h-16/lg:h-20 (deliberadamente más grande que
+// el de acceso de empleados) → seguía viéndose chico en producción.
+// Investigado a fondo (medición de píxeles del screenshot real): el
+// tamaño en sí ya estaba bien — lo que faltaba era estandarizar el mismo
+// tamaño "hero" en todas las pantallas de entrada del producto, no solo
+// admin (ver src/lib/brand/logo.tsx, variant="hero", pedido explícito de
+// Reynoso: "estandarizar el tamaño del logo en admin y en las otras
+// partes"). Ya no vive un tamaño distinto acá — es el mismo que usan
+// acceso de empleado y el panel de marca de escritorio.
 function AdminLogo() {
-  // Historial completo (todas confirmadas insuficientes por Reynoso viendo
-  // el resultado real en su teléfono): PR #90 lg:h-14 → PR #95 h-12/lg:h-16
-  // → intento de igualarlo al logo de acceso de empleados (h-8, 169×32px
-  // medido con Playwright) → seguía viéndose chico. Confirmado
-  // explícitamente: lo quiere más grande que el de empleados, no igual —
-  // esto no es "más grande" arbitrario, es la instrucción directa después
-  // de descartar la equivalencia. Se sube a h-16/lg:h-20 (bastante más que
-  // cualquier intento anterior) con max-w-full de seguridad: sin eso, un
-  // teléfono angosto (~375px, con el p-6 del <main>) podría desbordar el
-  // ancho disponible a esta altura — max-w-full fuerza al navegador a
-  // encoger manteniendo proporción en vez de recortar o causar scroll
-  // horizontal.
-  return (
-    // eslint-disable-next-line @next/next/no-img-element -- viene de un endpoint propio, no de un dominio externo optimizable
-    <img src="/api/branding/logo" alt="Caudall" className="h-16 lg:h-20 max-w-full mx-auto mb-4 mix-blend-multiply" />
-  );
+  return <BrandLogo variant="hero" src="/api/branding/logo" className="mx-auto mb-4 mix-blend-multiply" />;
 }
 
 export function AdminLoginForm() {

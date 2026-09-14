@@ -8,6 +8,7 @@ import { getPlatformSettings } from '@/lib/settings/platform-settings';
 import { countContextAnsweredAndTotal } from '@/lib/engines/diagnostic';
 import { buildPostDiagnosticMessagePlan } from '@/lib/engines/post-diagnostic-message';
 import { recordSocialComparisonSnapshot, percentileToNaturalFrequency } from '@/lib/engines/social-comparison';
+import { getNationalComparison } from '@/lib/engines/national-benchmark';
 import { sendDiagnosticResultEmail } from '@/lib/email/send-diagnostic-result';
 import { EmployeeTopBar } from '../../employee-topbar';
 import { BackHomeLink } from '../../back-home-link';
@@ -82,6 +83,13 @@ export default async function ResultadoPage() {
       }
     }
 
+    // Mismo "+X vs. promedio" que ya muestra /inicio en su círculo (pedido
+    // explícito: "me interesa que esté aquí también, conforme corresponda")
+    // — usa el mismo mecanismo (getNationalComparison), con su propio gate
+    // de consentimiento (CTX_COMPARE_OPT_IN=YES) y su propio fallback si no
+    // hay cohorte suficiente; null si no aplica, igual que en /inicio.
+    const generalComparison = await getNationalComparison(employeeId);
+
     const t = await getTranslations('diagnostic.result');
     const tDim = await getTranslations('diagnostic.dimensions');
     const tLevel = await getTranslations('diagnostic.result.levels');
@@ -95,12 +103,13 @@ export default async function ResultadoPage() {
       high: settings.progressTierHighCutoff
     });
 
-    // Percentil/posición del Motor de Comparación Social, mostrado junto al
-    // índice (no dentro del ScoreGauge: el gauge es del CFHI general, esto
-    // compara la dimensión prioritaria — mezclarlos en el mismo número
-    // sería engañoso). Nunca se muestra en INFERIOR
-    // (comparison.includeNumericComparison ya resuelve esa regla en el
-    // motor — ver social-comparison.ts) ni sin datos suficientes.
+    // Percentil/posición del Motor de Comparación Social — es un número
+    // aparte del "vs. promedio" del ScoreGauge (ese es el CFHI general
+    // contra el benchmark nacional; esto compara la dimensión prioritaria),
+    // así que se muestra en su propia tarjeta, no dentro del círculo.
+    // Nunca se muestra en INFERIOR (comparison.includeNumericComparison ya
+    // resuelve esa regla en el motor — ver social-comparison.ts) ni sin
+    // datos suficientes.
     const { comparison } = messagePlan;
     // GENERAL (fallback de Resiliencia): mismo motivo que en
     // social-comparison-card.tsx — el percentil es del índice general,
@@ -141,7 +150,12 @@ export default async function ResultadoPage() {
           </div>
           <div className="lg:max-w-md lg:mx-auto">
             <p className="text-sm font-semibold text-yale mb-2">{t('title')}</p>
-            <ScoreGauge score={cfhiRounded} vsAverage={null} outOfLabel={t('outOf100')} vsAverageLabel={t('comparison.vsAverage')} />
+            <ScoreGauge
+              score={cfhiRounded}
+              vsAverage={generalComparison ? cfhiRounded - generalComparison.overall : null}
+              outOfLabel={t('outOf100')}
+              vsAverageLabel={t('comparison.vsAverage')}
+            />
             <span className="inline-block text-[11px] px-2.5 py-1 rounded-lg bg-picton/10 text-yale mt-2">
               {tLevel('prefix')}: {tLevel(cfhiLevel)}
             </span>
