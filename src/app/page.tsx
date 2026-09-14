@@ -266,17 +266,34 @@ export default async function HomePage() {
               </div>
               <p className="text-[15px] text-nickel leading-relaxed">{solucion.body}</p>
             </div>
-            {/* Cada paso agrupado con su flecha en un solo span
-                (whitespace-nowrap): si envuelve en mobile, envuelve la
-                unidad completa — evita que una flecha quede huérfana al
-                inicio de línea. */}
+            {/* Solo la flecha + primera palabra de cada paso van en un
+                nowrap (evita que la flecha quede huérfana al inicio de
+                línea) — el resto de la frase envuelve con normalidad.
+                Antes el paso completo era una sola unidad nowrap: con
+                pasos de una palabra (seed) no se notaba, pero con frases
+                largas de /admin/contenido ("Prioriza dónde enfocarte")
+                esa unidad no cabía en mobile y forzaba scroll horizontal
+                de toda la página. */}
             <div className="flex items-center gap-3.5 flex-wrap text-base font-semibold">
-              {solucion.steps.map((step, i) => (
-                <span key={step} className="whitespace-nowrap">
-                  {i > 0 ? <span className="text-cola text-sm mr-3.5">→</span> : null}
-                  {step}
-                </span>
-              ))}
+              {solucion.steps.map((step, i) => {
+                const [firstWord, ...restWords] = step.split(' ');
+                const rest = restWords.length ? ` ${restWords.join(' ')}` : '';
+                return (
+                  <span key={step}>
+                    {i > 0 ? (
+                      <span className="whitespace-nowrap">
+                        <span className="text-cola text-sm mr-3.5" aria-hidden>
+                          →
+                        </span>
+                        {firstWord}
+                      </span>
+                    ) : (
+                      firstWord
+                    )}
+                    {rest}
+                  </span>
+                );
+              })}
               {/* Cierra el ciclo de vuelta al primer paso — no es una
                   secuencia lineal que termina, se repite. */}
               {solucion.steps.length > 1 ? (
