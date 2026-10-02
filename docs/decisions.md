@@ -183,6 +183,33 @@ Este documento captura las decisiones estructurales del MVP en formato ADR (Arch
 
 ---
 
+## ADR-010 — Modelo comercial: pricing por licencia anclado a referencia de mercado
+
+**Estado:** Accepted
+**Contexto:** Caudall vende licencias individuales por empleado con vigencia de 3, 6 o 12 meses (ADR-006), pero no existía ningún precio de referencia documentado. Reynoso compartió un one-pager comercial de Mercer Marsh Benefits (Colombia, oct 2026) con sus tres tiers de "Programas de Bienestar Financiero" — Básico (COP 9.0M / 2 meses), Medium (COP 12.0M / 3 meses) y Premium (COP 17.0M / 3-4 meses) — como referencia de cuánto paga el mercado regional por bienestar financiero corporativo. El modelo de Mercer es fundamentalmente distinto al de Caudall: proyectos puntuales con facilitadores humanos y talleres en vivo (costo marginal alto por empleado), contra una plataforma de software continua sin facilitadores (costo marginal bajo, escalable).
+
+**Decisión:** Usar el pricing de Mercer como techo de referencia ("qué está dispuesto a pagar el mercado"), no como plantilla a copiar, y fijar los tres tiers de licencia de Caudall por debajo del equivalente por-empleado de Mercer, apalancando que Caudall ofrece acceso continuo (3/6/12 meses reales) contra un proyecto puntual de 2-4 meses:
+
+| Vigencia de licencia | Precio por empleado (USD) | Precio por empleado (DOP aprox.) | Referencia vs. Mercer (por empleado, normalizado a 100 colaboradores) |
+|---|---|---|---|
+| 3 meses | $15–18 | RD$880–1,060 | ~40% menos que Básico (COP 9.0M/100 ≈ $28), mismo período |
+| 6 meses | $24–28 | RD$1,415–1,650 | ~25% menos que Medium (COP 12.0M/100 ≈ $38), doble duración |
+| 12 meses | $38–45 | RD$2,240–2,650 | ≤ Premium (COP 17.0M/100 ≈ $53), pero 3-4x la duración |
+
+Tipos de cambio usados (oct 2026, aproximados): 1 USD ≈ 59 DOP, 1 USD ≈ 3,200 COP.
+
+**Alternativas consideradas:**
+- Copiar el pricing de Mercer directamente (ajustado solo por tipo de cambio). Rechazado: ignora que la estructura de costos de Caudall (sin facilitadores en vivo) es radicalmente distinta, y dejaría a Caudall más caro que su propuesta de valor real.
+- Pricing por debajo de cualquier referencia de mercado, solo en función del costo interno de Caudall. Rechazado por ahora: sin un benchmark de mercado, el riesgo es dejar valor sobre la mesa o parecer "demasiado barato para ser bueno" frente a RRHH acostumbrado a los precios de consultoras como Mercer.
+
+**Consecuencias:**
+- Estos números son una **hipótesis de pricing inicial**, no validada todavía con clientes reales en República Dominicana — pendiente de contraste con el mercado local antes de fijarse como lista de precios pública.
+- Falta definir descuento por volumen (empresas que compran muchas licencias a la vez) — no cubierto por esta ADR.
+- Los precios no están hardcodeados en ningún lado del producto (no hay módulo de cobro en el MVP, ver ADR-002) — esta ADR es puramente de estrategia comercial, no afecta código todavía.
+- Si se revisa este pricing con datos reales de mercado dominicano, debe abrirse una ADR-011 que supere a esta.
+
+---
+
 ## Cambios a estas decisiones
 
 Cualquier cambio a las decisiones anteriores requiere:
