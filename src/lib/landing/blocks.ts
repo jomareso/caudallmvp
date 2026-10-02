@@ -77,7 +77,13 @@ const contentSchemas = {
   empleador_reto: z.object({
     eyebrow: z.string().min(1),
     title: z.string().min(1),
-    body: z.string().min(1)
+    body: z.string().min(1),
+    // Cifras del benchmark nacional (mismos 3 Estudios de Salud
+    // Financiera que respaldan empleador_metodologia.findings, nunca un
+    // dato nuevo inventado para esta sección) que cuantifican el
+    // problema antes de explicar la solución — mismo contrato value/
+    // label que findingSchema, mismo componente visual de stat tiles.
+    stats: z.array(findingSchema)
   }),
   empleador_solucion: z.object({
     eyebrow: z.string().min(1),
@@ -208,6 +214,7 @@ export const LANDING_BLOCK_FIELDS: Record<LandingBlockType, LandingFieldDescript
   empleador_reto: [
     { key: 'eyebrow', kind: 'text', labelKey: 'eyebrow' },
     { key: 'title', kind: 'textarea', labelKey: 'title' },
+    { key: 'stats', kind: 'findings', labelKey: 'stats', helpKey: 'findingsHelp' },
     { key: 'body', kind: 'textarea', labelKey: 'body' }
   ],
   empleador_solucion: [

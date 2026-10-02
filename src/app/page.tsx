@@ -231,6 +231,22 @@ export default async function HomePage() {
             </span>
             <p className="text-xs font-semibold tracking-wide uppercase text-cola">{reto.eyebrow}</p>
             <h2 className="text-xl lg:text-2xl font-semibold">{reto.title}</h2>
+            {/* Mismas cifras del benchmark nacional que ya respaldan
+                Metodología (nunca un dato nuevo) — acá cuantifican el
+                problema antes de narrarlo, en vez de solo respaldar la
+                metodología después. Mismo componente de stat tiles. */}
+            {(reto.stats ?? []).length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-silver/50 rounded-xl border border-silver/50 bg-[#FAFAFC] overflow-hidden">
+                {(reto.stats ?? []).map((stat, i) => (
+                  <div key={i} className="flex flex-col gap-1.5 px-6 py-6">
+                    <p className="text-[28px] leading-none font-semibold bg-gradient-to-r from-yale to-cola bg-clip-text text-transparent text-balance">
+                      {stat.value}
+                    </p>
+                    <p className="text-[12.5px] text-nickel leading-snug">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <p className="text-[15px] text-nickel leading-relaxed">{reto.body}</p>
           </div>
         </section>
