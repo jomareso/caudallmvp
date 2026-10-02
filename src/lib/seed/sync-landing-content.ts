@@ -49,6 +49,14 @@ const INITIAL_CONTENT: Record<LandingBlockType, unknown> = {
   empleador_reto: {
     eyebrow: 'El problema',
     title: 'Invertir en bienestar financiero sin datos es intervenir a ciegas.',
+    // Mismas cifras reales de los 3 Estudios de Salud Financiera que
+    // respaldan empleador_metodologia.findings — acá cuantifican el
+    // problema primero, antes de la narrativa de abajo.
+    stats: [
+      { value: '15%', label: 'de la población dominicana alcanza un nivel de salud financiera "Saludable"' },
+      { value: 'Ahorro', label: 'la dimensión financiera más débil del país, por debajo de deuda y planificación' },
+      { value: '53.7 → 60.4', label: 'puntaje promedio nacional entre 2021 y 2024 — la mejora sigue siendo lenta' }
+    ],
     body: 'Sin una lectura clara de la salud financiera de tu equipo, terminas invirtiendo en bienestar por intuición, no por evidencia.'
   },
   empleador_solucion: {

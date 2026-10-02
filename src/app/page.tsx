@@ -231,6 +231,22 @@ export default async function HomePage() {
             </span>
             <p className="text-xs font-semibold tracking-wide uppercase text-cola">{reto.eyebrow}</p>
             <h2 className="text-xl lg:text-2xl font-semibold">{reto.title}</h2>
+            {/* Mismas cifras del benchmark nacional que ya respaldan
+                Metodología (nunca un dato nuevo) — acá cuantifican el
+                problema antes de narrarlo, en vez de solo respaldar la
+                metodología después. Mismo componente de stat tiles. */}
+            {(reto.stats ?? []).length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-silver/50 rounded-xl border border-silver/50 bg-[#FAFAFC] overflow-hidden">
+                {(reto.stats ?? []).map((stat, i) => (
+                  <div key={i} className="flex flex-col gap-1.5 px-6 py-6">
+                    <p className="text-[28px] leading-none font-semibold bg-gradient-to-r from-yale to-cola bg-clip-text text-transparent text-balance">
+                      {stat.value}
+                    </p>
+                    <p className="text-[12.5px] text-nickel leading-snug">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <p className="text-[15px] text-nickel leading-relaxed">{reto.body}</p>
           </div>
         </section>
@@ -266,17 +282,34 @@ export default async function HomePage() {
               </div>
               <p className="text-[15px] text-nickel leading-relaxed">{solucion.body}</p>
             </div>
-            {/* Cada paso agrupado con su flecha en un solo span
-                (whitespace-nowrap): si envuelve en mobile, envuelve la
-                unidad completa — evita que una flecha quede huérfana al
-                inicio de línea. */}
+            {/* Solo la flecha + primera palabra de cada paso van en un
+                nowrap (evita que la flecha quede huérfana al inicio de
+                línea) — el resto de la frase envuelve con normalidad.
+                Antes el paso completo era una sola unidad nowrap: con
+                pasos de una palabra (seed) no se notaba, pero con frases
+                largas de /admin/contenido ("Prioriza dónde enfocarte")
+                esa unidad no cabía en mobile y forzaba scroll horizontal
+                de toda la página. */}
             <div className="flex items-center gap-3.5 flex-wrap text-base font-semibold">
-              {solucion.steps.map((step, i) => (
-                <span key={step} className="whitespace-nowrap">
-                  {i > 0 ? <span className="text-cola text-sm mr-3.5">→</span> : null}
-                  {step}
-                </span>
-              ))}
+              {solucion.steps.map((step, i) => {
+                const [firstWord, ...restWords] = step.split(' ');
+                const rest = restWords.length ? ` ${restWords.join(' ')}` : '';
+                return (
+                  <span key={step}>
+                    {i > 0 ? (
+                      <span className="whitespace-nowrap">
+                        <span className="text-cola text-sm mr-3.5" aria-hidden>
+                          →
+                        </span>
+                        {firstWord}
+                      </span>
+                    ) : (
+                      firstWord
+                    )}
+                    {rest}
+                  </span>
+                );
+              })}
               {/* Cierra el ciclo de vuelta al primer paso — no es una
                   secuencia lineal que termina, se repite. */}
               {solucion.steps.length > 1 ? (
